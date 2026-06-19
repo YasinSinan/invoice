@@ -6,3 +6,5 @@ venv/
 !sample_data/*.xlsx
 .streamlit/
 .env
+.DS_Store
+.idea/
