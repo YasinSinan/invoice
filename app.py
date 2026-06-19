@@ -48,8 +48,9 @@ if cost_files:
             key=f"carrier_{f.name}",
         )
     st.caption(
-        "Su an sadece Asendia destekleniyor. Diger kargo firmalari (UniUni, UPS, "
-        "DHL, FedEx, ePost Global) icin destek ileride eklenecek."
+        "Su an Asendia, UniUni ve UPS destekleniyor. Diger kargo firmalari "
+        "(DHL, FedEx, ePost Global, intelcom, APC, USPS, Evri, Purolator) "
+        "icin destek ileride eklenecek."
     )
 
 run = st.button("Hesapla", type="primary", disabled=income_file is None)
