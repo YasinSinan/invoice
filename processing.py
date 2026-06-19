@@ -39,6 +39,31 @@ CARRIER_PROFILES = {
     },
 }
 
+# ByeLabel dosyasi (shipments-...xlsx) tek tabloda birden fazla firma icerir.
+# Carrier & Service kolonundaki degere gore filtrelenip ayri profil olarak eklenir.
+# charge_col = kargo bedeli, tax_col = vergi/gumruk (ayri ayri hesaplanir, sonra toplanir).
+_BYELABEL_BASE = {
+    "tracking_col": "Master Tracking Number",
+    "charge_col": "Cost",
+    "tax_col": "Tax",
+    "date_col": "Create Date",
+    "service_filter_col": "Carrier & Service",
+}
+
+CARRIER_PROFILES.update(
+    {
+        "ePost Global": {**_BYELABEL_BASE, "service_filter_contains": "ePost Global"},
+        "DHL": {**_BYELABEL_BASE, "service_filter_contains": "DHL"},
+        "intelcom": {**_BYELABEL_BASE, "service_filter_contains": "Intelcom"},
+        "APC": {**_BYELABEL_BASE, "service_filter_contains": "APC"},
+        "USPS": {**_BYELABEL_BASE, "service_filter_contains": "USPS"},
+        "Evri": {**_BYELABEL_BASE, "service_filter_contains": "Evri"},
+        "Purolator": {**_BYELABEL_BASE, "service_filter_contains": "Purolator"},
+        "FedEx (ByeLabel)": {**_BYELABEL_BASE, "service_filter_contains": "FedEx"},
+        "UPS (ByeLabel)": {**_BYELABEL_BASE, "service_filter_contains": "UPS"},
+    }
+)
+
 
 def _parse_money_text(value):
     """'$74.69', '-$0.67', '($12.34)' gibi metinleri sayiya cevirir."""
@@ -73,6 +98,10 @@ def load_income_file(file_obj):
 def load_cost_file(file_obj, carrier_name):
     """Bir kargo firmasinin gider dosyasini okur, takip numarasina gore gruplar.
 
+    Kargo bedeli (charge_col) ve vergi/gumruk (tax_col, varsa) ayri ayri
+    toplanir, sonra "Gider" olarak birlestirilir - boylece rapor hem
+    kargo bedelini hem vergiyi ayri ayri gosterebilir.
+
     Ayni takip numarasi birden fazla satirda gecerse (tekrar/surcharge satiri vs.)
     ucretler toplanir - hicbir satir atilmaz.
 
@@ -82,15 +111,28 @@ def load_cost_file(file_obj, carrier_name):
     if carrier_name not in CARRIER_PROFILES:
         raise ValueError(f"Taninmayan kargo firmasi: {carrier_name}")
 
+    empty_cols = ["TrackingKey", "Gider_Kargo", "Gider_Tax", "Gider", "Kargo Firmasi", "Satir Sayisi"]
+
     profile = CARRIER_PROFILES[carrier_name]
     df = pd.read_excel(file_obj)
 
     track_col = profile["tracking_col"]
     charge_col = profile["charge_col"]
+    tax_col = profile.get("tax_col")
     currency_col = profile.get("currency_col")
     date_col = profile.get("date_col")
 
-    for col in (track_col, charge_col):
+    filter_col = profile.get("service_filter_col")
+    filter_contains = profile.get("service_filter_contains")
+    if filter_col:
+        if filter_col not in df.columns:
+            raise ValueError(f"{carrier_name} dosyasinda '{filter_col}' kolonu bulunamadi")
+        df = df[df[filter_col].astype(str).str.contains(filter_contains, case=False, na=False)].copy()
+        if df.empty:
+            return pd.DataFrame(columns=empty_cols), None
+
+    needed_cols = [track_col, charge_col] + ([tax_col] if tax_col else [])
+    for col in needed_cols:
         if col not in df.columns:
             raise ValueError(f"{carrier_name} dosyasinda '{col}' kolonu bulunamadi")
 
@@ -99,7 +141,15 @@ def load_cost_file(file_obj, carrier_name):
 
     if profile.get("charge_is_money_text"):
         df[charge_col] = df[charge_col].apply(_parse_money_text)
+        if tax_col:
+            df[tax_col] = df[tax_col].apply(_parse_money_text)
         df = df.dropna(subset=[charge_col])
+
+    if tax_col:
+        df[tax_col] = df[tax_col].fillna(0)
+    else:
+        df["_no_tax"] = 0.0
+        tax_col = "_no_tax"
 
     currency_warning = None
     fx_failed_count = 0
@@ -121,27 +171,34 @@ def load_cost_file(file_obj, carrier_name):
             nonlocal fx_failed_count
             cur = row[currency_col]
             if pd.isna(cur) or cur == TARGET_CURRENCY:
-                return row[charge_col]
+                return row[charge_col], row[tax_col]
             rate = get_rate(cur, row["_date_str"])
             if rate is None:
                 fx_failed_count += 1
-                return None
-            return row[charge_col] * rate
+                return None, None
+            return row[charge_col] * rate, row[tax_col] * rate
 
-        df["Gider"] = df.apply(convert, axis=1)
+        converted = df.apply(convert, axis=1, result_type="expand")
+        df["Gider_Kargo"] = converted[0]
+        df["Gider_Tax"] = converted[1]
 
         currencies = [c for c in df[currency_col].dropna().unique() if c != TARGET_CURRENCY]
         currency_warning = f"{carrier_name}: {', '.join(currencies)} -> USD gunluk kur ile cevrildi."
     else:
-        df["Gider"] = df[charge_col]
+        df["Gider_Kargo"] = df[charge_col]
+        df["Gider_Tax"] = df[tax_col]
 
     if fx_failed_count:
         msg = f"UYARI: {carrier_name} icin {fx_failed_count} satirda doviz kuru alinamadi, bu satirlar dislandi."
         currency_warning = f"{currency_warning} {msg}" if currency_warning else msg
 
-    df = df.dropna(subset=["Gider"])
+    df = df.dropna(subset=["Gider_Kargo"])
 
-    grouped = df.groupby("TrackingKey", as_index=False)["Gider"].sum()
+    grouped = df.groupby("TrackingKey", as_index=False).agg(
+        Gider_Kargo=("Gider_Kargo", "sum"),
+        Gider_Tax=("Gider_Tax", "sum"),
+    )
+    grouped["Gider"] = grouped["Gider_Kargo"] + grouped["Gider_Tax"]
     grouped["Kargo Firmasi"] = carrier_name
     grouped["Satir Sayisi"] = df.groupby("TrackingKey").size().values
 
@@ -155,12 +212,14 @@ def build_report(income_df, cost_dfs):
         cost_summary = (
             cost_all.groupby("TrackingKey", as_index=False)
             .agg(
+                Gider_Kargo=("Gider_Kargo", "sum"),
+                Gider_Tax=("Gider_Tax", "sum"),
                 Gider=("Gider", "sum"),
                 Kargo_Firmalari=("Kargo Firmasi", lambda x: ", ".join(sorted(set(x)))),
             )
         )
     else:
-        cost_summary = pd.DataFrame(columns=["TrackingKey", "Gider", "Kargo_Firmalari"])
+        cost_summary = pd.DataFrame(columns=["TrackingKey", "Gider_Kargo", "Gider_Tax", "Gider", "Kargo_Firmalari"])
 
     merged = income_df.merge(cost_summary, on="TrackingKey", how="left")
 
@@ -185,6 +244,8 @@ def summarize(merged):
     matched = merged[merged["Durum"] == "Eslesti"]
     return {
         "toplam_gelir": merged["Invoice Amount"].sum(),
+        "toplam_gider_kargo": matched["Gider_Kargo"].sum(),
+        "toplam_gider_tax": matched["Gider_Tax"].sum(),
         "toplam_gider_eslesen": matched["Gider"].sum(),
         "toplam_kar": matched["Kar"].sum(),
         "toplam_gonderi": len(merged),

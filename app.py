@@ -48,9 +48,8 @@ if cost_files:
             key=f"carrier_{f.name}",
         )
     st.caption(
-        "Su an Asendia, UniUni ve UPS destekleniyor. Diger kargo firmalari "
-        "(DHL, FedEx, ePost Global, intelcom, APC, USPS, Evri, Purolator) "
-        "icin destek ileride eklenecek."
+        "Su an Asendia, UniUni, UPS, ePost Global, DHL, intelcom, APC, USPS, "
+        "Evri, Purolator ve FedEx destekleniyor."
     )
 
 run = st.button("Hesapla", type="primary", disabled=income_file is None)
@@ -84,12 +83,15 @@ if run and income_file is not None:
     st.divider()
     st.subheader("Ozet")
 
-    m1, m2, m3, m4 = st.columns(4)
+    m1, m2, m3, m4, m5 = st.columns(5)
     m1.metric("Toplam gelir", f"${summary['toplam_gelir']:,.2f}")
-    m2.metric("Toplam gider (eslesen)", f"${summary['toplam_gider_eslesen']:,.2f}")
-    m3.metric("Toplam kar (eslesen)", f"${summary['toplam_kar']:,.2f}")
+    m2.metric("Kargo gideri", f"${summary['toplam_gider_kargo']:,.2f}")
+    m3.metric("Vergi/gumruk gideri", f"${summary['toplam_gider_tax']:,.2f}")
+    m4.metric("Toplam gider", f"${summary['toplam_gider_eslesen']:,.2f}")
+    m5.metric("Toplam kar", f"${summary['toplam_kar']:,.2f}")
+
     eslesme_orani = summary["eslesen_sayisi"] / summary["toplam_gonderi"] * 100 if summary["toplam_gonderi"] else 0
-    m4.metric("Eslesme orani", f"%{eslesme_orani:.1f}")
+    st.caption(f"Eslesme orani: %{eslesme_orani:.1f}")
 
     st.caption(
         f"Toplam {summary['toplam_gonderi']} gonderi  |  "
@@ -111,12 +113,16 @@ if run and income_file is not None:
                     "Carrier Name",
                     "Status",
                     "Invoice Amount",
+                    "Gider_Kargo",
+                    "Gider_Tax",
                     "Gider",
                     "Kar",
                     "Durum",
                     "Added Date",
                 ]
-            ].sort_values("Added Date"),
+            ]
+            .rename(columns={"Gider_Kargo": "Kargo Gideri", "Gider_Tax": "Vergi/Gumruk", "Gider": "Toplam Gider"})
+            .sort_values("Added Date"),
             use_container_width=True,
             hide_index=True,
         )
