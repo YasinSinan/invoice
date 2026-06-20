@@ -10,7 +10,19 @@ import io
 import pandas as pd
 import streamlit as st
 
-from processing import CARRIER_PROFILES, build_report, load_cost_file, load_income_file, summarize
+from processing import (
+    BYELABEL_GROUP_LABEL,
+    CARRIER_PROFILES,
+    build_report,
+    carrier_breakdown,
+    country_breakdown,
+    customer_breakdown,
+    customer_country_breakdown,
+    load_byelabel_group,
+    load_cost_file,
+    load_income_file,
+    summarize,
+)
 
 st.set_page_config(page_title="Gelir-Gider Karsilastirma", layout="wide")
 
@@ -27,6 +39,11 @@ with col1:
     st.subheader("1. Gelir dosyasi")
     st.caption("WH_CUSTOMER_SHIPMENT_LIST formatinda, musteriden alinan tutarlari iceren dosya.")
     income_file = st.file_uploader("Gelir Excel dosyasini secin", type=["xlsx"], key="income")
+    only_paid = st.checkbox(
+        "Sadece odenmis gonderileri dahil et (Status = Paid)",
+        value=True,
+        help="Isaretliyse User Cancelled, New Shipment, Payment Waiting gibi durumlar disarida tutulur.",
+    )
 
 with col2:
     st.subheader("2. Gider dosyalari")
@@ -44,12 +61,14 @@ if cost_files:
     for f in cost_files:
         carrier_for_file[f.name] = st.selectbox(
             f"  {f.name}",
-            options=list(CARRIER_PROFILES.keys()),
+            options=list(CARRIER_PROFILES.keys()) + [BYELABEL_GROUP_LABEL],
             key=f"carrier_{f.name}",
         )
     st.caption(
-        "Su an Asendia, UniUni, UPS, ePost Global, DHL, intelcom, APC, USPS, "
-        "Evri, Purolator ve FedEx destekleniyor."
+        "Su an Asendia, UniUni, UPS ve Asendia'nin ayri Vergi/Gumruk dosyasi "
+        "dogrudan destekleniyor. ByeLabel dosyasini (shipments-...xlsx) sectiginde "
+        "icindeki tum firmalar (ePost Global, DHL, intelcom, APC, USPS, Evri, "
+        "Purolator, FedEx, UPS) otomatik ayri ayri islenir."
     )
 
 run = st.button("Hesapla", type="primary", disabled=income_file is None)
@@ -57,7 +76,7 @@ run = st.button("Hesapla", type="primary", disabled=income_file is None)
 # ---------------------------------------------------------------- hesapla ---
 if run and income_file is not None:
     try:
-        income_df = load_income_file(income_file)
+        income_df = load_income_file(income_file, only_paid=only_paid)
     except ValueError as e:
         st.error(f"Gelir dosyasi okunamadi: {e}")
         st.stop()
@@ -66,15 +85,29 @@ if run and income_file is not None:
     warnings = []
     toplam_genel_gider = 0.0
     genel_gider_detay = []
+    breakdown_dfs = []
     for f in cost_files or []:
         try:
-            cost_df, warning, genel_gider = load_cost_file(f, carrier_for_file[f.name])
-            cost_dfs.append(cost_df)
-            if warning:
-                warnings.append(warning)
-            if genel_gider:
-                toplam_genel_gider += genel_gider
-                genel_gider_detay.append((carrier_for_file[f.name], f.name, genel_gider))
+            secilen = carrier_for_file[f.name]
+            if secilen == BYELABEL_GROUP_LABEL:
+                group_cost_dfs, group_warnings, group_genel_gider, group_breakdown_dfs = load_byelabel_group(f)
+                cost_dfs.extend(group_cost_dfs)
+                warnings.extend(group_warnings)
+                if group_genel_gider:
+                    toplam_genel_gider += group_genel_gider
+                    genel_gider_detay.append((BYELABEL_GROUP_LABEL, f.name, group_genel_gider))
+                for bd in group_breakdown_dfs:
+                    breakdown_dfs.append(bd)
+            else:
+                cost_df, warning, genel_gider, breakdown_df = load_cost_file(f, secilen)
+                cost_dfs.append(cost_df)
+                if warning:
+                    warnings.append(warning)
+                if genel_gider:
+                    toplam_genel_gider += genel_gider
+                    genel_gider_detay.append((secilen, f.name, genel_gider))
+                if not breakdown_df.empty:
+                    breakdown_dfs.append(breakdown_df)
         except ValueError as e:
             st.error(f"{f.name} okunamadi: {e}")
             st.stop()
@@ -119,6 +152,102 @@ if run and income_file is not None:
         f"{summary['eslesen_sayisi']} eslesti  |  "
         f"{summary['gider_bulunamadi_sayisi']} gider bulunamadi  |  "
         f"{summary['takip_no_yok_sayisi']} takip no yok"
+    )
+
+    st.subheader("Kargo Firmalarina Gore Analiz")
+    st.caption(
+        "Kargo firmasi (gelir dosyasindaki Carrier Name) bazinda paket sayisi, "
+        "gelir, gider ve kar/zarar dagilimi."
+    )
+    carrier_table = carrier_breakdown(merged)
+    st.dataframe(
+        carrier_table.style.format(
+            {
+                "Toplam Gelir": "${:,.2f}",
+                "Kargo Gideri": "${:,.2f}",
+                "Vergi Gideri": "${:,.2f}",
+                "Toplam Gider": "${:,.2f}",
+                "Kar/Zarar": "${:,.2f}",
+                "Paket Basi Kar/Zarar": "${:,.2f}",
+            }
+        ),
+        use_container_width=True,
+        hide_index=True,
+    )
+
+    if breakdown_dfs:
+        st.caption(
+            "Asagidaki tablo her dosyada hangi kategori/sutunun Kargo, hangisinin "
+            "Vergi, hangisinin (takip numarasi olmadigi icin) Genel Gider sayildigini "
+            "ve ne kadar tutar tasidigini gosterir."
+        )
+        full_breakdown = pd.concat(breakdown_dfs, ignore_index=True)
+        st.dataframe(
+            full_breakdown.style.format({"Tutar": "${:,.2f}"}),
+            use_container_width=True,
+            hide_index=True,
+        )
+
+    st.subheader("Ulkeye gore analiz")
+    st.caption(
+        "Toplam gelir ve gonderi sayisi tum gonderileri kapsar. Kargo/Vergi/Kar "
+        "sutunlari sadece gider dosyasinda eslesen gonderilerden gelir."
+    )
+    cb = country_breakdown(merged)
+    st.dataframe(
+        cb.style.format(
+            {
+                "Toplam_Gelir": "${:,.2f}",
+                "Kargo_Gideri": "${:,.2f}",
+                "Vergi_Gideri": "${:,.2f}",
+                "Toplam_Gider": "${:,.2f}",
+                "Kar": "${:,.2f}",
+                "Paket_Basi_Kar": "${:,.2f}",
+            }
+        ),
+        use_container_width=True,
+        hide_index=True,
+    )
+
+    st.divider()
+
+    st.subheader("Musteriye gore analiz")
+    st.caption(
+        "Gelir dosyasindaki User No / User Name'e gore musteri bazinda paket "
+        "sayisi, bize odedigi tutar, firmaya odedigimiz tutar, kar/zarar ve "
+        "gonderdigi ulkeler. Eslesen Sayisi/Firmaya Odenen/Kar sutunlari sadece "
+        "ESLESEN gonderilerden gelir."
+    )
+    cust_table = customer_breakdown(merged)
+    st.dataframe(
+        cust_table.style.format(
+            {
+                "Bize Odenen (Gelir)": "${:,.2f}",
+                "Firmaya Odenen (Gider)": "${:,.2f}",
+                "Kar/Zarar": "${:,.2f}",
+                "Paket Basi Kar/Zarar": "${:,.2f}",
+            }
+        ),
+        use_container_width=True,
+        hide_index=True,
+    )
+
+    st.caption(
+        "Asagidaki tablo her musterinin HER ULKEDE ayri ayri kar mi zarar mi "
+        "ettirdigini gosterir (en zararli kombinasyonlar basta). Genel toplamda "
+        "kar gibi gorunen bir musteri, bazi ulkelerde zarar ettiriyor olabilir."
+    )
+    cust_country_table = customer_country_breakdown(merged)
+    st.dataframe(
+        cust_country_table.style.format(
+            {
+                "Gelir": "${:,.2f}",
+                "Gider": "${:,.2f}",
+                "Kar/Zarar": "${:,.2f}",
+            }
+        ),
+        use_container_width=True,
+        hide_index=True,
     )
 
     st.divider()
@@ -178,6 +307,14 @@ if run and income_file is not None:
             writer, sheet_name="Gider Bulunamayan", index=False
         )
         unmatched_cost.to_excel(writer, sheet_name="Eslesmeyen Gider", index=False)
+        if breakdown_dfs:
+            pd.concat(breakdown_dfs, ignore_index=True).to_excel(
+                writer, sheet_name="Kargo-Vergi Detayi", index=False
+            )
+        cb.to_excel(writer, sheet_name="Ulke Bazinda", index=False)
+        carrier_table.to_excel(writer, sheet_name="Kargo Firmasi Bazinda", index=False)
+        cust_table.to_excel(writer, sheet_name="Musteri Bazinda", index=False)
+        cust_country_table.to_excel(writer, sheet_name="Musteri x Ulke", index=False)
 
     st.download_button(
         "Raporu Excel olarak indir",

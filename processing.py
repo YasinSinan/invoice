@@ -12,15 +12,19 @@ from fx import TARGET_CURRENCY, get_rate
 
 NO_TRACKING_VALUES = {"No Tracking Number", "Customer Label", "nan", "", "None"}
 
-# Her kargo firmasi icin: takip numarasi kolonu ve ucret kolonu (veya kolonlari).
+# Kullaniciya arayuzde gosterilen kargo firmalari (her biri kendi dosya formatina sahip).
 # currency_col / date_col verilirse, ucret otomatik olarak USD'ye cevrilir
 # (her satir kendi tarihindeki gunluk kur ile).
 CARRIER_PROFILES = {
     "Asendia": {
-        "tracking_col": "CustomerTrackingNumberOriginal",
-        "charge_col": "TOTALCHARGE",
-        "currency_col": "CurrencyType",
-        "date_col": "JobDate",
+        # Asendia farkli zamanlarda farkli kolon adlandirmasi kullanabiliyor
+        # (orn. "CustomerTrackingNumberOriginal" vs "Customer Tracking Number
+        # Original"). Liste olarak verilen alanlar, dosyada hangisi varsa o
+        # kullanilir.
+        "tracking_col": ["CustomerTrackingNumberOriginal", "Customer Tracking Number Original"],
+        "charge_col": ["TOTALCHARGE", "total charge", "Total Charge"],
+        "currency_col": ["CurrencyType", "Currency Type"],
+        "date_col": ["JobDate", "Job Date"],
         "invoice_col": "Invoice Number",
     },
     "UniUni": {
@@ -39,11 +43,50 @@ CARRIER_PROFILES = {
         "tax_category_col": "Shipping System / Adjustment",
         "tax_category_values": ["US Customs Duties", "Government Charges", "Brokerage Charges"],
     },
+    "Asendia - Vergi/Gumruk": {
+        # Asendia'nin ayri Duty & Tax raporu. Sadece "2026" sayfasi islenir;
+        # "2025" sayfasinda Customer Tracking Number Original kolonu yok ve
+        # gelir penceresiyle (2026 Nisan-Mayis) tarihsel ortusmesi de yok.
+        "tracking_col": "Customer Tracking Number Original",
+        "charge_col": "Total Charge",
+        "date_col": "Job Date",
+        "invoice_col": "Invoice Number",
+        "sheet_name": "2026",
+        "all_tax": True,
+    },
+    "FedEx": {
+        # FedEx'in detayli fatura raporu: her gonderi tek satir, ama her satirda
+        # 51 ayri ucret kalemi (Description/Amount cifti) yan yana kolon olarak
+        # gelir. Her cift kendi aciklamasina gore Kargo/Vergi olarak ayrilir.
+        "tracking_col": "Express or Ground Tracking ID",
+        "charge_col": "Net Charge Amount",
+        "date_col": "Invoice Date",
+        "invoice_col": "Invoice Number",
+        "wide_charge_pairs": True,
+        "base_charge_col": "Transportation Charge Amount",
+        "desc_col_prefix": "Tracking ID Charge Description",
+        "amount_col_prefix": "Tracking ID Charge Amount",
+        "max_pairs": 51,
+        "tax_category_values": [
+            "Original VAT",
+            "Customs Duty",
+            "Canada GST",
+            "Canada HST",
+            "Clearance Entry Fee",
+            "US Inbound Processing Fee",
+            "Other Government Agency Fee",
+            "Rebill Duty",
+            "Additional Tax Admin",
+            "Broker Document Transfer Fee",
+            "Additional Entry Line Items Fee",
+        ],
+    },
 }
 
 # ByeLabel dosyasi (shipments-...xlsx) tek tabloda birden fazla firma icerir.
-# Carrier & Service kolonundaki degere gore filtrelenip ayri profil olarak eklenir.
-# charge_col = kargo bedeli, tax_col = vergi/gumruk (ayri ayri hesaplanir, sonra toplanir).
+# Carrier & Service kolonundaki degere gore filtrelenip ayri profil olarak tanimlanir.
+# Bu profiller kullaniciya TEK TEK gosterilmez - arayuzde sadece BYELABEL_GROUP_LABEL
+# secilir, load_byelabel_group() hepsini otomatik calistirir.
 _BYELABEL_BASE = {
     "tracking_col": "Master Tracking Number",
     "charge_col": "Cost",
@@ -52,19 +95,43 @@ _BYELABEL_BASE = {
     "service_filter_col": "Carrier & Service",
 }
 
-CARRIER_PROFILES.update(
-    {
-        "ePost Global": {**_BYELABEL_BASE, "service_filter_contains": "ePost Global"},
-        "DHL": {**_BYELABEL_BASE, "service_filter_contains": "DHL"},
-        "intelcom": {**_BYELABEL_BASE, "service_filter_contains": "Intelcom"},
-        "APC": {**_BYELABEL_BASE, "service_filter_contains": "APC"},
-        "USPS": {**_BYELABEL_BASE, "service_filter_contains": "USPS"},
-        "Evri": {**_BYELABEL_BASE, "service_filter_contains": "Evri"},
-        "Purolator": {**_BYELABEL_BASE, "service_filter_contains": "Purolator"},
-        "FedEx (ByeLabel)": {**_BYELABEL_BASE, "service_filter_contains": "FedEx"},
-        "UPS (ByeLabel)": {**_BYELABEL_BASE, "service_filter_contains": "UPS"},
-    }
-)
+BYELABEL_SUB_PROFILES = {
+    "ePost Global": {**_BYELABEL_BASE, "service_filter_contains": "ePost Global"},
+    "DHL": {**_BYELABEL_BASE, "service_filter_contains": "DHL"},
+    "intelcom": {**_BYELABEL_BASE, "service_filter_contains": "Intelcom"},
+    "APC": {**_BYELABEL_BASE, "service_filter_contains": "APC"},
+    "USPS": {**_BYELABEL_BASE, "service_filter_contains": "USPS"},
+    "Evri": {**_BYELABEL_BASE, "service_filter_contains": "Evri"},
+    "Purolator": {**_BYELABEL_BASE, "service_filter_contains": "Purolator"},
+    "FedEx (ByeLabel)": {**_BYELABEL_BASE, "service_filter_contains": "FedEx"},
+    "UPS (ByeLabel)": {**_BYELABEL_BASE, "service_filter_contains": "UPS"},
+}
+
+BYELABEL_GROUP_LABEL = "ByeLabel (Tum Firmalar)"
+
+# load_cost_file'in carrier_name'e gore profil bulabilmesi icin birlestirilmis sozluk.
+_ALL_PROFILES = {**CARRIER_PROFILES, **BYELABEL_SUB_PROFILES}
+
+# Ayni firmanin farkli yazimlarini (orn. "FedEx", "FedEx BL", "FEDEX BL",
+# "FedEx (ByeLabel)") tek bir isim altinda birlestirmek icin. Anahtar: aranacak
+# alt-string (kucuk harfle), deger: gosterilecek tek/kanonik isim. Yeni bir
+# firma icin birlestirme istenirse buraya bir satir eklemek yeterli.
+CARRIER_NAME_ALIASES = {
+    "fedex": "FedEx",
+    "ups": "UPS",
+}
+
+
+def _normalize_carrier_name(name):
+    """CARRIER_NAME_ALIASES'e gore farkli yazimlari tek isim altinda birlestirir.
+    Eslesme yoksa orijinal ismi degistirmeden dondurur."""
+    if pd.isna(name):
+        return name
+    lowered = str(name).lower()
+    for key, canonical in CARRIER_NAME_ALIASES.items():
+        if key in lowered:
+            return canonical
+    return name
 
 
 def _parse_money_text(value):
@@ -82,16 +149,51 @@ def _parse_money_text(value):
     return -num if negative else num
 
 
-def load_income_file(file_obj):
-    """Gelir dosyasini okur, ihtiyac duyulan kolonlari secer."""
+def _resolve_col(df, name_or_list, carrier_name, required=True):
+    """Profildeki bir alan adi tek string veya alternatif isimlerin listesi
+    olabilir (orn. Asendia zaman zaman "JobDate", zaman zaman "Job Date"
+    kullanabiliyor). Dosyada hangisi varsa onu dondurur.
+
+    required=False ise ve hicbiri bulunamazsa None doner (hata firlatmaz) -
+    opsiyonel alanlar (orn. currency_col, date_col) icin kullanilir.
+    """
+    candidates = name_or_list if isinstance(name_or_list, list) else [name_or_list]
+    for c in candidates:
+        if c in df.columns:
+            return c
+    if not required:
+        return None
+    secenekler = ", ".join(f"'{c}'" for c in candidates)
+    raise ValueError(f"{carrier_name} dosyasinda beklenen kolon(lar) bulunamadi: {secenekler}")
+
+
+def load_income_file(file_obj, only_paid=True):
+    """Gelir dosyasini okur, ihtiyac duyulan kolonlari secer.
+
+    only_paid=True ise sadece Status="Paid" olan gonderiler dahil edilir
+    (User Cancelled, New Shipment, Payment Waiting vb. disarida tutulur).
+    """
     df = pd.read_excel(file_obj)
 
-    required = ["Shipment No", "Track Number", "Carrier Name", "Invoice Amount", "Status", "Added Date"]
+    required = [
+        "Shipment No",
+        "Track Number",
+        "Carrier Name",
+        "Invoice Amount",
+        "Status",
+        "Added Date",
+        "Receiver Country",
+        "User No",
+        "User Name",
+    ]
     missing = [c for c in required if c not in df.columns]
     if missing:
         raise ValueError(f"Gelir dosyasinda eksik kolon(lar): {', '.join(missing)}")
 
     out = df[required].copy()
+    if only_paid:
+        out = out[out["Status"] == "Paid"].reset_index(drop=True)
+    out["Carrier Name"] = out["Carrier Name"].apply(_normalize_carrier_name)
     out["TrackingKey"] = out["Track Number"].astype(str).str.strip()
     out["Takip_Var_Mi"] = ~out["TrackingKey"].isin(NO_TRACKING_VALUES)
     return out
@@ -113,21 +215,31 @@ def load_cost_file(file_obj, carrier_name):
     Para birimi USD disindaysa, her satir kendi tarihindeki gunluk kur ile
     otomatik olarak USD'ye cevrilir (Frankfurter API).
 
-    Returns: (grouped_df, currency_warning, genel_gider_tutari)
+    Returns: (grouped_df, currency_warning, genel_gider_tutari, breakdown_df)
+    breakdown_df: hangi kategori/sutunun Kargo / Vergi / Genel Gider olarak
+    siniflandirildigini ve ne kadar tutar tasidigini gosterir (seffaflik icin).
     """
-    if carrier_name not in CARRIER_PROFILES:
+    if carrier_name not in _ALL_PROFILES:
         raise ValueError(f"Taninmayan kargo firmasi: {carrier_name}")
 
     empty_cols = ["TrackingKey", "Gider_Kargo", "Gider_Tax", "Gider", "Kargo Firmasi", "Satir Sayisi"]
+    empty_breakdown = pd.DataFrame(columns=["Kargo Firmasi", "Kategori/Sutun", "Siniflandirma", "Tutar"])
 
-    profile = CARRIER_PROFILES[carrier_name]
-    df = pd.read_excel(file_obj)
+    profile = _ALL_PROFILES[carrier_name]
+    display_name = _normalize_carrier_name(carrier_name)
+    if hasattr(file_obj, "seek"):
+        file_obj.seek(0)
+    df = pd.read_excel(file_obj, sheet_name=profile.get("sheet_name", 0))
 
-    track_col = profile["tracking_col"]
-    charge_col = profile["charge_col"]
-    tax_col = profile.get("tax_col")
-    currency_col = profile.get("currency_col")
-    date_col = profile.get("date_col")
+    track_col = _resolve_col(df, profile["tracking_col"], carrier_name)
+    charge_col = _resolve_col(df, profile["charge_col"], carrier_name)
+    tax_col = _resolve_col(df, profile["tax_col"], carrier_name, required=False) if profile.get("tax_col") else None
+    currency_col = (
+        _resolve_col(df, profile["currency_col"], carrier_name, required=False)
+        if profile.get("currency_col")
+        else None
+    )
+    date_col = _resolve_col(df, profile["date_col"], carrier_name, required=False) if profile.get("date_col") else None
     tax_category_col = profile.get("tax_category_col")
     tax_category_values = profile.get("tax_category_values")
 
@@ -138,12 +250,59 @@ def load_cost_file(file_obj, carrier_name):
             raise ValueError(f"{carrier_name} dosyasinda '{filter_col}' kolonu bulunamadi")
         df = df[df[filter_col].astype(str).str.contains(filter_contains, case=False, na=False)].copy()
         if df.empty:
-            return pd.DataFrame(columns=empty_cols), None, 0.0
+            return pd.DataFrame(columns=empty_cols), None, 0.0, empty_breakdown
 
-    needed_cols = [track_col, charge_col] + ([tax_col] if tax_col else [])
-    for col in needed_cols:
-        if col not in df.columns:
-            raise ValueError(f"{carrier_name} dosyasinda '{col}' kolonu bulunamadi")
+    # Bazi firmalar (orn. FedEx) her gonderi icin bircok ayri ucret kalemini
+    # ayni satirda yan yana kolonlar olarak verir (Description/Amount cifti
+    # tekrarlanir). Bu durumda her cift kendi aciklamasina gore Kargo/Vergi
+    # olarak siniflandirilip satir bazinda toplanir.
+    wide_breakdown_rows = []
+    if profile.get("wide_charge_pairs"):
+        desc_prefix = profile["desc_col_prefix"]
+        amount_prefix = profile["amount_col_prefix"]
+        wide_tax_values = set(profile.get("tax_category_values", []))
+        max_pairs = profile.get("max_pairs", 60)
+
+        indices = [""] + [f".{i}" for i in range(1, max_pairs)]
+        pairs = [
+            (f"{desc_prefix}{idx}", f"{amount_prefix}{idx}")
+            for idx in indices
+            if f"{desc_prefix}{idx}" in df.columns and f"{amount_prefix}{idx}" in df.columns
+        ]
+        if not pairs:
+            raise ValueError(f"{carrier_name} dosyasinda '{desc_prefix}' / '{amount_prefix}' kolonlari bulunamadi")
+
+        kargo_raw = pd.Series(0.0, index=df.index)
+        tax_raw = pd.Series(0.0, index=df.index)
+        cat_totals = {}
+
+        base_col = profile.get("base_charge_col")
+        if base_col and base_col in df.columns:
+            base_amt = df[base_col].apply(_parse_money_text).fillna(0.0)
+            kargo_raw = kargo_raw + base_amt
+            cat_totals[base_col] = cat_totals.get(base_col, 0.0) + float(base_amt.sum())
+
+        for desc_col, amt_col in pairs:
+            amt = df[amt_col].apply(_parse_money_text).fillna(0.0)
+            desc = df[desc_col]
+            is_tax_line = desc.isin(wide_tax_values)
+            kargo_raw = kargo_raw + amt.where(~is_tax_line, 0.0)
+            tax_raw = tax_raw + amt.where(is_tax_line, 0.0)
+
+            for d, total in amt.groupby(desc).sum().items():
+                if pd.isna(d):
+                    continue
+                cat_totals[d] = cat_totals.get(d, 0.0) + float(total)
+
+        df = pd.concat(
+            [df, pd.DataFrame({"_wide_kargo": kargo_raw, "_wide_tax": tax_raw, "_wide_total": kargo_raw + tax_raw})],
+            axis=1,
+        )
+        charge_col = "_wide_total"
+
+        for d, total in cat_totals.items():
+            label = "Vergi" if d in wide_tax_values else "Kargo"
+            wide_breakdown_rows.append((display_name, d, label, total))
 
     if profile.get("charge_is_money_text"):
         df[charge_col] = df[charge_col].apply(_parse_money_text)
@@ -161,6 +320,12 @@ def load_cost_file(file_obj, carrier_name):
     overhead_mask = is_tax & no_tracking
     genel_gider = float(df.loc[overhead_mask, charge_col].fillna(0).sum())
 
+    breakdown_rows = []
+    if tax_category_col and tax_category_col in df.columns:
+        overhead_by_cat = df.loc[overhead_mask].groupby(tax_category_col)[charge_col].sum()
+        for cat, total in overhead_by_cat.items():
+            breakdown_rows.append((display_name, cat, "Genel Gider (pakete baglanamiyor)", float(total)))
+
     df = df[~overhead_mask].copy()
     df = df.dropna(subset=[track_col]).copy()
     df["TrackingKey"] = df[track_col].astype(str).str.strip()
@@ -168,19 +333,40 @@ def load_cost_file(file_obj, carrier_name):
     if profile.get("charge_is_money_text"):
         df = df.dropna(subset=[charge_col])
 
-    if tax_category_col and tax_category_col in df.columns:
+    if "_wide_kargo" in df.columns:
+        # Satir bazinda zaten Kargo/Vergi olarak hesaplanmis (wide_charge_pairs).
+        df["_kargo_raw"] = df["_wide_kargo"]
+        df["_tax_raw"] = df["_wide_tax"]
+        breakdown_rows.extend(wide_breakdown_rows)
+    elif profile.get("all_tax"):
+        # Tum dosya zaten bir vergi/gumruk dosyasi (orn. Asendia Duty & Tax raporu) -
+        # charge_col'un tamami Vergi sayilir, Kargo payi yok.
+        df["_kargo_raw"] = 0.0
+        df["_tax_raw"] = df[charge_col]
+        breakdown_rows.append((display_name, charge_col, "Vergi", float(df[charge_col].sum())))
+    elif tax_category_col and tax_category_col in df.columns:
         # Ayni tutar kolonu (charge_col), baska bir kolonun degerine gore
         # kargo / vergi olarak ikiye bolunur (orn. UPS'te "Brokerage Charges" gibi
         # satirlar Net Amount Due icinde ama vergi sayilmasi gerekiyor).
         is_tax = df[tax_category_col].isin(tax_category_values)
         df["_kargo_raw"] = df[charge_col].where(~is_tax, 0.0)
         df["_tax_raw"] = df[charge_col].where(is_tax, 0.0)
+
+        cat_totals = df.groupby(tax_category_col)[charge_col].sum()
+        for cat, total in cat_totals.items():
+            label = "Vergi" if cat in tax_category_values else "Kargo"
+            breakdown_rows.append((display_name, cat, label, float(total)))
     elif tax_col:
         df["_kargo_raw"] = df[charge_col]
         df["_tax_raw"] = df[tax_col].fillna(0)
+        breakdown_rows.append((display_name, charge_col, "Kargo", float(df[charge_col].sum())))
+        breakdown_rows.append((display_name, tax_col, "Vergi", float(df[tax_col].fillna(0).sum())))
     else:
         df["_kargo_raw"] = df[charge_col]
         df["_tax_raw"] = 0.0
+        breakdown_rows.append((display_name, charge_col, "Kargo", float(df[charge_col].sum())))
+
+    breakdown_df = pd.DataFrame(breakdown_rows, columns=["Kargo Firmasi", "Kategori/Sutun", "Siniflandirma", "Tutar"])
 
     currency_warning = None
     fx_failed_count = 0
@@ -230,10 +416,40 @@ def load_cost_file(file_obj, carrier_name):
         Gider_Tax=("Gider_Tax", "sum"),
     )
     grouped["Gider"] = grouped["Gider_Kargo"] + grouped["Gider_Tax"]
-    grouped["Kargo Firmasi"] = carrier_name
+    grouped["Kargo Firmasi"] = display_name
     grouped["Satir Sayisi"] = df.groupby("TrackingKey").size().values
 
-    return grouped, currency_warning, genel_gider
+    return grouped, currency_warning, genel_gider, breakdown_df
+
+
+def load_byelabel_group(file_obj):
+    """ByeLabel dosyasini (shipments-...xlsx) tek seferde yukler, icindeki
+    butun firmalari (ePost Global, DHL, intelcom, APC, USPS, Evri, Purolator,
+    FedEx, UPS) otomatik olarak ayri ayri isler.
+
+    Kullaniciya arayuzde tek bir secenek ("ByeLabel - Tum Firmalar") gosterilir,
+    ama sonuctaki tablolarda her firma kendi adiyla (orn. "DHL", "ePost Global")
+    ayri ayri gorunur - cunku her biri kendi profiliyle load_cost_file()
+    uzerinden ayri ayri islenir.
+
+    Returns: (cost_dfs, warnings, toplam_genel_gider, breakdown_dfs)
+    """
+    cost_dfs = []
+    warnings = []
+    toplam_genel_gider = 0.0
+    breakdown_dfs = []
+
+    for sub_carrier in BYELABEL_SUB_PROFILES:
+        grouped, warning, genel_gider, breakdown_df = load_cost_file(file_obj, sub_carrier)
+        if not grouped.empty:
+            cost_dfs.append(grouped)
+        if warning:
+            warnings.append(warning)
+        toplam_genel_gider += genel_gider
+        if not breakdown_df.empty:
+            breakdown_dfs.append(breakdown_df)
+
+    return cost_dfs, warnings, toplam_genel_gider, breakdown_dfs
 
 
 def build_report(income_df, cost_dfs):
@@ -292,3 +508,137 @@ def summarize(merged, genel_gider=0.0):
         "takip_no_yok_sayisi": (merged["Durum"] == "Takip no yok").sum(),
         "gider_bulunamadi_sayisi": (merged["Durum"] == "Gider bulunamadi").sum(),
     }
+
+
+def country_breakdown(merged):
+    """Ulkeye gore gelir, kargo gideri, vergi ve kar dagilimi.
+
+    Toplam gelir ve gonderi sayisi TUM gonderileri kapsar (eslesen/eslesmeyen).
+    Kargo/Vergi/Toplam Gider/Kar sutunlari sadece ESLESEN gonderilerden gelir
+    (pandas sum() varsayilan olarak NaN'lari atlar, bu yuzden eslesmeyenler
+    bu sutunlarda otomatik olarak hesaba katilmaz).
+
+    Paket Basi Kar = Kar / Eslesen Sayisi (eslesen yoksa 0 gosterilir).
+    """
+    out = (
+        merged.groupby("Receiver Country", as_index=False)
+        .agg(
+            Gonderi_Sayisi=("Shipment No", "count"),
+            Eslesen_Sayisi=("Durum", lambda x: (x == "Eslesti").sum()),
+            Toplam_Gelir=("Invoice Amount", "sum"),
+            Kargo_Gideri=("Gider_Kargo", "sum"),
+            Vergi_Gideri=("Gider_Tax", "sum"),
+            Toplam_Gider=("Gider", "sum"),
+            Kar=("Kar", "sum"),
+        )
+        .rename(columns={"Receiver Country": "Ulke"})
+        .sort_values("Toplam_Gelir", ascending=False)
+        .reset_index(drop=True)
+    )
+    out["Paket_Basi_Kar"] = [
+        (kar / sayi) if sayi > 0 else 0.0
+        for kar, sayi in zip(out["Kar"], out["Eslesen_Sayisi"])
+    ]
+    return out
+
+
+def carrier_breakdown(merged):
+    """Kargo firmasina (gelir dosyasindaki Carrier Name) gore paket sayisi,
+    gelir, gider ve kar/zarar dagilimi.
+
+    Paket Sayisi ve Toplam Gelir TUM gonderileri kapsar. Eslesen Sayisi, Kargo
+    Gideri, Vergi Gideri, Toplam Gider ve Kar/Zarar sutunlari sadece ESLESEN
+    gonderilerden gelir (pandas sum() varsayilan olarak NaN'lari atlar).
+
+    Carrier Name bos olan gonderiler (henuz kargo firmasi atanmamis) "Atanmamis"
+    olarak ayri bir satirda gosterilir, sessizce atilmaz.
+
+    Paket Basi Kar/Zarar = Kar/Zarar / Eslesen Sayisi (eslesen yoksa 0 gosterilir).
+    """
+    merged = merged.copy()
+    merged["Carrier Name"] = merged["Carrier Name"].fillna("Atanmamis")
+
+    out = (
+        merged.groupby("Carrier Name", as_index=False)
+        .agg(
+            **{
+                "Paket Sayisi": ("Shipment No", "count"),
+                "Eslesen Sayisi": ("Durum", lambda x: (x == "Eslesti").sum()),
+                "Toplam Gelir": ("Invoice Amount", "sum"),
+                "Kargo Gideri": ("Gider_Kargo", "sum"),
+                "Vergi Gideri": ("Gider_Tax", "sum"),
+                "Toplam Gider": ("Gider", "sum"),
+                "Kar/Zarar": ("Kar", "sum"),
+            }
+        )
+        .rename(columns={"Carrier Name": "Kargo Firmasi"})
+        .sort_values("Toplam Gelir", ascending=False)
+        .reset_index(drop=True)
+    )
+    out["Paket Basi Kar/Zarar"] = [
+        (kar / sayi) if sayi > 0 else 0.0
+        for kar, sayi in zip(out["Kar/Zarar"], out["Eslesen Sayisi"])
+    ]
+    return out
+
+
+def customer_breakdown(merged):
+    """Musteri (User No) bazinda paket sayisi, gelir, gider, kar/zarar ve
+    gonderdigi ulkeler.
+
+    Paket Sayisi ve Bize Odenen TUM gonderileri kapsar. Eslesen Sayisi,
+    Firmaya Odenen, Kar/Zarar sutunlari sadece ESLESEN gonderilerden gelir.
+    """
+    merged = merged.copy()
+    merged["User No"] = merged["User No"].astype(str)
+    merged["User Name"] = merged["User Name"].fillna("Bilinmiyor")
+
+    out = (
+        merged.groupby(["User No", "User Name"], as_index=False)
+        .agg(
+            **{
+                "Paket Sayisi": ("Shipment No", "count"),
+                "Eslesen Sayisi": ("Durum", lambda x: (x == "Eslesti").sum()),
+                "Bize Odenen (Gelir)": ("Invoice Amount", "sum"),
+                "Firmaya Odenen (Gider)": ("Gider", "sum"),
+                "Kar/Zarar": ("Kar", "sum"),
+                "Gonderdigi Ulkeler": ("Receiver Country", lambda x: ", ".join(sorted(set(x.dropna())))),
+            }
+        )
+        .rename(columns={"User No": "Musteri No", "User Name": "Musteri Adi"})
+        .sort_values("Bize Odenen (Gelir)", ascending=False)
+        .reset_index(drop=True)
+    )
+    out["Paket Basi Kar/Zarar"] = [
+        (kar / sayi) if sayi > 0 else 0.0
+        for kar, sayi in zip(out["Kar/Zarar"], out["Eslesen Sayisi"])
+    ]
+    return out
+
+
+def customer_country_breakdown(merged):
+    """Musteri x Ulke bazinda kar/zarar analizi.
+
+    Hangi musterinin hangi ulkeye yaptigi gonderilerin kar mi zarar mi
+    ettirdigini gosterir. En cok zarar ettiren kombinasyonlar basta gorunur.
+    """
+    merged = merged.copy()
+    merged["User No"] = merged["User No"].astype(str)
+    merged["User Name"] = merged["User Name"].fillna("Bilinmiyor")
+
+    out = (
+        merged.groupby(["User No", "User Name", "Receiver Country"], as_index=False)
+        .agg(
+            **{
+                "Paket Sayisi": ("Shipment No", "count"),
+                "Eslesen Sayisi": ("Durum", lambda x: (x == "Eslesti").sum()),
+                "Gelir": ("Invoice Amount", "sum"),
+                "Gider": ("Gider", "sum"),
+                "Kar/Zarar": ("Kar", "sum"),
+            }
+        )
+        .rename(columns={"User No": "Musteri No", "User Name": "Musteri Adi", "Receiver Country": "Ulke"})
+        .sort_values("Kar/Zarar")
+        .reset_index(drop=True)
+    )
+    return out
