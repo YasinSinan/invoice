@@ -36,6 +36,8 @@ CARRIER_PROFILES = {
         "date_col": "Invoice Date",
         "invoice_col": "Invoice Number",
         "charge_is_money_text": True,
+        "tax_category_col": "Shipping System / Adjustment",
+        "tax_category_values": ["US Customs Duties", "Government Charges", "Brokerage Charges"],
     },
 }
 
@@ -98,15 +100,20 @@ def load_income_file(file_obj):
 def load_cost_file(file_obj, carrier_name):
     """Bir kargo firmasinin gider dosyasini okur, takip numarasina gore gruplar.
 
-    Kargo bedeli (charge_col) ve vergi/gumruk (tax_col, varsa) ayri ayri
-    toplanir, sonra "Gider" olarak birlestirilir - boylece rapor hem
-    kargo bedelini hem vergiyi ayri ayri gosterebilir.
+    Kargo bedeli (charge_col) ve vergi/gumruk (tax_col veya tax_category_col
+    ile belirlenen) ayri ayri toplanir, sonra "Gider" olarak birlestirilir.
+
+    Takip numarasi OLMAYAN vergi/komisyon satirlari (orn. UPS'te Brokerage
+    Charges, Government Charges) belirli bir pakete baglanamaz - bunlar
+    "genel gider" olarak ayrica dondurulur, pakete dagitilmaz.
 
     Ayni takip numarasi birden fazla satirda gecerse (tekrar/surcharge satiri vs.)
     ucretler toplanir - hicbir satir atilmaz.
 
     Para birimi USD disindaysa, her satir kendi tarihindeki gunluk kur ile
     otomatik olarak USD'ye cevrilir (Frankfurter API).
+
+    Returns: (grouped_df, currency_warning, genel_gider_tutari)
     """
     if carrier_name not in CARRIER_PROFILES:
         raise ValueError(f"Taninmayan kargo firmasi: {carrier_name}")
@@ -121,6 +128,8 @@ def load_cost_file(file_obj, carrier_name):
     tax_col = profile.get("tax_col")
     currency_col = profile.get("currency_col")
     date_col = profile.get("date_col")
+    tax_category_col = profile.get("tax_category_col")
+    tax_category_values = profile.get("tax_category_values")
 
     filter_col = profile.get("service_filter_col")
     filter_contains = profile.get("service_filter_contains")
@@ -129,27 +138,49 @@ def load_cost_file(file_obj, carrier_name):
             raise ValueError(f"{carrier_name} dosyasinda '{filter_col}' kolonu bulunamadi")
         df = df[df[filter_col].astype(str).str.contains(filter_contains, case=False, na=False)].copy()
         if df.empty:
-            return pd.DataFrame(columns=empty_cols), None
+            return pd.DataFrame(columns=empty_cols), None, 0.0
 
     needed_cols = [track_col, charge_col] + ([tax_col] if tax_col else [])
     for col in needed_cols:
         if col not in df.columns:
             raise ValueError(f"{carrier_name} dosyasinda '{col}' kolonu bulunamadi")
 
-    df = df.dropna(subset=[track_col]).copy()
-    df["TrackingKey"] = df[track_col].astype(str).str.strip()
-
     if profile.get("charge_is_money_text"):
         df[charge_col] = df[charge_col].apply(_parse_money_text)
         if tax_col:
             df[tax_col] = df[tax_col].apply(_parse_money_text)
+
+    if tax_category_col and tax_category_col in df.columns:
+        is_tax = df[tax_category_col].isin(tax_category_values)
+    else:
+        is_tax = pd.Series(False, index=df.index)
+
+    # Vergi kategorisinde olup takip numarasi OLMAYAN satirlar -> genel gider.
+    # Belirli bir pakete baglanamadiklari icin eslestirmeye dahil edilmezler.
+    no_tracking = df[track_col].isna()
+    overhead_mask = is_tax & no_tracking
+    genel_gider = float(df.loc[overhead_mask, charge_col].fillna(0).sum())
+
+    df = df[~overhead_mask].copy()
+    df = df.dropna(subset=[track_col]).copy()
+    df["TrackingKey"] = df[track_col].astype(str).str.strip()
+
+    if profile.get("charge_is_money_text"):
         df = df.dropna(subset=[charge_col])
 
-    if tax_col:
-        df[tax_col] = df[tax_col].fillna(0)
+    if tax_category_col and tax_category_col in df.columns:
+        # Ayni tutar kolonu (charge_col), baska bir kolonun degerine gore
+        # kargo / vergi olarak ikiye bolunur (orn. UPS'te "Brokerage Charges" gibi
+        # satirlar Net Amount Due icinde ama vergi sayilmasi gerekiyor).
+        is_tax = df[tax_category_col].isin(tax_category_values)
+        df["_kargo_raw"] = df[charge_col].where(~is_tax, 0.0)
+        df["_tax_raw"] = df[charge_col].where(is_tax, 0.0)
+    elif tax_col:
+        df["_kargo_raw"] = df[charge_col]
+        df["_tax_raw"] = df[tax_col].fillna(0)
     else:
-        df["_no_tax"] = 0.0
-        tax_col = "_no_tax"
+        df["_kargo_raw"] = df[charge_col]
+        df["_tax_raw"] = 0.0
 
     currency_warning = None
     fx_failed_count = 0
@@ -171,12 +202,12 @@ def load_cost_file(file_obj, carrier_name):
             nonlocal fx_failed_count
             cur = row[currency_col]
             if pd.isna(cur) or cur == TARGET_CURRENCY:
-                return row[charge_col], row[tax_col]
+                return row["_kargo_raw"], row["_tax_raw"]
             rate = get_rate(cur, row["_date_str"])
             if rate is None:
                 fx_failed_count += 1
                 return None, None
-            return row[charge_col] * rate, row[tax_col] * rate
+            return row["_kargo_raw"] * rate, row["_tax_raw"] * rate
 
         converted = df.apply(convert, axis=1, result_type="expand")
         df["Gider_Kargo"] = converted[0]
@@ -185,8 +216,8 @@ def load_cost_file(file_obj, carrier_name):
         currencies = [c for c in df[currency_col].dropna().unique() if c != TARGET_CURRENCY]
         currency_warning = f"{carrier_name}: {', '.join(currencies)} -> USD gunluk kur ile cevrildi."
     else:
-        df["Gider_Kargo"] = df[charge_col]
-        df["Gider_Tax"] = df[tax_col]
+        df["Gider_Kargo"] = df["_kargo_raw"]
+        df["Gider_Tax"] = df["_tax_raw"]
 
     if fx_failed_count:
         msg = f"UYARI: {carrier_name} icin {fx_failed_count} satirda doviz kuru alinamadi, bu satirlar dislandi."
@@ -202,7 +233,7 @@ def load_cost_file(file_obj, carrier_name):
     grouped["Kargo Firmasi"] = carrier_name
     grouped["Satir Sayisi"] = df.groupby("TrackingKey").size().values
 
-    return grouped, currency_warning
+    return grouped, currency_warning, genel_gider
 
 
 def build_report(income_df, cost_dfs):
@@ -239,15 +270,23 @@ def build_report(income_df, cost_dfs):
     return merged, unmatched_cost
 
 
-def summarize(merged):
-    """Ozet metrikler."""
+def summarize(merged, genel_gider=0.0):
+    """Ozet metrikler.
+
+    genel_gider: pakete baglanamayan vergi/komisyon gibi gider toplami
+    (orn. UPS Brokerage/Government Charges). Pakete dagitilmaz, sadece
+    net kardan ayrica dusulur.
+    """
     matched = merged[merged["Durum"] == "Eslesti"]
+    toplam_kar = matched["Kar"].sum()
     return {
         "toplam_gelir": merged["Invoice Amount"].sum(),
         "toplam_gider_kargo": matched["Gider_Kargo"].sum(),
         "toplam_gider_tax": matched["Gider_Tax"].sum(),
         "toplam_gider_eslesen": matched["Gider"].sum(),
-        "toplam_kar": matched["Kar"].sum(),
+        "toplam_kar": toplam_kar,
+        "genel_gider": genel_gider,
+        "net_kar": toplam_kar - genel_gider,
         "toplam_gonderi": len(merged),
         "eslesen_sayisi": len(matched),
         "takip_no_yok_sayisi": (merged["Durum"] == "Takip no yok").sum(),

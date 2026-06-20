@@ -64,12 +64,17 @@ if run and income_file is not None:
 
     cost_dfs = []
     warnings = []
+    toplam_genel_gider = 0.0
+    genel_gider_detay = []
     for f in cost_files or []:
         try:
-            cost_df, warning = load_cost_file(f, carrier_for_file[f.name])
+            cost_df, warning, genel_gider = load_cost_file(f, carrier_for_file[f.name])
             cost_dfs.append(cost_df)
             if warning:
                 warnings.append(warning)
+            if genel_gider:
+                toplam_genel_gider += genel_gider
+                genel_gider_detay.append((carrier_for_file[f.name], f.name, genel_gider))
         except ValueError as e:
             st.error(f"{f.name} okunamadi: {e}")
             st.stop()
@@ -78,7 +83,7 @@ if run and income_file is not None:
         st.warning(w)
 
     merged, unmatched_cost = build_report(income_df, cost_dfs)
-    summary = summarize(merged)
+    summary = summarize(merged, genel_gider=toplam_genel_gider)
 
     st.divider()
     st.subheader("Ozet")
@@ -88,7 +93,23 @@ if run and income_file is not None:
     m2.metric("Kargo gideri", f"${summary['toplam_gider_kargo']:,.2f}")
     m3.metric("Vergi/gumruk gideri", f"${summary['toplam_gider_tax']:,.2f}")
     m4.metric("Toplam gider", f"${summary['toplam_gider_eslesen']:,.2f}")
-    m5.metric("Toplam kar", f"${summary['toplam_kar']:,.2f}")
+    m5.metric("Kar (pakete dagitilan)", f"${summary['toplam_kar']:,.2f}")
+
+    if toplam_genel_gider:
+        n1, n2 = st.columns(2)
+        n1.metric(
+            "Genel gider (pakete baglanamayan vergi/komisyon)",
+            f"${summary['genel_gider']:,.2f}",
+            help="Takip numarasi olmayan, belirli bir pakete baglanamayan vergi/komisyon satirlari (orn. UPS Brokerage/Government Charges).",
+        )
+        n2.metric("Net kar (genel gider dusulmus)", f"${summary['net_kar']:,.2f}")
+
+        with st.expander("Genel gider detayi (firma / dosya bazinda)"):
+            st.dataframe(
+                pd.DataFrame(genel_gider_detay, columns=["Kargo Firmasi", "Dosya", "Genel Gider"]),
+                use_container_width=True,
+                hide_index=True,
+            )
 
     eslesme_orani = summary["eslesen_sayisi"] / summary["toplam_gonderi"] * 100 if summary["toplam_gonderi"] else 0
     st.caption(f"Eslesme orani: %{eslesme_orani:.1f}")
