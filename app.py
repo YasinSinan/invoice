@@ -21,6 +21,7 @@ from processing import (
     load_byelabel_group,
     load_cost_file,
     load_income_file,
+    manual_expense_total,
     summarize,
 )
 
@@ -71,6 +72,24 @@ if cost_files:
         "Purolator, FedEx, UPS) otomatik ayri ayri islenir."
     )
 
+st.subheader("3. Manuel gider (opsiyonel)")
+st.caption(
+    "Hicbir pakete baglanmayan, dogrudan net kardan dusulecek giderler "
+    "(orn. depo kirasi, personel maasi, internet faturasi). Sadece aciklama "
+    "ve tutar girin; satir eklemek/silmek icin tablonun altindaki + / cop "
+    "kutusu ikonlarini kullanin."
+)
+manual_expenses_df = st.data_editor(
+    pd.DataFrame({"Aciklama": pd.Series(dtype="str"), "Tutar": pd.Series(dtype="float")}),
+    num_rows="dynamic",
+    column_config={
+        "Aciklama": st.column_config.TextColumn("Aciklama"),
+        "Tutar": st.column_config.NumberColumn("Tutar ($)", format="$%.2f"),
+    },
+    use_container_width=True,
+    key="manual_expenses_editor",
+)
+
 run = st.button("Hesapla", type="primary", disabled=income_file is None)
 
 # ---------------------------------------------------------------- hesapla ---
@@ -115,6 +134,9 @@ if run and income_file is not None:
     for w in warnings:
         st.warning(w)
 
+    manuel_gider_toplam = manual_expense_total(manual_expenses_df)
+    toplam_genel_gider += manuel_gider_toplam
+
     merged, unmatched_cost = build_report(income_df, cost_dfs)
     summary = summarize(merged, genel_gider=toplam_genel_gider)
 
@@ -131,18 +153,22 @@ if run and income_file is not None:
     if toplam_genel_gider:
         n1, n2 = st.columns(2)
         n1.metric(
-            "Genel gider (pakete baglanamayan vergi/komisyon)",
+            "Genel gider (pakete baglanamayan vergi/komisyon + manuel)",
             f"${summary['genel_gider']:,.2f}",
-            help="Takip numarasi olmayan, belirli bir pakete baglanamayan vergi/komisyon satirlari (orn. UPS Brokerage/Government Charges).",
+            help="Takip numarasi olmayan vergi/komisyon satirlari (orn. UPS Brokerage/Government Charges) ile manuel girilen giderlerin toplami.",
         )
         n2.metric("Net kar (genel gider dusulmus)", f"${summary['net_kar']:,.2f}")
 
-        with st.expander("Genel gider detayi (firma / dosya bazinda)"):
-            st.dataframe(
-                pd.DataFrame(genel_gider_detay, columns=["Kargo Firmasi", "Dosya", "Genel Gider"]),
-                use_container_width=True,
-                hide_index=True,
-            )
+        with st.expander("Genel gider detayi (firma/dosya + manuel girisler)"):
+            if genel_gider_detay:
+                st.dataframe(
+                    pd.DataFrame(genel_gider_detay, columns=["Kargo Firmasi", "Dosya", "Genel Gider"]),
+                    use_container_width=True,
+                    hide_index=True,
+                )
+            if manuel_gider_toplam:
+                st.write(f"Manuel giderler toplami: ${manuel_gider_toplam:,.2f}")
+                st.dataframe(manual_expenses_df, use_container_width=True, hide_index=True)
 
     eslesme_orani = summary["eslesen_sayisi"] / summary["toplam_gonderi"] * 100 if summary["toplam_gonderi"] else 0
     st.caption(f"Eslesme orani: %{eslesme_orani:.1f}")
@@ -315,6 +341,8 @@ if run and income_file is not None:
         carrier_table.to_excel(writer, sheet_name="Kargo Firmasi Bazinda", index=False)
         cust_table.to_excel(writer, sheet_name="Musteri Bazinda", index=False)
         cust_country_table.to_excel(writer, sheet_name="Musteri x Ulke", index=False)
+        if manuel_gider_toplam:
+            manual_expenses_df.to_excel(writer, sheet_name="Manuel Giderler", index=False)
 
     st.download_button(
         "Raporu Excel olarak indir",

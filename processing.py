@@ -642,3 +642,19 @@ def customer_country_breakdown(merged):
         .reset_index(drop=True)
     )
     return out
+
+
+def manual_expense_total(manual_df):
+    """Kullanicinin elle ekledigi (Aciklama, Tutar) satirlarinin toplami.
+
+    Bu giderler hicbir pakete baglanmaz, dogrudan net kardan dusulur - ayni
+    UPS Brokerage Charges gibi pakete baglanamayan vergi kalemleri gibi.
+    Bos/eksik satirlar (aciklama veya tutar olmayan) hesaba katilmaz.
+    """
+    if manual_df is None or manual_df.empty:
+        return 0.0
+    valid = manual_df.dropna(subset=["Aciklama", "Tutar"])
+    valid = valid[valid["Aciklama"].astype(str).str.strip() != ""]
+    if valid.empty:
+        return 0.0
+    return float(pd.to_numeric(valid["Tutar"], errors="coerce").fillna(0).sum())
