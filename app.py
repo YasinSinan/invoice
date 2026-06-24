@@ -13,6 +13,8 @@ import streamlit as st
 from processing import (
     BYELABEL_GROUP_LABEL,
     CARRIER_PROFILES,
+    KNOWN_CARRIERS,
+    apply_per_package_carrier_fee,
     build_report,
     carrier_breakdown,
     country_breakdown,
@@ -37,7 +39,7 @@ st.caption(
 col1, col2 = st.columns(2)
 
 with col1:
-    st.subheader("1. Gelir dosyasi")
+    st.subheader("Gelir")
     st.caption("WH_CUSTOMER_SHIPMENT_LIST formatinda, musteriden alinan tutarlari iceren dosya.")
     income_file = st.file_uploader("Gelir Excel dosyasini secin", type=["xlsx"], key="income")
     only_paid = st.checkbox(
@@ -46,8 +48,24 @@ with col1:
         help="Isaretliyse User Cancelled, New Shipment, Payment Waiting gibi durumlar disarida tutulur.",
     )
 
+    st.markdown("**Manuel gelir (opsiyonel)**")
+    st.caption(
+        "Hicbir pakete baglanmayan, dogrudan net kara eklenecek gelirler "
+        "(orn. depo kirasi geliri, danismanlik geliri)."
+    )
+    manual_income_df = st.data_editor(
+        pd.DataFrame({"Aciklama": pd.Series(dtype="str"), "Tutar": pd.Series(dtype="float")}),
+        num_rows="dynamic",
+        column_config={
+            "Aciklama": st.column_config.TextColumn("Aciklama"),
+            "Tutar": st.column_config.NumberColumn("Tutar ($)", format="$%.2f"),
+        },
+        use_container_width=True,
+        key="manual_income_editor",
+    )
+
 with col2:
-    st.subheader("2. Gider dosyalari")
+    st.subheader("Gider")
     st.caption("Kargo firmasindan gelen fatura dosyalari. Birden fazla dosya secebilirsiniz.")
     cost_files = st.file_uploader(
         "Gider Excel dosyasini/dosyalarini secin",
@@ -56,39 +74,63 @@ with col2:
         key="cost",
     )
 
-carrier_for_file = {}
-if cost_files:
-    st.write("Her dosya icin kargo firmasini secin:")
-    for f in cost_files:
-        carrier_for_file[f.name] = st.selectbox(
-            f"  {f.name}",
-            options=list(CARRIER_PROFILES.keys()) + [BYELABEL_GROUP_LABEL],
-            key=f"carrier_{f.name}",
+    carrier_for_file = {}
+    if cost_files:
+        st.write("Her dosya icin kargo firmasini secin:")
+        for f in cost_files:
+            carrier_for_file[f.name] = st.selectbox(
+                f"  {f.name}",
+                options=list(CARRIER_PROFILES.keys()) + [BYELABEL_GROUP_LABEL],
+                key=f"carrier_{f.name}",
+            )
+        st.caption(
+            "Su an Asendia, UniUni, UPS ve Asendia'nin ayri Vergi/Gumruk dosyasi "
+            "dogrudan destekleniyor. ByeLabel dosyasini (shipments-...xlsx) sectiginde "
+            "icindeki tum firmalar (ePost Global, DHL, intelcom, APC, USPS, Evri, "
+            "Purolator, FedEx, UPS) otomatik ayri ayri islenir."
         )
+
+    st.markdown("**Manuel gider (opsiyonel)**")
     st.caption(
-        "Su an Asendia, UniUni, UPS ve Asendia'nin ayri Vergi/Gumruk dosyasi "
-        "dogrudan destekleniyor. ByeLabel dosyasini (shipments-...xlsx) sectiginde "
-        "icindeki tum firmalar (ePost Global, DHL, intelcom, APC, USPS, Evri, "
-        "Purolator, FedEx, UPS) otomatik ayri ayri islenir."
+        "Hicbir pakete baglanmayan, dogrudan net kardan dusulecek giderler "
+        "(orn. depo kirasi, personel maasi, internet faturasi)."
+    )
+    manual_expenses_df = st.data_editor(
+        pd.DataFrame({"Aciklama": pd.Series(dtype="str"), "Tutar": pd.Series(dtype="float")}),
+        num_rows="dynamic",
+        column_config={
+            "Aciklama": st.column_config.TextColumn("Aciklama"),
+            "Tutar": st.column_config.NumberColumn("Tutar ($)", format="$%.2f"),
+        },
+        use_container_width=True,
+        key="manual_expenses_editor",
     )
 
-st.subheader("3. Manuel gider (opsiyonel)")
-st.caption(
-    "Hicbir pakete baglanmayan, dogrudan net kardan dusulecek giderler "
-    "(orn. depo kirasi, personel maasi, internet faturasi). Sadece aciklama "
-    "ve tutar girin; satir eklemek/silmek icin tablonun altindaki + / cop "
-    "kutusu ikonlarini kullanin."
-)
-manual_expenses_df = st.data_editor(
-    pd.DataFrame({"Aciklama": pd.Series(dtype="str"), "Tutar": pd.Series(dtype="float")}),
-    num_rows="dynamic",
-    column_config={
-        "Aciklama": st.column_config.TextColumn("Aciklama"),
-        "Tutar": st.column_config.NumberColumn("Tutar ($)", format="$%.2f"),
-    },
-    use_container_width=True,
-    key="manual_expenses_editor",
-)
+    st.markdown("**Paket basina ek gider - firma bazinda (opsiyonel)**")
+    st.caption(
+        "Belirli bir kargo firmasinin HER paketine ayni tutari ekler (orn. "
+        "UniUni icin paket basina $2). Tutar otomatik olarak paket sayisiyla "
+        "carpilir ve her paketin kar/zarar hesabina islenir - tum tablolarda "
+        "(ulke, firma, musteri) otomatik yansir. Gideri eslesmemis paketler "
+        "bu tutari aldiktan sonra 'eslesti' sayilir."
+    )
+    manual_carrier_expenses_df = st.data_editor(
+        pd.DataFrame(
+            {
+                "Kargo Firmasi": pd.Series(dtype="str"),
+                "Aciklama": pd.Series(dtype="str"),
+                "Paket Basi Tutar": pd.Series(dtype="float"),
+            }
+        ),
+        num_rows="dynamic",
+        column_config={
+            "Kargo Firmasi": st.column_config.SelectboxColumn("Kargo Firmasi", options=KNOWN_CARRIERS),
+            "Aciklama": st.column_config.TextColumn("Aciklama"),
+            "Paket Basi Tutar": st.column_config.NumberColumn("Paket Basi Tutar ($)", format="$%.2f"),
+        },
+        use_container_width=True,
+        key="manual_carrier_expenses_editor",
+    )
 
 run = st.button("Hesapla", type="primary", disabled=income_file is None)
 
@@ -136,9 +178,11 @@ if run and income_file is not None:
 
     manuel_gider_toplam = manual_expense_total(manual_expenses_df)
     toplam_genel_gider += manuel_gider_toplam
+    manuel_gelir_toplam = manual_expense_total(manual_income_df)
 
     merged, unmatched_cost = build_report(income_df, cost_dfs)
-    summary = summarize(merged, genel_gider=toplam_genel_gider)
+    merged = apply_per_package_carrier_fee(merged, manual_carrier_expenses_df)
+    summary = summarize(merged, genel_gider=toplam_genel_gider, manuel_gelir=manuel_gelir_toplam)
 
     st.divider()
     st.subheader("Ozet")
@@ -150,17 +194,28 @@ if run and income_file is not None:
     m4.metric("Toplam gider", f"${summary['toplam_gider_eslesen']:,.2f}")
     m5.metric("Kar (pakete dagitilan)", f"${summary['toplam_kar']:,.2f}")
 
-    if toplam_genel_gider:
-        n1, n2 = st.columns(2)
+    gecerli_paket_basi = manual_carrier_expenses_df.dropna(subset=["Kargo Firmasi", "Paket Basi Tutar"])
+    gecerli_paket_basi = gecerli_paket_basi[gecerli_paket_basi["Kargo Firmasi"].astype(str).str.strip() != ""]
+    has_per_package_fee = not gecerli_paket_basi.empty
+
+    if toplam_genel_gider or manuel_gelir_toplam:
+        n1, n2, n3 = st.columns(3)
         n1.metric(
-            "Genel gider (pakete baglanamayan vergi/komisyon + manuel)",
+            "Genel gider (pakete baglanamayan vergi/komisyon + manuel gider)",
             f"${summary['genel_gider']:,.2f}",
             help="Takip numarasi olmayan vergi/komisyon satirlari (orn. UPS Brokerage/Government Charges) ile manuel girilen giderlerin toplami.",
         )
-        n2.metric("Net kar (genel gider dusulmus)", f"${summary['net_kar']:,.2f}")
+        n2.metric(
+            "Manuel gelir",
+            f"${summary['manuel_gelir']:,.2f}",
+            help="Pakete baglanmayan, elle girilen gelir kalemleri.",
+        )
+        n3.metric("Net kar", f"${summary['net_kar']:,.2f}")
 
-        with st.expander("Genel gider detayi (firma/dosya + manuel girisler)"):
+    if toplam_genel_gider or manuel_gelir_toplam or has_per_package_fee:
+        with st.expander("Genel gider / manuel gelir / paket basi gider detayi"):
             if genel_gider_detay:
+                st.write("Pakete baglanamayan vergi/komisyon (firma/dosya bazinda):")
                 st.dataframe(
                     pd.DataFrame(genel_gider_detay, columns=["Kargo Firmasi", "Dosya", "Genel Gider"]),
                     use_container_width=True,
@@ -169,6 +224,31 @@ if run and income_file is not None:
             if manuel_gider_toplam:
                 st.write(f"Manuel giderler toplami: ${manuel_gider_toplam:,.2f}")
                 st.dataframe(manual_expenses_df, use_container_width=True, hide_index=True)
+            if manuel_gelir_toplam:
+                st.write(f"Manuel gelirler toplami: ${manuel_gelir_toplam:,.2f}")
+                st.dataframe(manual_income_df, use_container_width=True, hide_index=True)
+            if has_per_package_fee:
+                st.write(
+                    "Paket basina eklenen ek gider (firma bazinda, paket sayisiyla "
+                    "carpilmis hali - bu tutar zaten yukaridaki 'Kar (pakete dagitilan)' "
+                    "rakamina islenmis durumda):"
+                )
+                detay_satirlari = []
+                for _, r in gecerli_paket_basi.iterrows():
+                    etkilenen = int(((merged["Carrier Name"] == r["Kargo Firmasi"]) & merged["Takip_Var_Mi"]).sum())
+                    toplam_eklenen = etkilenen * float(r["Paket Basi Tutar"])
+                    detay_satirlari.append(
+                        (r["Kargo Firmasi"], r.get("Aciklama", ""), r["Paket Basi Tutar"], etkilenen, toplam_eklenen)
+                    )
+                detay_df = pd.DataFrame(
+                    detay_satirlari,
+                    columns=["Kargo Firmasi", "Aciklama", "Paket Basi Tutar", "Etkilenen Paket Sayisi", "Toplam Eklenen Gider"],
+                )
+                st.dataframe(
+                    detay_df.style.format({"Paket Basi Tutar": "${:,.2f}", "Toplam Eklenen Gider": "${:,.2f}"}),
+                    use_container_width=True,
+                    hide_index=True,
+                )
 
     eslesme_orani = summary["eslesen_sayisi"] / summary["toplam_gonderi"] * 100 if summary["toplam_gonderi"] else 0
     st.caption(f"Eslesme orani: %{eslesme_orani:.1f}")
@@ -343,6 +423,10 @@ if run and income_file is not None:
         cust_country_table.to_excel(writer, sheet_name="Musteri x Ulke", index=False)
         if manuel_gider_toplam:
             manual_expenses_df.to_excel(writer, sheet_name="Manuel Giderler", index=False)
+        if has_per_package_fee:
+            manual_carrier_expenses_df.to_excel(writer, sheet_name="Paket Basi Ek Gider", index=False)
+        if manuel_gelir_toplam:
+            manual_income_df.to_excel(writer, sheet_name="Manuel Gelirler", index=False)
 
     st.download_button(
         "Raporu Excel olarak indir",

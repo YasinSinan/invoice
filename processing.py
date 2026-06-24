@@ -134,6 +134,23 @@ def _normalize_carrier_name(name):
     return name
 
 
+# Manuel firma-bazinda gider girisinde (orn. "US-CA arasi kargo ucreti")
+# secilebilecek bilinen kargo firmalari.
+KNOWN_CARRIERS = [
+    "Asendia",
+    "UniUni",
+    "UPS",
+    "FedEx",
+    "ePost Global",
+    "DHL",
+    "intelcom",
+    "APC",
+    "USPS",
+    "Evri",
+    "Purolator",
+]
+
+
 def _parse_money_text(value):
     """'$74.69', '-$0.67', '($12.34)' gibi metinleri sayiya cevirir."""
     if pd.isna(value):
@@ -486,12 +503,14 @@ def build_report(income_df, cost_dfs):
     return merged, unmatched_cost
 
 
-def summarize(merged, genel_gider=0.0):
+def summarize(merged, genel_gider=0.0, manuel_gelir=0.0):
     """Ozet metrikler.
 
-    genel_gider: pakete baglanamayan vergi/komisyon gibi gider toplami
-    (orn. UPS Brokerage/Government Charges). Pakete dagitilmaz, sadece
-    net kardan ayrica dusulur.
+    genel_gider: pakete baglanamayan vergi/komisyon + manuel gider toplami
+    (orn. UPS Brokerage/Government Charges, depo kirasi). Pakete dagitilmaz,
+    net kardan dusulur.
+    manuel_gelir: pakete baglanmayan, elle girilen gelir toplami. Net kara
+    eklenir.
     """
     matched = merged[merged["Durum"] == "Eslesti"]
     toplam_kar = matched["Kar"].sum()
@@ -502,7 +521,8 @@ def summarize(merged, genel_gider=0.0):
         "toplam_gider_eslesen": matched["Gider"].sum(),
         "toplam_kar": toplam_kar,
         "genel_gider": genel_gider,
-        "net_kar": toplam_kar - genel_gider,
+        "manuel_gelir": manuel_gelir,
+        "net_kar": toplam_kar - genel_gider + manuel_gelir,
         "toplam_gonderi": len(merged),
         "eslesen_sayisi": len(matched),
         "takip_no_yok_sayisi": (merged["Durum"] == "Takip no yok").sum(),
@@ -580,6 +600,46 @@ def carrier_breakdown(merged):
         for kar, sayi in zip(out["Kar/Zarar"], out["Eslesen Sayisi"])
     ]
     return out
+
+
+def apply_per_package_carrier_fee(merged, fee_df):
+    """Belirli bir kargo firmasinin HER takip edilebilir paketine (Takip_Var_Mi
+    = True) sabit bir paket-basi ek gider ekler (orn. UniUni icin paket basina
+    $2). Boylece eklenen tutar otomatik olarak paket sayisi ile carpilip her
+    paketin Gider/Kar degerine islenir - toplam kar, ulke/firma/musteri
+    kirilimlari dahil her yerde otomatik gorunur (hepsi merged'den hesaplanir).
+
+    Onceden gideri eslesmemis (Durum="Gider bulunamadi") paketler, bu ek
+    gideri aldiktan sonra "Eslesti" sayilir - artik gercek bir gider degerleri
+    var. Takip numarasi olmayan ("Takip no yok") paketlere uygulanmaz.
+
+    merged'in guncellenmis bir KOPYASINI dondurur (orijinali degistirmez).
+    """
+    if fee_df is None or fee_df.empty:
+        return merged
+
+    valid = fee_df.dropna(subset=["Kargo Firmasi", "Paket Basi Tutar"])
+    valid = valid[valid["Kargo Firmasi"].astype(str).str.strip() != ""]
+    if valid.empty:
+        return merged
+
+    merged = merged.copy()
+
+    for _, row in valid.iterrows():
+        firma = _normalize_carrier_name(str(row["Kargo Firmasi"]).strip())
+        tutar = float(row["Paket Basi Tutar"])
+
+        mask = (merged["Carrier Name"] == firma) & (merged["Takip_Var_Mi"])
+        if not mask.any():
+            continue
+
+        merged.loc[mask, "Gider_Kargo"] = merged.loc[mask, "Gider_Kargo"].fillna(0.0) + tutar
+        merged.loc[mask, "Gider_Tax"] = merged.loc[mask, "Gider_Tax"].fillna(0.0)
+        merged.loc[mask, "Gider"] = merged.loc[mask, "Gider_Kargo"] + merged.loc[mask, "Gider_Tax"]
+        merged.loc[mask, "Kar"] = merged.loc[mask, "Invoice Amount"] - merged.loc[mask, "Gider"]
+        merged.loc[mask & (merged["Durum"] != "Eslesti"), "Durum"] = "Eslesti"
+
+    return merged
 
 
 def customer_breakdown(merged):
