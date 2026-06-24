@@ -239,7 +239,7 @@ def load_cost_file(file_obj, carrier_name):
     if carrier_name not in _ALL_PROFILES:
         raise ValueError(f"Taninmayan kargo firmasi: {carrier_name}")
 
-    empty_cols = ["TrackingKey", "Gider_Kargo", "Gider_Tax", "Gider", "Kargo Firmasi", "Satir Sayisi"]
+    empty_cols = ["TrackingKey", "Gider_Kargo", "Gider_Tax", "Gider_Kalemleri", "Gider", "Kargo Firmasi", "Satir Sayisi"]
     empty_breakdown = pd.DataFrame(columns=["Kargo Firmasi", "Kategori/Sutun", "Siniflandirma", "Tutar"])
 
     profile = _ALL_PROFILES[carrier_name]
@@ -292,12 +292,15 @@ def load_cost_file(file_obj, carrier_name):
         kargo_raw = pd.Series(0.0, index=df.index)
         tax_raw = pd.Series(0.0, index=df.index)
         cat_totals = {}
+        item_desc_cols = []
 
         base_col = profile.get("base_charge_col")
         if base_col and base_col in df.columns:
             base_amt = df[base_col].apply(_parse_money_text).fillna(0.0)
             kargo_raw = kargo_raw + base_amt
             cat_totals[base_col] = cat_totals.get(base_col, 0.0) + float(base_amt.sum())
+            base_formatted = (base_col + ": $" + base_amt.round(2).astype(str)).where(base_amt != 0)
+            item_desc_cols.append(base_formatted)
 
         for desc_col, amt_col in pairs:
             amt = df[amt_col].apply(_parse_money_text).fillna(0.0)
@@ -306,10 +309,17 @@ def load_cost_file(file_obj, carrier_name):
             kargo_raw = kargo_raw + amt.where(~is_tax_line, 0.0)
             tax_raw = tax_raw + amt.where(is_tax_line, 0.0)
 
+            formatted = (desc.astype(str) + ": $" + amt.round(2).astype(str)).where(amt != 0)
+            item_desc_cols.append(formatted)
+
             for d, total in amt.groupby(desc).sum().items():
                 if pd.isna(d):
                     continue
                 cat_totals[d] = cat_totals.get(d, 0.0) + float(total)
+
+        item_desc_df = pd.concat(item_desc_cols, axis=1).copy()
+        df = df.copy()
+        df["_item_desc"] = item_desc_df.apply(lambda row: "; ".join(row.dropna()), axis=1)
 
         df = pd.concat(
             [df, pd.DataFrame({"_wide_kargo": kargo_raw, "_wide_tax": tax_raw, "_wide_total": kargo_raw + tax_raw})],
@@ -352,6 +362,7 @@ def load_cost_file(file_obj, carrier_name):
 
     if "_wide_kargo" in df.columns:
         # Satir bazinda zaten Kargo/Vergi olarak hesaplanmis (wide_charge_pairs).
+        # "_item_desc" da ayni adimda zaten olusturuldu.
         df["_kargo_raw"] = df["_wide_kargo"]
         df["_tax_raw"] = df["_wide_tax"]
         breakdown_rows.extend(wide_breakdown_rows)
@@ -360,6 +371,7 @@ def load_cost_file(file_obj, carrier_name):
         # charge_col'un tamami Vergi sayilir, Kargo payi yok.
         df["_kargo_raw"] = 0.0
         df["_tax_raw"] = df[charge_col]
+        df["_item_desc"] = display_name + ": $" + df[charge_col].round(2).astype(str)
         breakdown_rows.append((display_name, charge_col, "Vergi", float(df[charge_col].sum())))
     elif tax_category_col and tax_category_col in df.columns:
         # Ayni tutar kolonu (charge_col), baska bir kolonun degerine gore
@@ -368,6 +380,9 @@ def load_cost_file(file_obj, carrier_name):
         is_tax = df[tax_category_col].isin(tax_category_values)
         df["_kargo_raw"] = df[charge_col].where(~is_tax, 0.0)
         df["_tax_raw"] = df[charge_col].where(is_tax, 0.0)
+        df["_item_desc"] = (
+            df[tax_category_col].astype(str) + ": $" + df[charge_col].round(2).astype(str)
+        ).where(df[charge_col] != 0)
 
         cat_totals = df.groupby(tax_category_col)[charge_col].sum()
         for cat, total in cat_totals.items():
@@ -376,11 +391,15 @@ def load_cost_file(file_obj, carrier_name):
     elif tax_col:
         df["_kargo_raw"] = df[charge_col]
         df["_tax_raw"] = df[tax_col].fillna(0)
+        kargo_part = (charge_col + ": $" + df[charge_col].round(2).astype(str)).where(df[charge_col] != 0)
+        tax_part = (tax_col + ": $" + df[tax_col].fillna(0).round(2).astype(str)).where(df[tax_col].fillna(0) != 0)
+        df["_item_desc"] = pd.concat([kargo_part, tax_part], axis=1).apply(lambda row: "; ".join(row.dropna()), axis=1)
         breakdown_rows.append((display_name, charge_col, "Kargo", float(df[charge_col].sum())))
         breakdown_rows.append((display_name, tax_col, "Vergi", float(df[tax_col].fillna(0).sum())))
     else:
         df["_kargo_raw"] = df[charge_col]
         df["_tax_raw"] = 0.0
+        df["_item_desc"] = display_name + ": $" + df[charge_col].round(2).astype(str)
         breakdown_rows.append((display_name, charge_col, "Kargo", float(df[charge_col].sum())))
 
     breakdown_df = pd.DataFrame(breakdown_rows, columns=["Kargo Firmasi", "Kategori/Sutun", "Siniflandirma", "Tutar"])
@@ -431,6 +450,7 @@ def load_cost_file(file_obj, carrier_name):
     grouped = df.groupby("TrackingKey", as_index=False).agg(
         Gider_Kargo=("Gider_Kargo", "sum"),
         Gider_Tax=("Gider_Tax", "sum"),
+        Gider_Kalemleri=("_item_desc", lambda x: "; ".join(x.dropna())),
     )
     grouped["Gider"] = grouped["Gider_Kargo"] + grouped["Gider_Tax"]
     grouped["Kargo Firmasi"] = display_name
@@ -479,11 +499,14 @@ def build_report(income_df, cost_dfs):
                 Gider_Kargo=("Gider_Kargo", "sum"),
                 Gider_Tax=("Gider_Tax", "sum"),
                 Gider=("Gider", "sum"),
+                Gider_Kalemleri=("Gider_Kalemleri", lambda x: "; ".join(v for v in x if v)),
                 Kargo_Firmalari=("Kargo Firmasi", lambda x: ", ".join(sorted(set(x)))),
             )
         )
     else:
-        cost_summary = pd.DataFrame(columns=["TrackingKey", "Gider_Kargo", "Gider_Tax", "Gider", "Kargo_Firmalari"])
+        cost_summary = pd.DataFrame(
+            columns=["TrackingKey", "Gider_Kargo", "Gider_Tax", "Gider", "Gider_Kalemleri", "Kargo_Firmalari"]
+        )
 
     merged = income_df.merge(cost_summary, on="TrackingKey", how="left")
 
@@ -638,6 +661,10 @@ def apply_per_package_carrier_fee(merged, fee_df):
         merged.loc[mask, "Gider"] = merged.loc[mask, "Gider_Kargo"] + merged.loc[mask, "Gider_Tax"]
         merged.loc[mask, "Kar"] = merged.loc[mask, "Invoice Amount"] - merged.loc[mask, "Gider"]
         merged.loc[mask & (merged["Durum"] != "Eslesti"), "Durum"] = "Eslesti"
+
+        not_etiketi = f"Paket basi ek ucret: ${tutar:.2f}"
+        mevcut = merged.loc[mask, "Gider_Kalemleri"].fillna("")
+        merged.loc[mask, "Gider_Kalemleri"] = mevcut.where(mevcut == "", mevcut + "; ") + not_etiketi
 
     return merged
 

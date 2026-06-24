@@ -362,23 +362,26 @@ if run and income_file is not None:
 
     with tab1:
         st.dataframe(
-            merged[
+            merged.sort_values("Added Date")[
                 [
                     "Shipment No",
                     "Track Number",
                     "Carrier Name",
-                    "Status",
                     "Invoice Amount",
                     "Gider_Kargo",
                     "Gider_Tax",
                     "Gider",
+                    "Gider_Kalemleri",
                     "Kar",
-                    "Durum",
-                    "Added Date",
                 ]
-            ]
-            .rename(columns={"Gider_Kargo": "Kargo Gideri", "Gider_Tax": "Vergi/Gumruk", "Gider": "Toplam Gider"})
-            .sort_values("Added Date"),
+            ].rename(
+                columns={
+                    "Gider_Kargo": "Kargo Gideri",
+                    "Gider_Tax": "Vergi/Gumruk",
+                    "Gider": "Toplam Gider",
+                    "Gider_Kalemleri": "Gider Kalemleri",
+                }
+            ),
             use_container_width=True,
             hide_index=True,
         )
