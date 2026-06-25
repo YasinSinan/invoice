@@ -6,6 +6,7 @@ Calistirmak icin:
 """
 
 import io
+from datetime import datetime, timezone
 
 import pandas as pd
 import streamlit as st
@@ -26,6 +27,7 @@ from processing import (
     manual_expense_total,
     summarize,
 )
+from github_storage import GithubStorageError, list_saved_reports, load_report, save_report
 
 st.set_page_config(page_title="Gelir-Gider Karsilastirma", layout="wide")
 
@@ -34,6 +36,53 @@ st.caption(
     "Musteri faturasi (gelir) ve kargo firmasi faturasi (gider) dosyalarini "
     "yukleyin, paket/takip numarasina gore otomatik eslestirip kar-zarar raporu alin."
 )
+
+# ------------------------------------------------------------ gecmis analiz ---
+with st.expander("Gecmis analizler (aylik kayitlar)", expanded=False):
+    try:
+        saved_periods = list_saved_reports()
+    except GithubStorageError as e:
+        saved_periods = None
+        st.info(
+            "Gecmis analizleri kaydetme/goruntuleme ozelligi henuz kurulmadi. "
+            f"({e})"
+        )
+
+    if saved_periods is not None:
+        if not saved_periods:
+            st.caption("Henuz kayitli bir analiz yok. Asagida hesaplama yaptiktan sonra kaydedebilirsin.")
+        else:
+            secilen_donem = st.selectbox("Bir donem secin", options=saved_periods, key="gecmis_donem_secimi")
+            if st.button("Goruntule", key="gecmis_goruntule_buton"):
+                try:
+                    rapor = load_report(secilen_donem)
+                    st.caption(f"Kayit tarihi: {rapor.get('saved_at', '-')}")
+
+                    s = rapor["summary"]
+                    g1, g2, g3, g4, g5 = st.columns(5)
+                    g1.metric("Toplam gelir", f"${s['toplam_gelir']:,.2f}")
+                    g2.metric("Kargo gideri", f"${s['toplam_gider_kargo']:,.2f}")
+                    g3.metric("Vergi/gumruk gideri", f"${s['toplam_gider_tax']:,.2f}")
+                    g4.metric("Toplam gider", f"${s['toplam_gider_eslesen']:,.2f}")
+                    g5.metric("Kar (pakete dagitilan)", f"${s['toplam_kar']:,.2f}")
+                    if s.get("genel_gider") or s.get("manuel_gelir"):
+                        g6, g7, g8 = st.columns(3)
+                        g6.metric("Genel gider", f"${s['genel_gider']:,.2f}")
+                        g7.metric("Manuel gelir", f"${s['manuel_gelir']:,.2f}")
+                        g8.metric("Net kar", f"${s['net_kar']:,.2f}")
+
+                    st.markdown("**Kargo firmalarina gore analiz**")
+                    st.dataframe(pd.DataFrame(rapor["carrier_table"]), use_container_width=True, hide_index=True)
+
+                    st.markdown("**Ulkeye gore analiz**")
+                    st.dataframe(pd.DataFrame(rapor["country_table"]), use_container_width=True, hide_index=True)
+
+                    st.markdown("**Musteriye gore analiz**")
+                    st.dataframe(pd.DataFrame(rapor["customer_table"]), use_container_width=True, hide_index=True)
+                except Exception as e:
+                    st.error(f"Rapor yuklenemedi: {e}")
+
+st.divider()
 
 # ---------------------------------------------------------------- yukleme ---
 col1, col2 = st.columns(2)
@@ -437,6 +486,32 @@ if run and income_file is not None:
         file_name="gelir_gider_raporu.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
+
+    st.divider()
+    st.subheader("Bu analizi kaydet (gecmis analizler icin)")
+    st.caption(
+        "Bu hesaplamayi bir donem etiketiyle (orn. 2026-06) GitHub reposuna "
+        "kaydeder. Daha sonra sayfanin en ustundeki 'Gecmis analizler' "
+        "bolumunden tekrar goruntuleyebilirsin."
+    )
+    varsayilan_donem = datetime.now().strftime("%Y-%m")
+    donem_etiketi = st.text_input("Donem etiketi", value=varsayilan_donem, key="kayit_donem_etiketi")
+    if st.button("GitHub'a kaydet", key="kayit_buton"):
+        try:
+            payload = {
+                "saved_at": datetime.now(timezone.utc).isoformat(),
+                "summary": summary,
+                "carrier_table": carrier_table.to_dict("records"),
+                "country_table": cb.to_dict("records"),
+                "customer_table": cust_table.to_dict("records"),
+                "customer_country_table": cust_country_table.to_dict("records"),
+            }
+            save_report(donem_etiketi, payload)
+            st.success(f"'{donem_etiketi}' donemi olarak kaydedildi.")
+        except GithubStorageError as e:
+            st.error(str(e))
+        except Exception as e:
+            st.error(f"Kaydetme sirasinda bir hata olustu: {e}")
 
 elif not income_file:
     st.info("Baslamak icin once gelir dosyasini yukleyin.")
