@@ -27,7 +27,7 @@ from processing import (
     manual_expense_total,
     summarize,
 )
-from github_storage import GithubStorageError, list_saved_reports, load_report, save_report
+from github_storage import GithubStorageError, delete_report, list_saved_reports, load_report, save_report
 
 st.set_page_config(page_title="Gelir-Gider Karsilastirma", layout="wide")
 
@@ -53,9 +53,26 @@ with st.expander("Gecmis analizler (aylik kayitlar)", expanded=False):
             st.caption("Henuz kayitli bir analiz yok. Asagida hesaplama yaptiktan sonra kaydedebilirsin.")
         else:
             secilen_donem = st.selectbox("Bir donem secin", options=saved_periods, key="gecmis_donem_secimi")
-            if st.button("Goruntule", key="gecmis_goruntule_buton"):
+
+            col_goruntule, col_sil = st.columns([1, 1])
+            with col_goruntule:
+                if st.button("Goruntule", key="gecmis_goruntule_buton"):
+                    st.session_state["gecmis_goruntulenecek_donem"] = secilen_donem
+            with col_sil:
+                if st.button("Sil (geri alinamaz)", key="gecmis_sil_buton"):
+                    try:
+                        delete_report(secilen_donem)
+                        st.success(f"'{secilen_donem}' donemi silindi.")
+                        if st.session_state.get("gecmis_goruntulenecek_donem") == secilen_donem:
+                            st.session_state.pop("gecmis_goruntulenecek_donem", None)
+                        st.rerun()
+                    except Exception as e:
+                        st.error(f"Silinemedi: {e}")
+
+            goruntulenecek_donem = st.session_state.get("gecmis_goruntulenecek_donem")
+            if goruntulenecek_donem and goruntulenecek_donem in saved_periods:
                 try:
-                    rapor = load_report(secilen_donem)
+                    rapor = load_report(goruntulenecek_donem)
                     st.caption(f"Kayit tarihi: {rapor.get('saved_at', '-')}")
 
                     s = rapor["summary"]
@@ -181,10 +198,11 @@ with col2:
         key="manual_carrier_expenses_editor",
     )
 
-run = st.button("Hesapla", type="primary", disabled=income_file is None)
+if st.button("Hesapla", type="primary", disabled=income_file is None):
+    st.session_state["hesapla_tiklandi"] = True
 
 # ---------------------------------------------------------------- hesapla ---
-if run and income_file is not None:
+if st.session_state.get("hesapla_tiklandi") and income_file is not None:
     try:
         income_df = load_income_file(income_file, only_paid=only_paid)
     except ValueError as e:
