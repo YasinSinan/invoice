@@ -76,17 +76,27 @@ with st.expander("Gecmis analizler (aylik kayitlar)", expanded=False):
                     st.caption(f"Kayit tarihi: {rapor.get('saved_at', '-')}")
 
                     s = rapor["summary"]
-                    g1, g2, g3, g4, g5 = st.columns(5)
-                    g1.metric("Toplam gelir", f"${s['toplam_gelir']:,.2f}")
-                    g2.metric("Kargo gideri", f"${s['toplam_gider_kargo']:,.2f}")
-                    g3.metric("Vergi/gumruk gideri", f"${s['toplam_gider_tax']:,.2f}")
-                    g4.metric("Toplam gider", f"${s['toplam_gider_eslesen']:,.2f}")
-                    g5.metric("Kar (pakete dagitilan)", f"${s['toplam_kar']:,.2f}")
-                    if s.get("genel_gider") or s.get("manuel_gelir"):
-                        g6, g7, g8 = st.columns(3)
-                        g6.metric("Genel gider", f"${s['genel_gider']:,.2f}")
-                        g7.metric("Manuel gelir", f"${s['manuel_gelir']:,.2f}")
-                        g8.metric("Net kar", f"${s['net_kar']:,.2f}")
+                    st.metric("Toplam Paket Sayisi", f"{s['toplam_gonderi']:,}")
+
+                    st.markdown("")
+                    g_gelir, g_gider = st.columns(2)
+                    with g_gelir:
+                        st.markdown("**Gelir**")
+                        st.metric("Toplam Gelir", f"${s['toplam_gelir']:,.2f}")
+                        if s.get("manuel_gelir"):
+                            st.metric("Manuel Gelir", f"${s['manuel_gelir']:,.2f}")
+                    with g_gider:
+                        st.markdown("**Gider**")
+                        st.metric("Kargo Gideri", f"${s['toplam_gider_kargo']:,.2f}")
+                        st.metric("Vergi/Gumruk Gideri", f"${s['toplam_gider_tax']:,.2f}")
+                        st.metric("Toplam Gider", f"${s['toplam_gider_eslesen']:,.2f}")
+                        if s.get("genel_gider"):
+                            st.metric("Genel Gider", f"${s['genel_gider']:,.2f}")
+
+                    st.markdown("")
+                    _, g_kar_orta, _ = st.columns([1, 1, 1])
+                    with g_kar_orta:
+                        st.metric("Net Kar", f"${s['net_kar']:,.2f}")
 
                     st.markdown("**Kargo firmalarina gore analiz**")
                     st.dataframe(pd.DataFrame(rapor["carrier_table"]), use_container_width=True, hide_index=True)
