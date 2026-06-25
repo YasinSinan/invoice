@@ -6,6 +6,8 @@ CARRIER_PROFILES girdisi tanimlanir. Yeni bir kargo firmasi eklemek
 icin sadece bu sozluge yeni bir profil eklemek yeterli.
 """
 
+import re
+
 import pandas as pd
 
 from fx import TARGET_CURRENCY, get_rate
@@ -114,12 +116,24 @@ _ALL_PROFILES = {**CARRIER_PROFILES, **BYELABEL_SUB_PROFILES}
 
 # Ayni firmanin farkli yazimlarini (orn. "FedEx", "FedEx BL", "FEDEX BL",
 # "FedEx (ByeLabel)") tek bir isim altinda birlestirmek icin. Anahtar: aranacak
-# alt-string (kucuk harfle), deger: gosterilecek tek/kanonik isim. Yeni bir
-# firma icin birlestirme istenirse buraya bir satir eklemek yeterli.
+# alt-string (kucuk harfle, bosluk/alt cizgi/tire onemsiz), deger: gosterilecek
+# tek/kanonik isim. Yeni bir firma icin birlestirme istenirse buraya bir satir
+# eklemek yeterli.
 CARRIER_NAME_ALIASES = {
+    "asendia": "Asendia",
+    "epost": "ePost Global",
     "fedex": "FedEx",
+    "intelcom": "Intelcom",
+    "purolator": "Purolator",
     "ups": "UPS",
 }
+
+
+def _simplify(s):
+    """Kucuk harfe cevirir ve harf/sayi olmayan karakterleri (bosluk, alt cizgi,
+    tire vb.) kaldirir - boylece 'E_POST', 'ePost Global', 'e-post' gibi farkli
+    yazimlar karsilastirilabilir hale gelir."""
+    return re.sub(r"[^a-z0-9]", "", str(s).lower())
 
 
 def _normalize_carrier_name(name):
@@ -127,9 +141,9 @@ def _normalize_carrier_name(name):
     Eslesme yoksa orijinal ismi degistirmeden dondurur."""
     if pd.isna(name):
         return name
-    lowered = str(name).lower()
+    simplified = _simplify(name)
     for key, canonical in CARRIER_NAME_ALIASES.items():
-        if key in lowered:
+        if _simplify(key) in simplified:
             return canonical
     return name
 
