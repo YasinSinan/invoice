@@ -254,30 +254,43 @@ if st.session_state.get("hesapla_tiklandi") and income_file is not None:
     st.divider()
     st.subheader("Ozet")
 
-    m1, m2, m3, m4, m5 = st.columns(5)
-    m1.metric("Toplam gelir", f"${summary['toplam_gelir']:,.2f}")
-    m2.metric("Kargo gideri", f"${summary['toplam_gider_kargo']:,.2f}")
-    m3.metric("Vergi/gumruk gideri", f"${summary['toplam_gider_tax']:,.2f}")
-    m4.metric("Toplam gider", f"${summary['toplam_gider_eslesen']:,.2f}")
-    m5.metric("Kar (pakete dagitilan)", f"${summary['toplam_kar']:,.2f}")
+    st.metric("Toplam Paket Sayisi", f"{summary['toplam_gonderi']:,}")
+
+    st.markdown("")
+    col_gelir, col_gider = st.columns(2)
+    with col_gelir:
+        st.markdown("**Gelir**")
+        st.metric("Toplam Gelir", f"${summary['toplam_gelir']:,.2f}")
+
+    with col_gider:
+        st.markdown("**Gider**")
+        st.metric("Kargo Gideri", f"${summary['toplam_gider_kargo']:,.2f}")
+        st.metric("Vergi/Gumruk Gideri", f"${summary['toplam_gider_tax']:,.2f}")
+        st.metric("Toplam Gider", f"${summary['toplam_gider_eslesen']:,.2f}")
 
     gecerli_paket_basi = manual_carrier_expenses_df.dropna(subset=["Kargo Firmasi", "Paket Basi Tutar"])
     gecerli_paket_basi = gecerli_paket_basi[gecerli_paket_basi["Kargo Firmasi"].astype(str).str.strip() != ""]
     has_per_package_fee = not gecerli_paket_basi.empty
 
     if toplam_genel_gider or manuel_gelir_toplam:
-        n1, n2, n3 = st.columns(3)
-        n1.metric(
-            "Genel gider (pakete baglanamayan vergi/komisyon + manuel gider)",
-            f"${summary['genel_gider']:,.2f}",
-            help="Takip numarasi olmayan vergi/komisyon satirlari (orn. UPS Brokerage/Government Charges) ile manuel girilen giderlerin toplami.",
-        )
-        n2.metric(
-            "Manuel gelir",
-            f"${summary['manuel_gelir']:,.2f}",
-            help="Pakete baglanmayan, elle girilen gelir kalemleri.",
-        )
-        n3.metric("Net kar", f"${summary['net_kar']:,.2f}")
+        col_gelir2, col_gider2 = st.columns(2)
+        with col_gelir2:
+            st.metric(
+                "Manuel Gelir",
+                f"${summary['manuel_gelir']:,.2f}",
+                help="Pakete baglanmayan, elle girilen gelir kalemleri.",
+            )
+        with col_gider2:
+            st.metric(
+                "Genel Gider",
+                f"${summary['genel_gider']:,.2f}",
+                help="Takip numarasi olmayan vergi/komisyon satirlari (orn. UPS Brokerage/Government Charges) ile manuel girilen giderlerin toplami.",
+            )
+
+    st.markdown("")
+    _, kar_orta, _ = st.columns([1, 1, 1])
+    with kar_orta:
+        st.metric("Net Kar", f"${summary['net_kar']:,.2f}")
 
     if toplam_genel_gider or manuel_gelir_toplam or has_per_package_fee:
         with st.expander("Genel gider / manuel gelir / paket basi gider detayi"):
