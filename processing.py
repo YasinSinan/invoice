@@ -184,11 +184,14 @@ def _resolve_col(df, name_or_list, carrier_name, required=True):
     raise ValueError(f"{carrier_name} dosyasinda beklenen kolon(lar) bulunamadi: {secenekler}")
 
 
-def load_income_file(file_obj, only_paid=True):
+def load_income_file(file_obj, only_paid=True, exclude_unassigned_carrier=True):
     """Gelir dosyasini okur, ihtiyac duyulan kolonlari secer.
 
     only_paid=True ise sadece Status="Paid" olan gonderiler dahil edilir
     (User Cancelled, New Shipment, Payment Waiting vb. disarida tutulur).
+
+    exclude_unassigned_carrier=True ise Carrier Name (kargo firmasi) bos/atanmamis
+    olan gonderiler tamamen disarida tutulur (analizin hicbir yerinde gorunmezler).
     """
     df = pd.read_excel(file_obj)
 
@@ -210,6 +213,9 @@ def load_income_file(file_obj, only_paid=True):
     out = df[required].copy()
     if only_paid:
         out = out[out["Status"] == "Paid"].reset_index(drop=True)
+    if exclude_unassigned_carrier:
+        bos = out["Carrier Name"].isna() | (out["Carrier Name"].astype(str).str.strip() == "")
+        out = out[~bos].reset_index(drop=True)
     out["Carrier Name"] = out["Carrier Name"].apply(_normalize_carrier_name)
     out["TrackingKey"] = out["Track Number"].astype(str).str.strip()
     out["Takip_Var_Mi"] = ~out["TrackingKey"].isin(NO_TRACKING_VALUES)

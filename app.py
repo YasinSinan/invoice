@@ -123,6 +123,11 @@ with col1:
         value=True,
         help="Isaretliyse User Cancelled, New Shipment, Payment Waiting gibi durumlar disarida tutulur.",
     )
+    exclude_unassigned_carrier = st.checkbox(
+        "Kargo firmasi atanmamis gonderileri haric tut",
+        value=True,
+        help="Isaretliyse Carrier Name (kargo firmasi) bos olan gonderiler analize hic dahil edilmez.",
+    )
 
     st.markdown("**Manuel gelir (opsiyonel)**")
     st.caption(
@@ -214,7 +219,9 @@ if st.button("Hesapla", type="primary", disabled=income_file is None):
 # ---------------------------------------------------------------- hesapla ---
 if st.session_state.get("hesapla_tiklandi") and income_file is not None:
     try:
-        income_df = load_income_file(income_file, only_paid=only_paid)
+        income_df = load_income_file(
+            income_file, only_paid=only_paid, exclude_unassigned_carrier=exclude_unassigned_carrier
+        )
     except ValueError as e:
         st.error(f"Gelir dosyasi okunamadi: {e}")
         st.stop()
