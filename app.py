@@ -31,6 +31,32 @@ from github_storage import GithubStorageError, delete_report, list_saved_reports
 
 st.set_page_config(page_title="Gelir-Gider Karsilastirma", layout="wide")
 
+
+def indirme_butonlari(df, dosya_adi, key_prefix):
+    """Bir tablo icin CSV ve Excel indirme butonlarini yan yana gosterir."""
+    col_csv, col_excel = st.columns(2)
+    with col_csv:
+        csv_data = df.to_csv(index=False).encode("utf-8-sig")
+        st.download_button(
+            "CSV olarak indir",
+            data=csv_data,
+            file_name=f"{dosya_adi}.csv",
+            mime="text/csv",
+            key=f"{key_prefix}_csv",
+        )
+    with col_excel:
+        buf = io.BytesIO()
+        with pd.ExcelWriter(buf, engine="xlsxwriter") as writer:
+            df.to_excel(writer, index=False)
+        st.download_button(
+            "Excel olarak indir",
+            data=buf.getvalue(),
+            file_name=f"{dosya_adi}.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            key=f"{key_prefix}_excel",
+        )
+
+
 st.title("Depo Gelir-Gider Karsilastirma Araci")
 st.caption(
     "Musteri faturasi (gelir) ve kargo firmasi faturasi (gider) dosyalarini "
@@ -99,13 +125,19 @@ with st.expander("Gecmis analizler (aylik kayitlar)", expanded=False):
                         st.metric("Net Kar", f"${s['net_kar']:,.2f}")
 
                     st.markdown("**Kargo firmalarina gore analiz**")
-                    st.dataframe(pd.DataFrame(rapor["carrier_table"]), use_container_width=True, hide_index=True)
+                    gecmis_carrier_df = pd.DataFrame(rapor["carrier_table"])
+                    st.dataframe(gecmis_carrier_df, use_container_width=True, hide_index=True)
+                    indirme_butonlari(gecmis_carrier_df, f"{goruntulenecek_donem}_kargo_firmasi", "gecmis_carrier")
 
                     st.markdown("**Ulkeye gore analiz**")
-                    st.dataframe(pd.DataFrame(rapor["country_table"]), use_container_width=True, hide_index=True)
+                    gecmis_country_df = pd.DataFrame(rapor["country_table"])
+                    st.dataframe(gecmis_country_df, use_container_width=True, hide_index=True)
+                    indirme_butonlari(gecmis_country_df, f"{goruntulenecek_donem}_ulke", "gecmis_country")
 
                     st.markdown("**Musteriye gore analiz**")
-                    st.dataframe(pd.DataFrame(rapor["customer_table"]), use_container_width=True, hide_index=True)
+                    gecmis_customer_df = pd.DataFrame(rapor["customer_table"])
+                    st.dataframe(gecmis_customer_df, use_container_width=True, hide_index=True)
+                    indirme_butonlari(gecmis_customer_df, f"{goruntulenecek_donem}_musteri", "gecmis_customer")
                 except Exception as e:
                     st.error(f"Rapor yuklenemedi: {e}")
 
@@ -377,6 +409,7 @@ if st.session_state.get("hesapla_tiklandi") and income_file is not None:
         use_container_width=True,
         hide_index=True,
     )
+    indirme_butonlari(carrier_table, "kargo_firmasi_analizi", "carrier_table")
 
     if breakdown_dfs:
         st.caption(
@@ -390,6 +423,7 @@ if st.session_state.get("hesapla_tiklandi") and income_file is not None:
             use_container_width=True,
             hide_index=True,
         )
+        indirme_butonlari(full_breakdown, "kargo_vergi_siniflandirma", "full_breakdown")
 
     st.subheader("Ulkeye gore analiz")
     st.caption(
@@ -411,6 +445,7 @@ if st.session_state.get("hesapla_tiklandi") and income_file is not None:
         use_container_width=True,
         hide_index=True,
     )
+    indirme_butonlari(cb, "ulkeye_gore_analiz", "country_table")
 
     st.divider()
 
@@ -434,6 +469,7 @@ if st.session_state.get("hesapla_tiklandi") and income_file is not None:
         use_container_width=True,
         hide_index=True,
     )
+    indirme_butonlari(cust_table, "musteriye_gore_analiz", "cust_table")
 
     st.caption(
         "Asagidaki tablo her musterinin HER ULKEDE ayri ayri kar mi zarar mi "
@@ -452,36 +488,35 @@ if st.session_state.get("hesapla_tiklandi") and income_file is not None:
         use_container_width=True,
         hide_index=True,
     )
+    indirme_butonlari(cust_country_table, "musteri_x_ulke_analizi", "cust_country_table")
 
     st.divider()
 
     tab1, tab2, tab3 = st.tabs(["Detayli rapor", "Gider bulunamayanlar", "Eslesmeyen gider (fatura listesinde var, gelirde yok)"])
 
     with tab1:
-        st.dataframe(
-            merged.sort_values("Added Date")[
-                [
-                    "Shipment No",
-                    "Track Number",
-                    "Carrier Name",
-                    "Invoice Amount",
-                    "Gider_Kargo",
-                    "Gider_Tax",
-                    "Gider",
-                    "Gider_Kalemleri",
-                    "Kar",
-                ]
-            ].rename(
-                columns={
-                    "Gider_Kargo": "Kargo Gideri",
-                    "Gider_Tax": "Vergi/Gumruk",
-                    "Gider": "Toplam Gider",
-                    "Gider_Kalemleri": "Gider Kalemleri",
-                }
-            ),
-            use_container_width=True,
-            hide_index=True,
+        detayli_rapor_df = merged.sort_values("Added Date")[
+            [
+                "Shipment No",
+                "Track Number",
+                "Carrier Name",
+                "Invoice Amount",
+                "Gider_Kargo",
+                "Gider_Tax",
+                "Gider",
+                "Gider_Kalemleri",
+                "Kar",
+            ]
+        ].rename(
+            columns={
+                "Gider_Kargo": "Kargo Gideri",
+                "Gider_Tax": "Vergi/Gumruk",
+                "Gider": "Toplam Gider",
+                "Gider_Kalemleri": "Gider Kalemleri",
+            }
         )
+        st.dataframe(detayli_rapor_df, use_container_width=True, hide_index=True)
+        indirme_butonlari(detayli_rapor_df, "detayli_rapor", "tab1")
 
     with tab2:
         not_found = merged[merged["Durum"] == "Gider bulunamadi"]
@@ -490,11 +525,9 @@ if st.session_state.get("hesapla_tiklandi") and income_file is not None:
             "karsiligi bulunamadi. Henuz faturalanmamis olabilir, veya ait oldugu "
             "kargo firmasinin dosyasi yuklenmemis olabilir."
         )
-        st.dataframe(
-            not_found[["Shipment No", "Track Number", "Carrier Name", "Status", "Invoice Amount"]],
-            use_container_width=True,
-            hide_index=True,
-        )
+        not_found_display = not_found[["Shipment No", "Track Number", "Carrier Name", "Status", "Invoice Amount"]]
+        st.dataframe(not_found_display, use_container_width=True, hide_index=True)
+        indirme_butonlari(not_found_display, "gider_bulunamayanlar", "tab2")
 
     with tab3:
         st.caption(
@@ -503,6 +536,7 @@ if st.session_state.get("hesapla_tiklandi") and income_file is not None:
             "ait olabilir, kontrol etmekte fayda var."
         )
         st.dataframe(unmatched_cost, use_container_width=True, hide_index=True)
+        indirme_butonlari(unmatched_cost, "eslesmeyen_gider", "tab3")
 
     st.divider()
 
