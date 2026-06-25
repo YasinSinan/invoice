@@ -336,13 +336,46 @@ if st.session_state.get("hesapla_tiklandi") and income_file is not None:
                 help="Takip numarasi olmayan vergi/komisyon satirlari (orn. UPS Brokerage/Government Charges) ile manuel girilen giderlerin toplami.",
             )
 
+    gecerli_manuel_gelir = manual_income_df.dropna(subset=["Aciklama", "Tutar"])
+    gecerli_manuel_gelir = gecerli_manuel_gelir[gecerli_manuel_gelir["Aciklama"].astype(str).str.strip() != ""]
+    gecerli_manuel_gider = manual_expenses_df.dropna(subset=["Aciklama", "Tutar"])
+    gecerli_manuel_gider = gecerli_manuel_gider[gecerli_manuel_gider["Aciklama"].astype(str).str.strip() != ""]
+
+    if not gecerli_manuel_gelir.empty or not gecerli_manuel_gider.empty or has_per_package_fee:
+        col_mg, col_mgid = st.columns(2)
+        with col_mg:
+            if not gecerli_manuel_gelir.empty:
+                st.caption("Manuel gelir kalemleri:")
+                st.dataframe(
+                    gecerli_manuel_gelir.style.format({"Tutar": "${:,.2f}"}),
+                    use_container_width=True,
+                    hide_index=True,
+                )
+        with col_mgid:
+            if not gecerli_manuel_gider.empty:
+                st.caption("Manuel gider kalemleri:")
+                st.dataframe(
+                    gecerli_manuel_gider.style.format({"Tutar": "${:,.2f}"}),
+                    use_container_width=True,
+                    hide_index=True,
+                )
+            if has_per_package_fee:
+                st.caption("Paket basina eklenen gider (firma bazinda):")
+                st.dataframe(
+                    gecerli_paket_basi[["Kargo Firmasi", "Aciklama", "Paket Basi Tutar"]].style.format(
+                        {"Paket Basi Tutar": "${:,.2f}"}
+                    ),
+                    use_container_width=True,
+                    hide_index=True,
+                )
+
     st.markdown("")
     _, kar_orta, _ = st.columns([1, 1, 1])
     with kar_orta:
         st.metric("Net Kar", f"${summary['net_kar']:,.2f}")
 
-    if toplam_genel_gider or manuel_gelir_toplam or has_per_package_fee:
-        with st.expander("Genel gider / manuel gelir / paket basi gider detayi"):
+    if genel_gider_detay or has_per_package_fee:
+        with st.expander("Detay: pakete baglanamayan vergi/komisyon ve paket basi gider hesabi"):
             if genel_gider_detay:
                 st.write("Pakete baglanamayan vergi/komisyon (firma/dosya bazinda):")
                 st.dataframe(
@@ -350,17 +383,11 @@ if st.session_state.get("hesapla_tiklandi") and income_file is not None:
                     use_container_width=True,
                     hide_index=True,
                 )
-            if manuel_gider_toplam:
-                st.write(f"Manuel giderler toplami: ${manuel_gider_toplam:,.2f}")
-                st.dataframe(manual_expenses_df, use_container_width=True, hide_index=True)
-            if manuel_gelir_toplam:
-                st.write(f"Manuel gelirler toplami: ${manuel_gelir_toplam:,.2f}")
-                st.dataframe(manual_income_df, use_container_width=True, hide_index=True)
             if has_per_package_fee:
                 st.write(
                     "Paket basina eklenen ek gider (firma bazinda, paket sayisiyla "
-                    "carpilmis hali - bu tutar zaten yukaridaki 'Kar (pakete dagitilan)' "
-                    "rakamina islenmis durumda):"
+                    "carpilmis hali - bu tutar zaten yukaridaki Net Kar rakamina "
+                    "islenmis durumda):"
                 )
                 detay_satirlari = []
                 for _, r in gecerli_paket_basi.iterrows():
