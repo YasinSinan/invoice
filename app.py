@@ -321,7 +321,6 @@ if st.session_state.get("hesapla_tiklandi") and income_file is not None:
     cost_dfs = []
     warnings = []
     toplam_genel_gider = 0.0
-    genel_gider_detay = []
     breakdown_dfs = []
     for f in cost_files or []:
         try:
@@ -332,7 +331,6 @@ if st.session_state.get("hesapla_tiklandi") and income_file is not None:
                 warnings.extend(group_warnings)
                 if group_genel_gider:
                     toplam_genel_gider += group_genel_gider
-                    genel_gider_detay.append((BYELABEL_GROUP_LABEL, f.name, group_genel_gider))
                 for bd in group_breakdown_dfs:
                     breakdown_dfs.append(bd)
             else:
@@ -342,7 +340,6 @@ if st.session_state.get("hesapla_tiklandi") and income_file is not None:
                     warnings.append(warning)
                 if genel_gider:
                     toplam_genel_gider += genel_gider
-                    genel_gider_detay.append((secilen, f.name, genel_gider))
                 if not breakdown_df.empty:
                     breakdown_dfs.append(breakdown_df)
         except ValueError as e:
@@ -355,6 +352,14 @@ if st.session_state.get("hesapla_tiklandi") and income_file is not None:
     manuel_gider_toplam = manual_expense_total(manual_expenses_df)
     toplam_genel_gider += manuel_gider_toplam
     manuel_gelir_toplam = manual_expense_total(manual_income_df)
+
+    full_breakdown = pd.concat(breakdown_dfs, ignore_index=True) if breakdown_dfs else pd.DataFrame()
+    if not full_breakdown.empty:
+        genel_gider_kategori_detay = full_breakdown[
+            full_breakdown["Siniflandirma"] == "Genel Gider (pakete baglanamiyor)"
+        ][["Kargo Firmasi", "Kategori/Sutun", "Kaynak Sutun", "Tutar"]].rename(columns={"Tutar": "Genel Gider"})
+    else:
+        genel_gider_kategori_detay = pd.DataFrame()
 
     merged, unmatched_cost = build_report(income_df, cost_dfs)
     merged = apply_per_package_carrier_fee(merged, manual_carrier_expenses_df)
@@ -438,15 +443,17 @@ if st.session_state.get("hesapla_tiklandi") and income_file is not None:
         net_kar_icon = "📈" if summary["net_kar"] >= 0 else "📉"
         renkli_kart("Net Kar", f"${summary['net_kar']:,.2f}", net_kar_renk, net_kar_icon)
 
-    if genel_gider_detay:
-        st.caption("⚠️ Pakete baglanamayan vergi/komisyon - otomatik tespit edilen (firma/dosya bazinda):")
+    if not genel_gider_kategori_detay.empty:
+        st.caption(
+            "⚠️ Pakete baglanamayan vergi/komisyon - otomatik tespit edilen "
+            "(hangi kategorinin dosyadaki hangi sutundan geldigi ile birlikte):"
+        )
         st.dataframe(
-            pd.DataFrame(genel_gider_detay, columns=["Kargo Firmasi", "Dosya", "Genel Gider"]).style.format(
-                {"Genel Gider": "${:,.2f}"}
-            ),
+            genel_gider_kategori_detay.style.format({"Genel Gider": "${:,.2f}"}),
             use_container_width=True,
             hide_index=True,
         )
+        indirme_butonlari(genel_gider_kategori_detay, "genel_gider_detayi", "genel_gider_detay")
 
     if has_per_package_fee:
         st.caption(
@@ -502,13 +509,12 @@ if st.session_state.get("hesapla_tiklandi") and income_file is not None:
     )
     indirme_butonlari(carrier_table, "kargo_firmasi_analizi", "carrier_table")
 
-    if breakdown_dfs:
+    if not full_breakdown.empty:
         st.caption(
             "Asagidaki tablo her dosyada hangi kategori/sutunun Kargo, hangisinin "
             "Vergi, hangisinin (takip numarasi olmadigi icin) Genel Gider sayildigini "
             "ve ne kadar tutar tasidigini gosterir."
         )
-        full_breakdown = pd.concat(breakdown_dfs, ignore_index=True)
         st.dataframe(
             full_breakdown.style.format({"Tutar": "${:,.2f}"}),
             use_container_width=True,
@@ -646,10 +652,8 @@ if st.session_state.get("hesapla_tiklandi") and income_file is not None:
             writer, sheet_name="Gider Bulunamayan", index=False
         )
         unmatched_cost.to_excel(writer, sheet_name="Eslesmeyen Gider", index=False)
-        if breakdown_dfs:
-            pd.concat(breakdown_dfs, ignore_index=True).to_excel(
-                writer, sheet_name="Kargo-Vergi Detayi", index=False
-            )
+        if not full_breakdown.empty:
+            full_breakdown.to_excel(writer, sheet_name="Kargo-Vergi Detayi", index=False)
         cb.to_excel(writer, sheet_name="Ulke Bazinda", index=False)
         carrier_table.to_excel(writer, sheet_name="Kargo Firmasi Bazinda", index=False)
         cust_table.to_excel(writer, sheet_name="Musteri Bazinda", index=False)

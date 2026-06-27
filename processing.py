@@ -260,7 +260,7 @@ def load_cost_file(file_obj, carrier_name):
         raise ValueError(f"Taninmayan kargo firmasi: {carrier_name}")
 
     empty_cols = ["TrackingKey", "Gider_Kargo", "Gider_Tax", "Gider_Kalemleri", "Gider", "Kargo Firmasi", "Satir Sayisi"]
-    empty_breakdown = pd.DataFrame(columns=["Kargo Firmasi", "Kategori/Sutun", "Siniflandirma", "Tutar"])
+    empty_breakdown = pd.DataFrame(columns=["Kargo Firmasi", "Kategori/Sutun", "Kaynak Sutun", "Siniflandirma", "Tutar"])
 
     profile = _ALL_PROFILES[carrier_name]
     display_name = _normalize_carrier_name(carrier_name)
@@ -312,6 +312,7 @@ def load_cost_file(file_obj, carrier_name):
         kargo_raw = pd.Series(0.0, index=df.index)
         tax_raw = pd.Series(0.0, index=df.index)
         cat_totals = {}
+        cat_kaynak_sutun = {}
         item_desc_cols = []
 
         base_col = profile.get("base_charge_col")
@@ -319,6 +320,7 @@ def load_cost_file(file_obj, carrier_name):
             base_amt = df[base_col].apply(_parse_money_text).fillna(0.0)
             kargo_raw = kargo_raw + base_amt
             cat_totals[base_col] = cat_totals.get(base_col, 0.0) + float(base_amt.sum())
+            cat_kaynak_sutun[base_col] = base_col
             base_formatted = (base_col + ": $" + base_amt.round(2).astype(str)).where(base_amt != 0)
             item_desc_cols.append(base_formatted)
 
@@ -336,6 +338,7 @@ def load_cost_file(file_obj, carrier_name):
                 if pd.isna(d):
                     continue
                 cat_totals[d] = cat_totals.get(d, 0.0) + float(total)
+                cat_kaynak_sutun[d] = desc_prefix
 
         item_desc_df = pd.concat(item_desc_cols, axis=1).copy()
         df = df.copy()
@@ -349,7 +352,7 @@ def load_cost_file(file_obj, carrier_name):
 
         for d, total in cat_totals.items():
             label = "Vergi" if d in wide_tax_values else "Kargo"
-            wide_breakdown_rows.append((display_name, d, label, total))
+            wide_breakdown_rows.append((display_name, d, cat_kaynak_sutun.get(d, ""), label, total))
 
     if profile.get("charge_is_money_text"):
         df[charge_col] = df[charge_col].apply(_parse_money_text)
@@ -371,7 +374,7 @@ def load_cost_file(file_obj, carrier_name):
     if tax_category_col and tax_category_col in df.columns:
         overhead_by_cat = df.loc[overhead_mask].groupby(tax_category_col)[charge_col].sum()
         for cat, total in overhead_by_cat.items():
-            breakdown_rows.append((display_name, cat, "Genel Gider (pakete baglanamiyor)", float(total)))
+            breakdown_rows.append((display_name, cat, tax_category_col, "Genel Gider (pakete baglanamiyor)", float(total)))
 
     df = df[~overhead_mask].copy()
     df = df.dropna(subset=[track_col]).copy()
@@ -392,7 +395,7 @@ def load_cost_file(file_obj, carrier_name):
         df["_kargo_raw"] = 0.0
         df["_tax_raw"] = df[charge_col]
         df["_item_desc"] = display_name + ": $" + df[charge_col].round(2).astype(str)
-        breakdown_rows.append((display_name, charge_col, "Vergi", float(df[charge_col].sum())))
+        breakdown_rows.append((display_name, charge_col, charge_col, "Vergi", float(df[charge_col].sum())))
     elif tax_category_col and tax_category_col in df.columns:
         # Ayni tutar kolonu (charge_col), baska bir kolonun degerine gore
         # kargo / vergi olarak ikiye bolunur (orn. UPS'te "Brokerage Charges" gibi
@@ -407,22 +410,24 @@ def load_cost_file(file_obj, carrier_name):
         cat_totals = df.groupby(tax_category_col)[charge_col].sum()
         for cat, total in cat_totals.items():
             label = "Vergi" if cat in tax_category_values else "Kargo"
-            breakdown_rows.append((display_name, cat, label, float(total)))
+            breakdown_rows.append((display_name, cat, tax_category_col, label, float(total)))
     elif tax_col:
         df["_kargo_raw"] = df[charge_col]
         df["_tax_raw"] = df[tax_col].fillna(0)
         kargo_part = (charge_col + ": $" + df[charge_col].round(2).astype(str)).where(df[charge_col] != 0)
         tax_part = (tax_col + ": $" + df[tax_col].fillna(0).round(2).astype(str)).where(df[tax_col].fillna(0) != 0)
         df["_item_desc"] = pd.concat([kargo_part, tax_part], axis=1).apply(lambda row: "; ".join(row.dropna()), axis=1)
-        breakdown_rows.append((display_name, charge_col, "Kargo", float(df[charge_col].sum())))
-        breakdown_rows.append((display_name, tax_col, "Vergi", float(df[tax_col].fillna(0).sum())))
+        breakdown_rows.append((display_name, charge_col, charge_col, "Kargo", float(df[charge_col].sum())))
+        breakdown_rows.append((display_name, tax_col, tax_col, "Vergi", float(df[tax_col].fillna(0).sum())))
     else:
         df["_kargo_raw"] = df[charge_col]
         df["_tax_raw"] = 0.0
         df["_item_desc"] = display_name + ": $" + df[charge_col].round(2).astype(str)
-        breakdown_rows.append((display_name, charge_col, "Kargo", float(df[charge_col].sum())))
+        breakdown_rows.append((display_name, charge_col, charge_col, "Kargo", float(df[charge_col].sum())))
 
-    breakdown_df = pd.DataFrame(breakdown_rows, columns=["Kargo Firmasi", "Kategori/Sutun", "Siniflandirma", "Tutar"])
+    breakdown_df = pd.DataFrame(
+        breakdown_rows, columns=["Kargo Firmasi", "Kategori/Sutun", "Kaynak Sutun", "Siniflandirma", "Tutar"]
+    )
 
     currency_warning = None
     fx_failed_count = 0
