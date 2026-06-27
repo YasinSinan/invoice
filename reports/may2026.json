@@ -1,5 +1,5 @@
 {
-  "saved_at": "2026-06-25T14:53:49.843187+00:00",
+  "saved_at": "2026-06-26T15:50:33.068376+00:00",
   "summary": {
     "toplam_gelir": 157016.81,
     "toplam_gider_kargo": 106337.02332849575,
@@ -438,7 +438,29 @@
   ],
   "customer_table": [
     {
-      "Musteri No": "2765.0",
+      "Musteri No": "2434",
+      "Musteri Adi": "WHITE UNICORN",
+      "Paket Sayisi": 3638,
+      "Eslesen Sayisi": 3419,
+      "Bize Odenen (Gelir)": 41188.79,
+      "Firmaya Odenen (Gider)": 27534.765736700112,
+      "Kar/Zarar": 11641.924263299972,
+      "Gonderdigi Ulkeler": "Canada",
+      "Paket Basi Kar/Zarar": 3.4050670556595413
+    },
+    {
+      "Musteri No": "2753",
+      "Musteri Adi": "Smyrna",
+      "Paket Sayisi": 2418,
+      "Eslesen Sayisi": 2242,
+      "Bize Odenen (Gelir)": 23802.24,
+      "Firmaya Odenen (Gider)": 16134.13296300009,
+      "Kar/Zarar": 6149.037036999962,
+      "Gonderdigi Ulkeler": "Canada",
+      "Paket Basi Kar/Zarar": 2.7426570191792874
+    },
+    {
+      "Musteri No": "2765",
       "Musteri Adi": "Cihat Pamuk",
       "Paket Sayisi": 1646,
       "Eslesen Sayisi": 1631,
@@ -449,7 +471,7 @@
       "Paket Basi Kar/Zarar": 3.800835325076643
     },
     {
-      "Musteri No": "2754.0",
+      "Musteri No": "2754",
       "Musteri Adi": "ABDULLAH TOLGA KARAMAN",
       "Paket Sayisi": 549,
       "Eslesen Sayisi": 547,
@@ -460,7 +482,7 @@
       "Paket Basi Kar/Zarar": 6.035033817915912
     },
     {
-      "Musteri No": "1033.0",
+      "Musteri No": "1033",
       "Musteri Adi": "9GEEK LLC",
       "Paket Sayisi": 511,
       "Eslesen Sayisi": 509,
@@ -471,7 +493,7 @@
       "Paket Basi Kar/Zarar": 6.0125109624754405
     },
     {
-      "Musteri No": "2886.0",
+      "Musteri No": "2886",
       "Musteri Adi": "Abdul Rahim YILDIZ",
       "Paket Sayisi": 159,
       "Eslesen Sayisi": 156,
@@ -482,7 +504,29 @@
       "Paket Basi Kar/Zarar": -0.02230769230769151
     },
     {
-      "Musteri No": "2245.0",
+      "Musteri No": "2415",
+      "Musteri Adi": "ONEROSE",
+      "Paket Sayisi": 466,
+      "Eslesen Sayisi": 413,
+      "Bize Odenen (Gelir)": 4579.02,
+      "Firmaya Odenen (Gider)": 2906.3122695999978,
+      "Kar/Zarar": 1222.847730399999,
+      "Gonderdigi Ulkeler": "Canada",
+      "Paket Basi Kar/Zarar": 2.960890388377721
+    },
+    {
+      "Musteri No": "2896",
+      "Musteri Adi": "LUNASUN",
+      "Paket Sayisi": 348,
+      "Eslesen Sayisi": 331,
+      "Bize Odenen (Gelir)": 4226.82,
+      "Firmaya Odenen (Gider)": 2838.067301100001,
+      "Kar/Zarar": 1220.112698899999,
+      "Gonderdigi Ulkeler": "Canada",
+      "Paket Basi Kar/Zarar": 3.686141084290027
+    },
+    {
+      "Musteri No": "2245",
       "Musteri Adi": "Talha Yasin Gokduman",
       "Paket Sayisi": 103,
       "Eslesen Sayisi": 103,
@@ -493,7 +537,7 @@
       "Paket Basi Kar/Zarar": 11.041112039805823
     },
     {
-      "Musteri No": "2397.0",
+      "Musteri No": "2397",
       "Musteri Adi": "BETUL GOKMEN TURANOGLU",
       "Paket Sayisi": 354,
       "Eslesen Sayisi": 347,
@@ -504,18 +548,7 @@
       "Paket Basi Kar/Zarar": 3.4280115273775262
     },
     {
-      "Musteri No": "2434.0",
-      "Musteri Adi": "WHITE UNICORN",
-      "Paket Sayisi": 183,
-      "Eslesen Sayisi": 183,
-      "Bize Odenen (Gelir)": 3289.64,
-      "Firmaya Odenen (Gider)": 2054.907904300001,
-      "Kar/Zarar": 1234.732095699999,
-      "Gonderdigi Ulkeler": "Canada",
-      "Paket Basi Kar/Zarar": 6.747169921857918
-    },
-    {
-      "Musteri No": "2239.0",
+      "Musteri No": "2239",
       "Musteri Adi": "Gulay TOMA",
       "Paket Sayisi": 171,
       "Eslesen Sayisi": 171,
@@ -526,7 +559,7 @@
       "Paket Basi Kar/Zarar": 7.274468090058482
     },
     {
-      "Musteri No": "2820.0",
+      "Musteri No": "2820",
       "Musteri Adi": "ZEYNEP YILDIZ",
       "Paket Sayisi": 85,
       "Eslesen Sayisi": 82,
@@ -537,7 +570,7 @@
       "Paket Basi Kar/Zarar": 0.915853658536584
     },
     {
-      "Musteri No": "2427.0",
+      "Musteri No": "2427",
       "Musteri Adi": "ruken buluc",
       "Paket Sayisi": 197,
       "Eslesen Sayisi": 195,
@@ -548,7 +581,7 @@
       "Paket Basi Kar/Zarar": 0.4232586841025643
     },
     {
-      "Musteri No": "1964.0",
+      "Musteri No": "1964",
       "Musteri Adi": "NILDISA AHMET SAHIN",
       "Paket Sayisi": 249,
       "Eslesen Sayisi": 249,
@@ -559,7 +592,7 @@
       "Paket Basi Kar/Zarar": 3.4923044995983923
     },
     {
-      "Musteri No": "1990.0",
+      "Musteri No": "1990",
       "Musteri Adi": "EDİBE ERDEM UTMA",
       "Paket Sayisi": 171,
       "Eslesen Sayisi": 170,
@@ -570,7 +603,7 @@
       "Paket Basi Kar/Zarar": 5.43585455882353
     },
     {
-      "Musteri No": "2902.0",
+      "Musteri No": "2902",
       "Musteri Adi": "murat furkan bayar",
       "Paket Sayisi": 52,
       "Eslesen Sayisi": 49,
@@ -581,7 +614,7 @@
       "Paket Basi Kar/Zarar": 0.3559183673469398
     },
     {
-      "Musteri No": "1423.0",
+      "Musteri No": "1423",
       "Musteri Adi": "Huseyin Tuna Ozturk Öztürk",
       "Paket Sayisi": 78,
       "Eslesen Sayisi": 78,
@@ -592,7 +625,7 @@
       "Paket Basi Kar/Zarar": 1.134230769230769
     },
     {
-      "Musteri No": "1898.0",
+      "Musteri No": "1898",
       "Musteri Adi": "KEREM YENICAY",
       "Paket Sayisi": 125,
       "Eslesen Sayisi": 122,
@@ -603,7 +636,7 @@
       "Paket Basi Kar/Zarar": 1.9076229508196718
     },
     {
-      "Musteri No": "2543.0",
+      "Musteri No": "2543",
       "Musteri Adi": "TEMEL ARDA KARSLI",
       "Paket Sayisi": 72,
       "Eslesen Sayisi": 71,
@@ -614,7 +647,7 @@
       "Paket Basi Kar/Zarar": 3.6899999999999977
     },
     {
-      "Musteri No": "2830.0",
+      "Musteri No": "2830",
       "Musteri Adi": "Baki BOZKURT",
       "Paket Sayisi": 101,
       "Eslesen Sayisi": 101,
@@ -625,7 +658,7 @@
       "Paket Basi Kar/Zarar": 5.304433464356432
     },
     {
-      "Musteri No": "2901.0",
+      "Musteri No": "2901",
       "Musteri Adi": "İHSAN YETİMOVA",
       "Paket Sayisi": 49,
       "Eslesen Sayisi": 48,
@@ -636,7 +669,7 @@
       "Paket Basi Kar/Zarar": 4.071458333333331
     },
     {
-      "Musteri No": "2054.0",
+      "Musteri No": "2054",
       "Musteri Adi": "Hasan Dilmac",
       "Paket Sayisi": 43,
       "Eslesen Sayisi": 42,
@@ -647,18 +680,7 @@
       "Paket Basi Kar/Zarar": 0.7787470785714283
     },
     {
-      "Musteri No": "2753.0",
-      "Musteri Adi": "İrfan Çiftçi",
-      "Paket Sayisi": 32,
-      "Eslesen Sayisi": 31,
-      "Bize Odenen (Gelir)": 1008.59,
-      "Firmaya Odenen (Gider)": 591.1991102000002,
-      "Kar/Zarar": 401.3908897999999,
-      "Gonderdigi Ulkeler": "Canada",
-      "Paket Basi Kar/Zarar": 12.948093219354837
-    },
-    {
-      "Musteri No": "2392.0",
+      "Musteri No": "2392",
       "Musteri Adi": "yasin MOCO",
       "Paket Sayisi": 35,
       "Eslesen Sayisi": 34,
@@ -669,7 +691,7 @@
       "Paket Basi Kar/Zarar": 3.6191176470588244
     },
     {
-      "Musteri No": "2907.0",
+      "Musteri No": "2907",
       "Musteri Adi": "abdullah kutay",
       "Paket Sayisi": 30,
       "Eslesen Sayisi": 30,
@@ -680,7 +702,7 @@
       "Paket Basi Kar/Zarar": 4.272000000000001
     },
     {
-      "Musteri No": "2259.0",
+      "Musteri No": "2259",
       "Musteri Adi": "SERWIRE SERKAN MARAL",
       "Paket Sayisi": 49,
       "Eslesen Sayisi": 49,
@@ -691,7 +713,7 @@
       "Paket Basi Kar/Zarar": 5.477970069387755
     },
     {
-      "Musteri No": "2829.0",
+      "Musteri No": "2829",
       "Musteri Adi": "OZGE ALKAN",
       "Paket Sayisi": 29,
       "Eslesen Sayisi": 29,
@@ -702,7 +724,7 @@
       "Paket Basi Kar/Zarar": 3.400689655172414
     },
     {
-      "Musteri No": "2269.0",
+      "Musteri No": "2269",
       "Musteri Adi": "Mehmet Salih KUTLU",
       "Paket Sayisi": 28,
       "Eslesen Sayisi": 28,
@@ -713,7 +735,7 @@
       "Paket Basi Kar/Zarar": 9.7630766
     },
     {
-      "Musteri No": "2153.0",
+      "Musteri No": "2153",
       "Musteri Adi": "Tuğrul Mete Akgül",
       "Paket Sayisi": 25,
       "Eslesen Sayisi": 25,
@@ -724,7 +746,7 @@
       "Paket Basi Kar/Zarar": 8.081395648
     },
     {
-      "Musteri No": "1908.0",
+      "Musteri No": "1908",
       "Musteri Adi": "Ahmet Öztürk",
       "Paket Sayisi": 3,
       "Eslesen Sayisi": 2,
@@ -735,7 +757,7 @@
       "Paket Basi Kar/Zarar": -152.13000000000002
     },
     {
-      "Musteri No": "2417.0",
+      "Musteri No": "2417",
       "Musteri Adi": "Doğukan Şahin",
       "Paket Sayisi": 17,
       "Eslesen Sayisi": 17,
@@ -746,7 +768,7 @@
       "Paket Basi Kar/Zarar": 0.28411764705882436
     },
     {
-      "Musteri No": "2896.0",
+      "Musteri No": "2896",
       "Musteri Adi": "Tulay Gunes",
       "Paket Sayisi": 14,
       "Eslesen Sayisi": 14,
@@ -757,7 +779,7 @@
       "Paket Basi Kar/Zarar": 10.032099964285715
     },
     {
-      "Musteri No": "1040.0",
+      "Musteri No": "1040",
       "Musteri Adi": "vedat yıldırım",
       "Paket Sayisi": 20,
       "Eslesen Sayisi": 20,
@@ -768,7 +790,7 @@
       "Paket Basi Kar/Zarar": 7.38703435
     },
     {
-      "Musteri No": "1876.0",
+      "Musteri No": "1876",
       "Musteri Adi": "mehmet ali yılmaz",
       "Paket Sayisi": 35,
       "Eslesen Sayisi": 35,
@@ -779,7 +801,7 @@
       "Paket Basi Kar/Zarar": 0.9397605885714293
     },
     {
-      "Musteri No": "2906.0",
+      "Musteri No": "2906",
       "Musteri Adi": "fikret Topuz",
       "Paket Sayisi": 12,
       "Eslesen Sayisi": 12,
@@ -790,7 +812,7 @@
       "Paket Basi Kar/Zarar": 18.663502583333337
     },
     {
-      "Musteri No": "2799.0",
+      "Musteri No": "2799",
       "Musteri Adi": "Ersin Saydam",
       "Paket Sayisi": 22,
       "Eslesen Sayisi": 22,
@@ -801,7 +823,7 @@
       "Paket Basi Kar/Zarar": 2.6995454545454542
     },
     {
-      "Musteri No": "2081.0",
+      "Musteri No": "2081",
       "Musteri Adi": "MyAmi  STORE",
       "Paket Sayisi": 33,
       "Eslesen Sayisi": 32,
@@ -812,7 +834,7 @@
       "Paket Basi Kar/Zarar": 1.98778969375
     },
     {
-      "Musteri No": "2258.0",
+      "Musteri No": "2258",
       "Musteri Adi": "Semih Çınar",
       "Paket Sayisi": 7,
       "Eslesen Sayisi": 7,
@@ -823,7 +845,7 @@
       "Paket Basi Kar/Zarar": 8.172857142857158
     },
     {
-      "Musteri No": "2413.0",
+      "Musteri No": "2413",
       "Musteri Adi": "GULTEKIN CINARLIDERE chinari Store",
       "Paket Sayisi": 23,
       "Eslesen Sayisi": 23,
@@ -834,7 +856,7 @@
       "Paket Basi Kar/Zarar": 3.5593626304347823
     },
     {
-      "Musteri No": "2903.0",
+      "Musteri No": "2903",
       "Musteri Adi": "Tuncay Hura",
       "Paket Sayisi": 9,
       "Eslesen Sayisi": 9,
@@ -845,7 +867,7 @@
       "Paket Basi Kar/Zarar": 4.265555555555553
     },
     {
-      "Musteri No": "2050.0",
+      "Musteri No": "2050",
       "Musteri Adi": "LIFOSALE  OMER SAHIN",
       "Paket Sayisi": 25,
       "Eslesen Sayisi": 25,
@@ -856,7 +878,7 @@
       "Paket Basi Kar/Zarar": 3.20571146
     },
     {
-      "Musteri No": "2857.0",
+      "Musteri No": "2857",
       "Musteri Adi": "Muhammed Mustafa  Eraslan ",
       "Paket Sayisi": 11,
       "Eslesen Sayisi": 11,
@@ -867,7 +889,7 @@
       "Paket Basi Kar/Zarar": 6.718181818181818
     },
     {
-      "Musteri No": "1981.0",
+      "Musteri No": "1981",
       "Musteri Adi": "Ayhan ekinci",
       "Paket Sayisi": 17,
       "Eslesen Sayisi": 17,
@@ -878,7 +900,7 @@
       "Paket Basi Kar/Zarar": 4.651977305882353
     },
     {
-      "Musteri No": "2119.0",
+      "Musteri No": "2119",
       "Musteri Adi": "METIN TOMAR",
       "Paket Sayisi": 15,
       "Eslesen Sayisi": 15,
@@ -889,7 +911,7 @@
       "Paket Basi Kar/Zarar": 3.25761418
     },
     {
-      "Musteri No": "1689.0",
+      "Musteri No": "1689",
       "Musteri Adi": "Egenur Bakkal",
       "Paket Sayisi": 22,
       "Eslesen Sayisi": 22,
@@ -900,7 +922,7 @@
       "Paket Basi Kar/Zarar": 4.1063636363636355
     },
     {
-      "Musteri No": "1905.0",
+      "Musteri No": "1905",
       "Musteri Adi": "Gülhan Ayça Çalışkan",
       "Paket Sayisi": 2,
       "Eslesen Sayisi": 2,
@@ -911,7 +933,7 @@
       "Paket Basi Kar/Zarar": 16.889999999999993
     },
     {
-      "Musteri No": "2379.0",
+      "Musteri No": "2379",
       "Musteri Adi": "Hıdır Murat Pehlivan",
       "Paket Sayisi": 7,
       "Eslesen Sayisi": 7,
@@ -922,7 +944,7 @@
       "Paket Basi Kar/Zarar": 9.123111442857143
     },
     {
-      "Musteri No": "2436.0",
+      "Musteri No": "2436",
       "Musteri Adi": "Önsel Güzel",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 1,
@@ -933,7 +955,7 @@
       "Paket Basi Kar/Zarar": -135.57000000000002
     },
     {
-      "Musteri No": "2898.0",
+      "Musteri No": "2898",
       "Musteri Adi": "HAKAN CEYLAN",
       "Paket Sayisi": 4,
       "Eslesen Sayisi": 4,
@@ -944,7 +966,7 @@
       "Paket Basi Kar/Zarar": 7.35
     },
     {
-      "Musteri No": "2213.0",
+      "Musteri No": "2213",
       "Musteri Adi": "SEREN SAHIN",
       "Paket Sayisi": 3,
       "Eslesen Sayisi": 3,
@@ -955,7 +977,7 @@
       "Paket Basi Kar/Zarar": 2.2800000000000007
     },
     {
-      "Musteri No": "2494.0",
+      "Musteri No": "2494",
       "Musteri Adi": "Fatih Kaplan",
       "Paket Sayisi": 13,
       "Eslesen Sayisi": 13,
@@ -966,7 +988,7 @@
       "Paket Basi Kar/Zarar": 4.852307692307692
     },
     {
-      "Musteri No": "2824.0",
+      "Musteri No": "2824",
       "Musteri Adi": "HACER ILHAN",
       "Paket Sayisi": 19,
       "Eslesen Sayisi": 19,
@@ -977,7 +999,7 @@
       "Paket Basi Kar/Zarar": 0.2547368421052628
     },
     {
-      "Musteri No": "2415.0",
+      "Musteri No": "2415",
       "Musteri Adi": "ONEROSE birgül uzunurgancı",
       "Paket Sayisi": 3,
       "Eslesen Sayisi": 3,
@@ -988,7 +1010,7 @@
       "Paket Basi Kar/Zarar": 7.803333333333335
     },
     {
-      "Musteri No": "2036.0",
+      "Musteri No": "2036",
       "Musteri Adi": "MUHAMMED EMIN ACAR",
       "Paket Sayisi": 7,
       "Eslesen Sayisi": 7,
@@ -999,7 +1021,7 @@
       "Paket Basi Kar/Zarar": 5.665043428571429
     },
     {
-      "Musteri No": "2266.0",
+      "Musteri No": "2266",
       "Musteri Adi": "mahsum bozyiğit",
       "Paket Sayisi": 3,
       "Eslesen Sayisi": 3,
@@ -1010,7 +1032,7 @@
       "Paket Basi Kar/Zarar": -1.0899999999999952
     },
     {
-      "Musteri No": "2787.0",
+      "Musteri No": "2787",
       "Musteri Adi": "MUSTAFA TOMA",
       "Paket Sayisi": 6,
       "Eslesen Sayisi": 6,
@@ -1021,7 +1043,7 @@
       "Paket Basi Kar/Zarar": 2.926666666666669
     },
     {
-      "Musteri No": "2900.0",
+      "Musteri No": "2900",
       "Musteri Adi": "Fatma  Turkkaya",
       "Paket Sayisi": 3,
       "Eslesen Sayisi": 3,
@@ -1032,7 +1054,7 @@
       "Paket Basi Kar/Zarar": 14.57
     },
     {
-      "Musteri No": "2460.0",
+      "Musteri No": "2460",
       "Musteri Adi": "Koray  Merki",
       "Paket Sayisi": 6,
       "Eslesen Sayisi": 6,
@@ -1043,7 +1065,7 @@
       "Paket Basi Kar/Zarar": 7.948333333333333
     },
     {
-      "Musteri No": "2284.0",
+      "Musteri No": "2284",
       "Musteri Adi": "SUKRU YASİN AYDOGAN",
       "Paket Sayisi": 5,
       "Eslesen Sayisi": 5,
@@ -1054,7 +1076,7 @@
       "Paket Basi Kar/Zarar": 4.745060799999996
     },
     {
-      "Musteri No": "2426.0",
+      "Musteri No": "2426",
       "Musteri Adi": "Sevil  Kenar ",
       "Paket Sayisi": 7,
       "Eslesen Sayisi": 7,
@@ -1065,7 +1087,7 @@
       "Paket Basi Kar/Zarar": 3.174285714285714
     },
     {
-      "Musteri No": "2878.0",
+      "Musteri No": "2878",
       "Musteri Adi": "Selim Turgan",
       "Paket Sayisi": 6,
       "Eslesen Sayisi": 6,
@@ -1076,7 +1098,7 @@
       "Paket Basi Kar/Zarar": 4.346666666666667
     },
     {
-      "Musteri No": "2282.0",
+      "Musteri No": "2282",
       "Musteri Adi": "İBRAHİM YALÇIN",
       "Paket Sayisi": 3,
       "Eslesen Sayisi": 3,
@@ -1087,7 +1109,7 @@
       "Paket Basi Kar/Zarar": 4.153333333333332
     },
     {
-      "Musteri No": "2889.0",
+      "Musteri No": "2889",
       "Musteri Adi": "OSMAN ARISOY",
       "Paket Sayisi": 2,
       "Eslesen Sayisi": 1,
@@ -1098,7 +1120,7 @@
       "Paket Basi Kar/Zarar": 7.870000000000001
     },
     {
-      "Musteri No": "2466.0",
+      "Musteri No": "2466",
       "Musteri Adi": "Mushap Mucahhit Sezer",
       "Paket Sayisi": 5,
       "Eslesen Sayisi": 5,
@@ -1109,7 +1131,7 @@
       "Paket Basi Kar/Zarar": 3.812
     },
     {
-      "Musteri No": "2848.0",
+      "Musteri No": "2848",
       "Musteri Adi": "ahmet aykal",
       "Paket Sayisi": 4,
       "Eslesen Sayisi": 4,
@@ -1120,7 +1142,7 @@
       "Paket Basi Kar/Zarar": 2.7249373000000006
     },
     {
-      "Musteri No": "2546.0",
+      "Musteri No": "2546",
       "Musteri Adi": "Erdi BALTA",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 1,
@@ -1131,7 +1153,7 @@
       "Paket Basi Kar/Zarar": 13.620000000000005
     },
     {
-      "Musteri No": "2435.0",
+      "Musteri No": "2435",
       "Musteri Adi": "Fatma Çevlik",
       "Paket Sayisi": 2,
       "Eslesen Sayisi": 2,
@@ -1142,7 +1164,7 @@
       "Paket Basi Kar/Zarar": -3.2749999999999986
     },
     {
-      "Musteri No": "2811.0",
+      "Musteri No": "2811",
       "Musteri Adi": "murat yalavuz",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 1,
@@ -1153,7 +1175,7 @@
       "Paket Basi Kar/Zarar": 18.33
     },
     {
-      "Musteri No": "2122.0",
+      "Musteri No": "2122",
       "Musteri Adi": "Tugce Saymaz",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 1,
@@ -1164,7 +1186,7 @@
       "Paket Basi Kar/Zarar": 13.010000000000002
     },
     {
-      "Musteri No": "2275.0",
+      "Musteri No": "2275",
       "Musteri Adi": "Muhammed Alp Çeçen",
       "Paket Sayisi": 3,
       "Eslesen Sayisi": 3,
@@ -1175,7 +1197,7 @@
       "Paket Basi Kar/Zarar": 3.6566666666666663
     },
     {
-      "Musteri No": "2306.0",
+      "Musteri No": "2306",
       "Musteri Adi": "Bediha Feyzi",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 1,
@@ -1186,7 +1208,7 @@
       "Paket Basi Kar/Zarar": 4.75
     },
     {
-      "Musteri No": "2847.0",
+      "Musteri No": "2847",
       "Musteri Adi": "Ramazan Kırkıl",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 1,
@@ -1197,7 +1219,7 @@
       "Paket Basi Kar/Zarar": -8.850000000000001
     },
     {
-      "Musteri No": "2545.0",
+      "Musteri No": "2545",
       "Musteri Adi": "tuncay baytar",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 1,
@@ -1208,7 +1230,7 @@
       "Paket Basi Kar/Zarar": 4.6899999999999995
     },
     {
-      "Musteri No": "2885.0",
+      "Musteri No": "2885",
       "Musteri Adi": "MUSTAFA MERT YAZICI",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 0,
@@ -1219,7 +1241,7 @@
       "Paket Basi Kar/Zarar": 0.0
     },
     {
-      "Musteri No": "2784.0",
+      "Musteri No": "2784",
       "Musteri Adi": "ALİ YILDIZHAN",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 1,
@@ -1232,7 +1254,7 @@
   ],
   "customer_country_table": [
     {
-      "Musteri No": "2427.0",
+      "Musteri No": "2427",
       "Musteri Adi": "ruken buluc",
       "Ulke": "France",
       "Paket Sayisi": 77,
@@ -1242,7 +1264,7 @@
       "Kar/Zarar": -379.3500000000001
     },
     {
-      "Musteri No": "1908.0",
+      "Musteri No": "1908",
       "Musteri Adi": "Ahmet Öztürk",
       "Ulke": "United Kingdom",
       "Paket Sayisi": 2,
@@ -1252,7 +1274,7 @@
       "Kar/Zarar": -316.53000000000003
     },
     {
-      "Musteri No": "2902.0",
+      "Musteri No": "2902",
       "Musteri Adi": "murat furkan bayar",
       "Ulke": "Austria",
       "Paket Sayisi": 2,
@@ -1262,7 +1284,7 @@
       "Kar/Zarar": -143.48
     },
     {
-      "Musteri No": "2436.0",
+      "Musteri No": "2436",
       "Musteri Adi": "Önsel Güzel",
       "Ulke": "Spain",
       "Paket Sayisi": 1,
@@ -1272,7 +1294,7 @@
       "Kar/Zarar": -135.57000000000002
     },
     {
-      "Musteri No": "1898.0",
+      "Musteri No": "1898",
       "Musteri Adi": "KEREM YENICAY",
       "Ulke": "France",
       "Paket Sayisi": 34,
@@ -1282,7 +1304,7 @@
       "Kar/Zarar": -129.98000000000002
     },
     {
-      "Musteri No": "1876.0",
+      "Musteri No": "1876",
       "Musteri Adi": "mehmet ali yılmaz",
       "Ulke": "United States",
       "Paket Sayisi": 1,
@@ -1292,7 +1314,7 @@
       "Kar/Zarar": -34.53999999999998
     },
     {
-      "Musteri No": "2886.0",
+      "Musteri No": "2886",
       "Musteri Adi": "Abdul Rahim YILDIZ",
       "Ulke": "Italy",
       "Paket Sayisi": 20,
@@ -1302,7 +1324,7 @@
       "Kar/Zarar": -30.040000000000042
     },
     {
-      "Musteri No": "2820.0",
+      "Musteri No": "2820",
       "Musteri Adi": "ZEYNEP YILDIZ",
       "Ulke": "Spain",
       "Paket Sayisi": 65,
@@ -1312,7 +1334,7 @@
       "Kar/Zarar": -22.570000000000103
     },
     {
-      "Musteri No": "2886.0",
+      "Musteri No": "2886",
       "Musteri Adi": "Abdul Rahim YILDIZ",
       "Ulke": "Germany",
       "Paket Sayisi": 63,
@@ -1322,7 +1344,7 @@
       "Kar/Zarar": -22.399999999999913
     },
     {
-      "Musteri No": "2886.0",
+      "Musteri No": "2886",
       "Musteri Adi": "Abdul Rahim YILDIZ",
       "Ulke": "Portugal",
       "Paket Sayisi": 8,
@@ -1332,7 +1354,7 @@
       "Kar/Zarar": -9.990000000000002
     },
     {
-      "Musteri No": "2902.0",
+      "Musteri No": "2902",
       "Musteri Adi": "murat furkan bayar",
       "Ulke": "Ireland",
       "Paket Sayisi": 6,
@@ -1342,7 +1364,7 @@
       "Kar/Zarar": -9.110000000000003
     },
     {
-      "Musteri No": "2902.0",
+      "Musteri No": "2902",
       "Musteri Adi": "murat furkan bayar",
       "Ulke": "Sweden",
       "Paket Sayisi": 1,
@@ -1352,7 +1374,7 @@
       "Kar/Zarar": -8.919999999999995
     },
     {
-      "Musteri No": "2847.0",
+      "Musteri No": "2847",
       "Musteri Adi": "Ramazan Kırkıl",
       "Ulke": "United States",
       "Paket Sayisi": 1,
@@ -1362,7 +1384,7 @@
       "Kar/Zarar": -8.850000000000001
     },
     {
-      "Musteri No": "1423.0",
+      "Musteri No": "1423",
       "Musteri Adi": "Huseyin Tuna Ozturk Öztürk",
       "Ulke": "Greece",
       "Paket Sayisi": 1,
@@ -1372,7 +1394,7 @@
       "Kar/Zarar": -8.810000000000002
     },
     {
-      "Musteri No": "2392.0",
+      "Musteri No": "2392",
       "Musteri Adi": "yasin MOCO",
       "Ulke": "Germany",
       "Paket Sayisi": 1,
@@ -1382,7 +1404,7 @@
       "Kar/Zarar": -8.490000000000002
     },
     {
-      "Musteri No": "2417.0",
+      "Musteri No": "2417",
       "Musteri Adi": "Doğukan Şahin",
       "Ulke": "Germany",
       "Paket Sayisi": 5,
@@ -1392,7 +1414,7 @@
       "Kar/Zarar": -8.120000000000003
     },
     {
-      "Musteri No": "2886.0",
+      "Musteri No": "2886",
       "Musteri Adi": "Abdul Rahim YILDIZ",
       "Ulke": "Spain",
       "Paket Sayisi": 10,
@@ -1402,7 +1424,7 @@
       "Kar/Zarar": -7.580000000000002
     },
     {
-      "Musteri No": "2799.0",
+      "Musteri No": "2799",
       "Musteri Adi": "Ersin Saydam",
       "Ulke": "Germany",
       "Paket Sayisi": 2,
@@ -1412,7 +1434,7 @@
       "Kar/Zarar": -7.290000000000003
     },
     {
-      "Musteri No": "1423.0",
+      "Musteri No": "1423",
       "Musteri Adi": "Huseyin Tuna Ozturk Öztürk",
       "Ulke": "Germany",
       "Paket Sayisi": 62,
@@ -1422,7 +1444,7 @@
       "Kar/Zarar": -6.670000000000071
     },
     {
-      "Musteri No": "2435.0",
+      "Musteri No": "2435",
       "Musteri Adi": "Fatma Çevlik",
       "Ulke": "United States",
       "Paket Sayisi": 2,
@@ -1432,7 +1454,7 @@
       "Kar/Zarar": -6.549999999999997
     },
     {
-      "Musteri No": "2907.0",
+      "Musteri No": "2907",
       "Musteri Adi": "abdullah kutay",
       "Ulke": "Italy",
       "Paket Sayisi": 1,
@@ -1442,7 +1464,7 @@
       "Kar/Zarar": -5.069999999999965
     },
     {
-      "Musteri No": "2799.0",
+      "Musteri No": "2799",
       "Musteri Adi": "Ersin Saydam",
       "Ulke": "Spain",
       "Paket Sayisi": 1,
@@ -1452,7 +1474,7 @@
       "Kar/Zarar": -4.210000000000001
     },
     {
-      "Musteri No": "2266.0",
+      "Musteri No": "2266",
       "Musteri Adi": "mahsum bozyiğit",
       "Ulke": "Japan",
       "Paket Sayisi": 3,
@@ -1462,7 +1484,7 @@
       "Kar/Zarar": -3.2699999999999854
     },
     {
-      "Musteri No": "2213.0",
+      "Musteri No": "2213",
       "Musteri Adi": "SEREN SAHIN",
       "Ulke": "Italy",
       "Paket Sayisi": 1,
@@ -1472,7 +1494,7 @@
       "Kar/Zarar": -3.0
     },
     {
-      "Musteri No": "2901.0",
+      "Musteri No": "2901",
       "Musteri Adi": "İHSAN YETİMOVA",
       "Ulke": "Italy",
       "Paket Sayisi": 1,
@@ -1482,7 +1504,7 @@
       "Kar/Zarar": -2.8599999999999994
     },
     {
-      "Musteri No": "2054.0",
+      "Musteri No": "2054",
       "Musteri Adi": "Hasan Dilmac",
       "Ulke": "Netherlands The",
       "Paket Sayisi": 6,
@@ -1492,7 +1514,7 @@
       "Kar/Zarar": -1.4499999999999957
     },
     {
-      "Musteri No": "2417.0",
+      "Musteri No": "2417",
       "Musteri Adi": "Doğukan Şahin",
       "Ulke": "Switzerland",
       "Paket Sayisi": 1,
@@ -1502,7 +1524,7 @@
       "Kar/Zarar": -0.07000000000000028
     },
     {
-      "Musteri No": "1423.0",
+      "Musteri No": "1423",
       "Musteri Adi": "Huseyin Tuna Ozturk Öztürk",
       "Ulke": "Austria",
       "Paket Sayisi": 2,
@@ -1512,7 +1534,7 @@
       "Kar/Zarar": -0.019999999999999574
     },
     {
-      "Musteri No": "2885.0",
+      "Musteri No": "2885",
       "Musteri Adi": "MUSTAFA MERT YAZICI",
       "Ulke": "United Kingdom",
       "Paket Sayisi": 1,
@@ -1522,7 +1544,7 @@
       "Kar/Zarar": 0
     },
     {
-      "Musteri No": "1990.0",
+      "Musteri No": "1990",
       "Musteri Adi": "EDİBE ERDEM UTMA",
       "Ulke": "Mexico",
       "Paket Sayisi": 1,
@@ -1532,7 +1554,7 @@
       "Kar/Zarar": 0
     },
     {
-      "Musteri No": "2392.0",
+      "Musteri No": "2392",
       "Musteri Adi": "yasin MOCO",
       "Ulke": "Netherlands The",
       "Paket Sayisi": 19,
@@ -1542,7 +1564,7 @@
       "Kar/Zarar": 2.3092638912203256e-14
     },
     {
-      "Musteri No": "2903.0",
+      "Musteri No": "2903",
       "Musteri Adi": "Tuncay Hura",
       "Ulke": "Portugal",
       "Paket Sayisi": 1,
@@ -1552,7 +1574,7 @@
       "Kar/Zarar": 0.34999999999999787
     },
     {
-      "Musteri No": "2902.0",
+      "Musteri No": "2902",
       "Musteri Adi": "murat furkan bayar",
       "Ulke": "Switzerland",
       "Paket Sayisi": 1,
@@ -1562,7 +1584,7 @@
       "Kar/Zarar": 0.4000000000000128
     },
     {
-      "Musteri No": "2784.0",
+      "Musteri No": "2784",
       "Musteri Adi": "ALİ YILDIZHAN",
       "Ulke": "United States",
       "Paket Sayisi": 1,
@@ -1572,7 +1594,7 @@
       "Kar/Zarar": 1.54
     },
     {
-      "Musteri No": "2824.0",
+      "Musteri No": "2824",
       "Musteri Adi": "HACER ILHAN",
       "Ulke": "United States",
       "Paket Sayisi": 18,
@@ -1582,7 +1604,7 @@
       "Kar/Zarar": 1.8199999999999932
     },
     {
-      "Musteri No": "2886.0",
+      "Musteri No": "2886",
       "Musteri Adi": "Abdul Rahim YILDIZ",
       "Ulke": "France",
       "Paket Sayisi": 30,
@@ -1592,7 +1614,7 @@
       "Kar/Zarar": 1.8300000000000054
     },
     {
-      "Musteri No": "1876.0",
+      "Musteri No": "1876",
       "Musteri Adi": "mehmet ali yılmaz",
       "Ulke": "Poland",
       "Paket Sayisi": 1,
@@ -1602,7 +1624,7 @@
       "Kar/Zarar": 2.0000000000000036
     },
     {
-      "Musteri No": "2829.0",
+      "Musteri No": "2829",
       "Musteri Adi": "OZGE ALKAN",
       "Ulke": "Germany",
       "Paket Sayisi": 1,
@@ -1612,7 +1634,7 @@
       "Kar/Zarar": 2.2500000000000036
     },
     {
-      "Musteri No": "1423.0",
+      "Musteri No": "1423",
       "Musteri Adi": "Huseyin Tuna Ozturk Öztürk",
       "Ulke": "Slovenia",
       "Paket Sayisi": 2,
@@ -1622,7 +1644,7 @@
       "Kar/Zarar": 2.4300000000000015
     },
     {
-      "Musteri No": "1423.0",
+      "Musteri No": "1423",
       "Musteri Adi": "Huseyin Tuna Ozturk Öztürk",
       "Ulke": "Ireland",
       "Paket Sayisi": 1,
@@ -1632,7 +1654,7 @@
       "Kar/Zarar": 2.5100000000000016
     },
     {
-      "Musteri No": "2284.0",
+      "Musteri No": "2284",
       "Musteri Adi": "SUKRU YASİN AYDOGAN",
       "Ulke": "Canada",
       "Paket Sayisi": 1,
@@ -1642,7 +1664,7 @@
       "Kar/Zarar": 2.745303999999999
     },
     {
-      "Musteri No": "2848.0",
+      "Musteri No": "2848",
       "Musteri Adi": "ahmet aykal",
       "Ulke": "United States",
       "Paket Sayisi": 1,
@@ -1652,7 +1674,7 @@
       "Kar/Zarar": 2.7800000000000002
     },
     {
-      "Musteri No": "1040.0",
+      "Musteri No": "1040",
       "Musteri Adi": "vedat yıldırım",
       "Ulke": "New Zealand",
       "Paket Sayisi": 1,
@@ -1662,7 +1684,7 @@
       "Kar/Zarar": 2.9000000000000012
     },
     {
-      "Musteri No": "1040.0",
+      "Musteri No": "1040",
       "Musteri Adi": "vedat yıldırım",
       "Ulke": "Norway",
       "Paket Sayisi": 1,
@@ -1672,7 +1694,7 @@
       "Kar/Zarar": 3.0
     },
     {
-      "Musteri No": "2824.0",
+      "Musteri No": "2824",
       "Musteri Adi": "HACER ILHAN",
       "Ulke": "Turkey",
       "Paket Sayisi": 1,
@@ -1682,7 +1704,7 @@
       "Kar/Zarar": 3.0199999999999996
     },
     {
-      "Musteri No": "2054.0",
+      "Musteri No": "2054",
       "Musteri Adi": "Hasan Dilmac",
       "Ulke": "Spain",
       "Paket Sayisi": 24,
@@ -1692,7 +1714,7 @@
       "Kar/Zarar": 3.2399999999999896
     },
     {
-      "Musteri No": "2282.0",
+      "Musteri No": "2282",
       "Musteri Adi": "İBRAHİM YALÇIN",
       "Ulke": "Cyprus",
       "Paket Sayisi": 1,
@@ -1702,7 +1724,7 @@
       "Kar/Zarar": 3.6499999999999986
     },
     {
-      "Musteri No": "2213.0",
+      "Musteri No": "2213",
       "Musteri Adi": "SEREN SAHIN",
       "Ulke": "Cyprus",
       "Paket Sayisi": 1,
@@ -1712,7 +1734,7 @@
       "Kar/Zarar": 3.9700000000000006
     },
     {
-      "Musteri No": "2054.0",
+      "Musteri No": "2054",
       "Musteri Adi": "Hasan Dilmac",
       "Ulke": "Italy",
       "Paket Sayisi": 5,
@@ -1722,7 +1744,7 @@
       "Kar/Zarar": 4.309999999999995
     },
     {
-      "Musteri No": "2829.0",
+      "Musteri No": "2829",
       "Musteri Adi": "OZGE ALKAN",
       "Ulke": "Portugal",
       "Paket Sayisi": 1,
@@ -1732,7 +1754,7 @@
       "Kar/Zarar": 4.3100000000000005
     },
     {
-      "Musteri No": "1423.0",
+      "Musteri No": "1423",
       "Musteri Adi": "Huseyin Tuna Ozturk Öztürk",
       "Ulke": "Cyprus",
       "Paket Sayisi": 1,
@@ -1742,7 +1764,7 @@
       "Kar/Zarar": 4.619999999999997
     },
     {
-      "Musteri No": "2545.0",
+      "Musteri No": "2545",
       "Musteri Adi": "tuncay baytar",
       "Ulke": "United States",
       "Paket Sayisi": 1,
@@ -1752,7 +1774,7 @@
       "Kar/Zarar": 4.6899999999999995
     },
     {
-      "Musteri No": "2306.0",
+      "Musteri No": "2306",
       "Musteri Adi": "Bediha Feyzi",
       "Ulke": "Switzerland",
       "Paket Sayisi": 1,
@@ -1762,7 +1784,7 @@
       "Kar/Zarar": 4.75
     },
     {
-      "Musteri No": "2903.0",
+      "Musteri No": "2903",
       "Musteri Adi": "Tuncay Hura",
       "Ulke": "Spain",
       "Paket Sayisi": 2,
@@ -1772,7 +1794,7 @@
       "Kar/Zarar": 5.059999999999999
     },
     {
-      "Musteri No": "2902.0",
+      "Musteri No": "2902",
       "Musteri Adi": "murat furkan bayar",
       "Ulke": "France",
       "Paket Sayisi": 4,
@@ -1782,7 +1804,7 @@
       "Kar/Zarar": 5.069999999999993
     },
     {
-      "Musteri No": "2213.0",
+      "Musteri No": "2213",
       "Musteri Adi": "SEREN SAHIN",
       "Ulke": "Switzerland",
       "Paket Sayisi": 1,
@@ -1792,7 +1814,7 @@
       "Kar/Zarar": 5.870000000000001
     },
     {
-      "Musteri No": "2907.0",
+      "Musteri No": "2907",
       "Musteri Adi": "abdullah kutay",
       "Ulke": "Spain",
       "Paket Sayisi": 8,
@@ -1802,7 +1824,7 @@
       "Kar/Zarar": 6.109999999999989
     },
     {
-      "Musteri No": "2886.0",
+      "Musteri No": "2886",
       "Musteri Adi": "Abdul Rahim YILDIZ",
       "Ulke": "Netherlands The",
       "Paket Sayisi": 3,
@@ -1812,7 +1834,7 @@
       "Kar/Zarar": 6.169999999999984
     },
     {
-      "Musteri No": "2907.0",
+      "Musteri No": "2907",
       "Musteri Adi": "abdullah kutay",
       "Ulke": "United Kingdom",
       "Paket Sayisi": 1,
@@ -1822,7 +1844,7 @@
       "Kar/Zarar": 6.320000000000007
     },
     {
-      "Musteri No": "2829.0",
+      "Musteri No": "2829",
       "Musteri Adi": "OZGE ALKAN",
       "Ulke": "Spain",
       "Paket Sayisi": 9,
@@ -1832,7 +1854,7 @@
       "Kar/Zarar": 6.43
     },
     {
-      "Musteri No": "1689.0",
+      "Musteri No": "1689",
       "Musteri Adi": "Egenur Bakkal",
       "Ulke": "Germany",
       "Paket Sayisi": 1,
@@ -1842,7 +1864,7 @@
       "Kar/Zarar": 6.5
     },
     {
-      "Musteri No": "1423.0",
+      "Musteri No": "1423",
       "Musteri Adi": "Huseyin Tuna Ozturk Öztürk",
       "Ulke": "Switzerland",
       "Paket Sayisi": 2,
@@ -1852,7 +1874,7 @@
       "Kar/Zarar": 6.840000000000003
     },
     {
-      "Musteri No": "2889.0",
+      "Musteri No": "2889",
       "Musteri Adi": "OSMAN ARISOY",
       "Ulke": "Australia",
       "Paket Sayisi": 2,
@@ -1862,7 +1884,7 @@
       "Kar/Zarar": 7.870000000000001
     },
     {
-      "Musteri No": "2903.0",
+      "Musteri No": "2903",
       "Musteri Adi": "Tuncay Hura",
       "Ulke": "Germany",
       "Paket Sayisi": 2,
@@ -1872,7 +1894,7 @@
       "Kar/Zarar": 7.999999999999982
     },
     {
-      "Musteri No": "1689.0",
+      "Musteri No": "1689",
       "Musteri Adi": "Egenur Bakkal",
       "Ulke": "Canada",
       "Paket Sayisi": 1,
@@ -1882,7 +1904,7 @@
       "Kar/Zarar": 8.0
     },
     {
-      "Musteri No": "2848.0",
+      "Musteri No": "2848",
       "Musteri Adi": "ahmet aykal",
       "Ulke": "Canada",
       "Paket Sayisi": 3,
@@ -1892,7 +1914,7 @@
       "Kar/Zarar": 8.119749200000001
     },
     {
-      "Musteri No": "2799.0",
+      "Musteri No": "2799",
       "Musteri Adi": "Ersin Saydam",
       "Ulke": "Ireland",
       "Paket Sayisi": 3,
@@ -1902,7 +1924,7 @@
       "Kar/Zarar": 8.390000000000004
     },
     {
-      "Musteri No": "1423.0",
+      "Musteri No": "1423",
       "Musteri Adi": "Huseyin Tuna Ozturk Öztürk",
       "Ulke": "Romania",
       "Paket Sayisi": 1,
@@ -1912,7 +1934,7 @@
       "Kar/Zarar": 8.41
     },
     {
-      "Musteri No": "2282.0",
+      "Musteri No": "2282",
       "Musteri Adi": "İBRAHİM YALÇIN",
       "Ulke": "Switzerland",
       "Paket Sayisi": 2,
@@ -1922,7 +1944,7 @@
       "Kar/Zarar": 8.809999999999999
     },
     {
-      "Musteri No": "2820.0",
+      "Musteri No": "2820",
       "Musteri Adi": "ZEYNEP YILDIZ",
       "Ulke": "Netherlands The",
       "Paket Sayisi": 3,
@@ -1932,7 +1954,7 @@
       "Kar/Zarar": 8.809999999999999
     },
     {
-      "Musteri No": "2903.0",
+      "Musteri No": "2903",
       "Musteri Adi": "Tuncay Hura",
       "Ulke": "Switzerland",
       "Paket Sayisi": 2,
@@ -1942,7 +1964,7 @@
       "Kar/Zarar": 8.860000000000003
     },
     {
-      "Musteri No": "1040.0",
+      "Musteri No": "1040",
       "Musteri Adi": "vedat yıldırım",
       "Ulke": "Australia",
       "Paket Sayisi": 3,
@@ -1952,7 +1974,7 @@
       "Kar/Zarar": 9.54
     },
     {
-      "Musteri No": "2284.0",
+      "Musteri No": "2284",
       "Musteri Adi": "SUKRU YASİN AYDOGAN",
       "Ulke": "Ireland",
       "Paket Sayisi": 1,
@@ -1962,7 +1984,7 @@
       "Kar/Zarar": 9.589999999999982
     },
     {
-      "Musteri No": "2907.0",
+      "Musteri No": "2907",
       "Musteri Adi": "abdullah kutay",
       "Ulke": "Netherlands The",
       "Paket Sayisi": 1,
@@ -1972,7 +1994,7 @@
       "Kar/Zarar": 9.650000000000006
     },
     {
-      "Musteri No": "2275.0",
+      "Musteri No": "2275",
       "Musteri Adi": "Muhammed Alp Çeçen",
       "Ulke": "United Kingdom",
       "Paket Sayisi": 3,
@@ -1982,7 +2004,7 @@
       "Kar/Zarar": 10.969999999999999
     },
     {
-      "Musteri No": "2284.0",
+      "Musteri No": "2284",
       "Musteri Adi": "SUKRU YASİN AYDOGAN",
       "Ulke": "United Kingdom",
       "Paket Sayisi": 3,
@@ -1992,7 +2014,7 @@
       "Kar/Zarar": 11.389999999999999
     },
     {
-      "Musteri No": "2902.0",
+      "Musteri No": "2902",
       "Musteri Adi": "murat furkan bayar",
       "Ulke": "Germany",
       "Paket Sayisi": 3,
@@ -2002,7 +2024,7 @@
       "Kar/Zarar": 11.48
     },
     {
-      "Musteri No": "1908.0",
+      "Musteri No": "1908",
       "Musteri Adi": "Ahmet Öztürk",
       "Ulke": "Cyprus",
       "Paket Sayisi": 1,
@@ -2012,7 +2034,7 @@
       "Kar/Zarar": 12.269999999999996
     },
     {
-      "Musteri No": "2460.0",
+      "Musteri No": "2460",
       "Musteri Adi": "Koray  Merki",
       "Ulke": "Canada",
       "Paket Sayisi": 1,
@@ -2022,7 +2044,7 @@
       "Kar/Zarar": 12.959999999999999
     },
     {
-      "Musteri No": "2122.0",
+      "Musteri No": "2122",
       "Musteri Adi": "Tugce Saymaz",
       "Ulke": "Canada",
       "Paket Sayisi": 1,
@@ -2032,7 +2054,7 @@
       "Kar/Zarar": 13.010000000000002
     },
     {
-      "Musteri No": "2417.0",
+      "Musteri No": "2417",
       "Musteri Adi": "Doğukan Şahin",
       "Ulke": "United Kingdom",
       "Paket Sayisi": 11,
@@ -2042,7 +2064,7 @@
       "Kar/Zarar": 13.020000000000016
     },
     {
-      "Musteri No": "2829.0",
+      "Musteri No": "2829",
       "Musteri Adi": "OZGE ALKAN",
       "Ulke": "France",
       "Paket Sayisi": 5,
@@ -2052,7 +2074,7 @@
       "Kar/Zarar": 13.480000000000006
     },
     {
-      "Musteri No": "2546.0",
+      "Musteri No": "2546",
       "Musteri Adi": "Erdi BALTA",
       "Ulke": "Spain",
       "Paket Sayisi": 1,
@@ -2062,7 +2084,7 @@
       "Kar/Zarar": 13.620000000000005
     },
     {
-      "Musteri No": "1423.0",
+      "Musteri No": "1423",
       "Musteri Adi": "Huseyin Tuna Ozturk Öztürk",
       "Ulke": "Denmark",
       "Paket Sayisi": 1,
@@ -2072,7 +2094,7 @@
       "Kar/Zarar": 13.859999999999992
     },
     {
-      "Musteri No": "2901.0",
+      "Musteri No": "2901",
       "Musteri Adi": "İHSAN YETİMOVA",
       "Ulke": "Germany",
       "Paket Sayisi": 2,
@@ -2082,7 +2104,7 @@
       "Kar/Zarar": 14.630000000000024
     },
     {
-      "Musteri No": "1423.0",
+      "Musteri No": "1423",
       "Musteri Adi": "Huseyin Tuna Ozturk Öztürk",
       "Ulke": "Portugal",
       "Paket Sayisi": 1,
@@ -2092,7 +2114,7 @@
       "Kar/Zarar": 16.07000000000002
     },
     {
-      "Musteri No": "2903.0",
+      "Musteri No": "2903",
       "Musteri Adi": "Tuncay Hura",
       "Ulke": "Austria",
       "Paket Sayisi": 2,
@@ -2102,7 +2124,7 @@
       "Kar/Zarar": 16.11999999999999
     },
     {
-      "Musteri No": "2787.0",
+      "Musteri No": "2787",
       "Musteri Adi": "MUSTAFA TOMA",
       "Ulke": "United Kingdom",
       "Paket Sayisi": 6,
@@ -2112,7 +2134,7 @@
       "Kar/Zarar": 17.560000000000013
     },
     {
-      "Musteri No": "2811.0",
+      "Musteri No": "2811",
       "Musteri Adi": "murat yalavuz",
       "Ulke": "United States",
       "Paket Sayisi": 1,
@@ -2122,7 +2144,7 @@
       "Kar/Zarar": 18.33
     },
     {
-      "Musteri No": "2886.0",
+      "Musteri No": "2886",
       "Musteri Adi": "Abdul Rahim YILDIZ",
       "Ulke": "Belgium",
       "Paket Sayisi": 12,
@@ -2132,7 +2154,7 @@
       "Kar/Zarar": 18.520000000000014
     },
     {
-      "Musteri No": "2466.0",
+      "Musteri No": "2466",
       "Musteri Adi": "Mushap Mucahhit Sezer",
       "Ulke": "United States",
       "Paket Sayisi": 5,
@@ -2142,7 +2164,7 @@
       "Kar/Zarar": 19.06
     },
     {
-      "Musteri No": "2426.0",
+      "Musteri No": "2426",
       "Musteri Adi": "Sevil  Kenar ",
       "Ulke": "United Kingdom",
       "Paket Sayisi": 7,
@@ -2152,7 +2174,7 @@
       "Kar/Zarar": 22.22
     },
     {
-      "Musteri No": "2415.0",
+      "Musteri No": "2415",
       "Musteri Adi": "ONEROSE birgül uzunurgancı",
       "Ulke": "Canada",
       "Paket Sayisi": 3,
@@ -2162,7 +2184,7 @@
       "Kar/Zarar": 23.410000000000004
     },
     {
-      "Musteri No": "2878.0",
+      "Musteri No": "2878",
       "Musteri Adi": "Selim Turgan",
       "Ulke": "United Kingdom",
       "Paket Sayisi": 6,
@@ -2172,7 +2194,7 @@
       "Kar/Zarar": 26.08
     },
     {
-      "Musteri No": "2054.0",
+      "Musteri No": "2054",
       "Musteri Adi": "Hasan Dilmac",
       "Ulke": "Canada",
       "Paket Sayisi": 8,
@@ -2182,7 +2204,7 @@
       "Kar/Zarar": 26.6073773
     },
     {
-      "Musteri No": "2898.0",
+      "Musteri No": "2898",
       "Musteri Adi": "HAKAN CEYLAN",
       "Ulke": "Australia",
       "Paket Sayisi": 4,
@@ -2192,7 +2214,7 @@
       "Kar/Zarar": 29.4
     },
     {
-      "Musteri No": "2820.0",
+      "Musteri No": "2820",
       "Musteri Adi": "ZEYNEP YILDIZ",
       "Ulke": "France",
       "Paket Sayisi": 10,
@@ -2202,7 +2224,7 @@
       "Kar/Zarar": 31.159999999999997
     },
     {
-      "Musteri No": "2543.0",
+      "Musteri No": "2543",
       "Musteri Adi": "TEMEL ARDA KARSLI",
       "Ulke": "Australia",
       "Paket Sayisi": 6,
@@ -2212,7 +2234,7 @@
       "Kar/Zarar": 32.01
     },
     {
-      "Musteri No": "2901.0",
+      "Musteri No": "2901",
       "Musteri Adi": "İHSAN YETİMOVA",
       "Ulke": "France",
       "Paket Sayisi": 9,
@@ -2222,7 +2244,7 @@
       "Kar/Zarar": 32.28000000000001
     },
     {
-      "Musteri No": "1905.0",
+      "Musteri No": "1905",
       "Musteri Adi": "Gülhan Ayça Çalışkan",
       "Ulke": "United Kingdom",
       "Paket Sayisi": 2,
@@ -2232,7 +2254,7 @@
       "Kar/Zarar": 33.77999999999999
     },
     {
-      "Musteri No": "2460.0",
+      "Musteri No": "2460",
       "Musteri Adi": "Koray  Merki",
       "Ulke": "United Kingdom",
       "Paket Sayisi": 5,
@@ -2242,7 +2264,7 @@
       "Kar/Zarar": 34.73
     },
     {
-      "Musteri No": "2902.0",
+      "Musteri No": "2902",
       "Musteri Adi": "murat furkan bayar",
       "Ulke": "Spain",
       "Paket Sayisi": 11,
@@ -2252,7 +2274,7 @@
       "Kar/Zarar": 37.78000000000003
     },
     {
-      "Musteri No": "2036.0",
+      "Musteri No": "2036",
       "Musteri Adi": "MUHAMMED EMIN ACAR",
       "Ulke": "Canada",
       "Paket Sayisi": 7,
@@ -2262,7 +2284,7 @@
       "Kar/Zarar": 39.655304
     },
     {
-      "Musteri No": "2886.0",
+      "Musteri No": "2886",
       "Musteri Adi": "Abdul Rahim YILDIZ",
       "Ulke": "United Kingdom",
       "Paket Sayisi": 13,
@@ -2272,7 +2294,7 @@
       "Kar/Zarar": 40.01000000000002
     },
     {
-      "Musteri No": "1898.0",
+      "Musteri No": "1898",
       "Musteri Adi": "KEREM YENICAY",
       "Ulke": "Italy",
       "Paket Sayisi": 5,
@@ -2282,7 +2304,7 @@
       "Kar/Zarar": 42.040000000000006
     },
     {
-      "Musteri No": "2900.0",
+      "Musteri No": "2900",
       "Musteri Adi": "Fatma  Turkkaya",
       "Ulke": "United Kingdom",
       "Paket Sayisi": 3,
@@ -2292,7 +2314,7 @@
       "Kar/Zarar": 43.71
     },
     {
-      "Musteri No": "2392.0",
+      "Musteri No": "2392",
       "Musteri Adi": "yasin MOCO",
       "Ulke": "United Kingdom",
       "Paket Sayisi": 5,
@@ -2302,7 +2324,7 @@
       "Kar/Zarar": 43.71999999999999
     },
     {
-      "Musteri No": "2119.0",
+      "Musteri No": "2119",
       "Musteri Adi": "METIN TOMAR",
       "Ulke": "Canada",
       "Paket Sayisi": 15,
@@ -2312,7 +2334,7 @@
       "Kar/Zarar": 48.8642127
     },
     {
-      "Musteri No": "1423.0",
+      "Musteri No": "1423",
       "Musteri Adi": "Huseyin Tuna Ozturk Öztürk",
       "Ulke": "United Kingdom",
       "Paket Sayisi": 4,
@@ -2322,7 +2344,7 @@
       "Kar/Zarar": 49.23
     },
     {
-      "Musteri No": "2902.0",
+      "Musteri No": "2902",
       "Musteri Adi": "murat furkan bayar",
       "Ulke": "Netherlands The",
       "Paket Sayisi": 3,
@@ -2332,7 +2354,7 @@
       "Kar/Zarar": 49.51999999999998
     },
     {
-      "Musteri No": "2258.0",
+      "Musteri No": "2258",
       "Musteri Adi": "Semih Çınar",
       "Ulke": "United Kingdom",
       "Paket Sayisi": 7,
@@ -2342,7 +2364,7 @@
       "Kar/Zarar": 57.21000000000011
     },
     {
-      "Musteri No": "2820.0",
+      "Musteri No": "2820",
       "Musteri Adi": "ZEYNEP YILDIZ",
       "Ulke": "Belgium",
       "Paket Sayisi": 7,
@@ -2352,7 +2374,7 @@
       "Kar/Zarar": 57.7
     },
     {
-      "Musteri No": "2799.0",
+      "Musteri No": "2799",
       "Musteri Adi": "Ersin Saydam",
       "Ulke": "United Kingdom",
       "Paket Sayisi": 16,
@@ -2362,7 +2384,7 @@
       "Kar/Zarar": 62.5
     },
     {
-      "Musteri No": "2494.0",
+      "Musteri No": "2494",
       "Musteri Adi": "Fatih Kaplan",
       "Ulke": "United States",
       "Paket Sayisi": 13,
@@ -2372,7 +2394,7 @@
       "Kar/Zarar": 63.08
     },
     {
-      "Musteri No": "2081.0",
+      "Musteri No": "2081",
       "Musteri Adi": "MyAmi  STORE",
       "Ulke": "Canada",
       "Paket Sayisi": 33,
@@ -2382,7 +2404,7 @@
       "Kar/Zarar": 63.6092702
     },
     {
-      "Musteri No": "2379.0",
+      "Musteri No": "2379",
       "Musteri Adi": "Hıdır Murat Pehlivan",
       "Ulke": "Canada",
       "Paket Sayisi": 7,
@@ -2392,7 +2414,7 @@
       "Kar/Zarar": 63.861780100000004
     },
     {
-      "Musteri No": "1876.0",
+      "Musteri No": "1876",
       "Musteri Adi": "mehmet ali yılmaz",
       "Ulke": "Canada",
       "Paket Sayisi": 33,
@@ -2402,7 +2424,7 @@
       "Kar/Zarar": 65.43162060000002
     },
     {
-      "Musteri No": "2829.0",
+      "Musteri No": "2829",
       "Musteri Adi": "OZGE ALKAN",
       "Ulke": "United Kingdom",
       "Paket Sayisi": 13,
@@ -2412,7 +2434,7 @@
       "Kar/Zarar": 72.15
     },
     {
-      "Musteri No": "2857.0",
+      "Musteri No": "2857",
       "Musteri Adi": "Muhammed Mustafa  Eraslan ",
       "Ulke": "United Kingdom",
       "Paket Sayisi": 11,
@@ -2422,7 +2444,7 @@
       "Kar/Zarar": 73.89999999999999
     },
     {
-      "Musteri No": "2902.0",
+      "Musteri No": "2902",
       "Musteri Adi": "murat furkan bayar",
       "Ulke": "Belgium",
       "Paket Sayisi": 21,
@@ -2432,7 +2454,7 @@
       "Kar/Zarar": 74.70000000000005
     },
     {
-      "Musteri No": "1689.0",
+      "Musteri No": "1689",
       "Musteri Adi": "Egenur Bakkal",
       "Ulke": "United Kingdom",
       "Paket Sayisi": 20,
@@ -2442,7 +2464,7 @@
       "Kar/Zarar": 75.83999999999999
     },
     {
-      "Musteri No": "1981.0",
+      "Musteri No": "1981",
       "Musteri Adi": "Ayhan ekinci",
       "Ulke": "Canada",
       "Paket Sayisi": 17,
@@ -2452,7 +2474,7 @@
       "Kar/Zarar": 79.0836142
     },
     {
-      "Musteri No": "2050.0",
+      "Musteri No": "2050",
       "Musteri Adi": "LIFOSALE  OMER SAHIN",
       "Ulke": "Canada",
       "Paket Sayisi": 25,
@@ -2462,7 +2484,7 @@
       "Kar/Zarar": 80.1427865
     },
     {
-      "Musteri No": "2413.0",
+      "Musteri No": "2413",
       "Musteri Adi": "GULTEKIN CINARLIDERE chinari Store",
       "Ulke": "Canada",
       "Paket Sayisi": 23,
@@ -2472,7 +2494,7 @@
       "Kar/Zarar": 81.86534049999999
     },
     {
-      "Musteri No": "2392.0",
+      "Musteri No": "2392",
       "Musteri Adi": "yasin MOCO",
       "Ulke": "Belgium",
       "Paket Sayisi": 10,
@@ -2482,7 +2504,7 @@
       "Kar/Zarar": 87.82
     },
     {
-      "Musteri No": "2830.0",
+      "Musteri No": "2830",
       "Musteri Adi": "Baki BOZKURT",
       "Ulke": "Canada",
       "Paket Sayisi": 16,
@@ -2492,7 +2514,7 @@
       "Kar/Zarar": 88.9077799
     },
     {
-      "Musteri No": "2907.0",
+      "Musteri No": "2907",
       "Musteri Adi": "abdullah kutay",
       "Ulke": "Belgium",
       "Paket Sayisi": 19,
@@ -2502,7 +2524,7 @@
       "Kar/Zarar": 111.15
     },
     {
-      "Musteri No": "1040.0",
+      "Musteri No": "1040",
       "Musteri Adi": "vedat yıldırım",
       "Ulke": "Canada",
       "Paket Sayisi": 15,
@@ -2512,7 +2534,7 @@
       "Kar/Zarar": 132.300687
     },
     {
-      "Musteri No": "1898.0",
+      "Musteri No": "1898",
       "Musteri Adi": "KEREM YENICAY",
       "Ulke": "Australia",
       "Paket Sayisi": 21,
@@ -2522,7 +2544,7 @@
       "Kar/Zarar": 133.66999999999996
     },
     {
-      "Musteri No": "2896.0",
+      "Musteri No": "2896",
       "Musteri Adi": "Tulay Gunes",
       "Ulke": "Canada",
       "Paket Sayisi": 14,
@@ -2532,7 +2554,7 @@
       "Kar/Zarar": 140.4493995
     },
     {
-      "Musteri No": "2427.0",
+      "Musteri No": "2427",
       "Musteri Adi": "ruken buluc",
       "Ulke": "Canada",
       "Paket Sayisi": 39,
@@ -2542,7 +2564,7 @@
       "Kar/Zarar": 147.2254434
     },
     {
-      "Musteri No": "2901.0",
+      "Musteri No": "2901",
       "Musteri Adi": "İHSAN YETİMOVA",
       "Ulke": "Netherlands The",
       "Paket Sayisi": 37,
@@ -2552,7 +2574,7 @@
       "Kar/Zarar": 151.37999999999988
     },
     {
-      "Musteri No": "2765.0",
+      "Musteri No": "2765",
       "Musteri Adi": "Cihat Pamuk",
       "Ulke": "Australia",
       "Paket Sayisi": 61,
@@ -2562,7 +2584,7 @@
       "Kar/Zarar": 170.69
     },
     {
-      "Musteri No": "1898.0",
+      "Musteri No": "1898",
       "Musteri Adi": "KEREM YENICAY",
       "Ulke": "United Kingdom",
       "Paket Sayisi": 65,
@@ -2572,7 +2594,7 @@
       "Kar/Zarar": 186.99999999999997
     },
     {
-      "Musteri No": "2153.0",
+      "Musteri No": "2153",
       "Musteri Adi": "Tuğrul Mete Akgül",
       "Ulke": "Canada",
       "Paket Sayisi": 25,
@@ -2582,7 +2604,7 @@
       "Kar/Zarar": 202.0348912
     },
     {
-      "Musteri No": "2906.0",
+      "Musteri No": "2906",
       "Musteri Adi": "fikret Topuz",
       "Ulke": "Canada",
       "Paket Sayisi": 12,
@@ -2592,7 +2614,7 @@
       "Kar/Zarar": 223.96203100000002
     },
     {
-      "Musteri No": "2543.0",
+      "Musteri No": "2543",
       "Musteri Adi": "TEMEL ARDA KARSLI",
       "Ulke": "Singapore",
       "Paket Sayisi": 66,
@@ -2602,7 +2624,7 @@
       "Kar/Zarar": 229.97999999999982
     },
     {
-      "Musteri No": "2259.0",
+      "Musteri No": "2259",
       "Musteri Adi": "SERWIRE SERKAN MARAL",
       "Ulke": "Canada",
       "Paket Sayisi": 49,
@@ -2612,7 +2634,7 @@
       "Kar/Zarar": 268.4205334
     },
     {
-      "Musteri No": "2269.0",
+      "Musteri No": "2269",
       "Musteri Adi": "Mehmet Salih KUTLU",
       "Ulke": "Canada",
       "Paket Sayisi": 28,
@@ -2622,7 +2644,7 @@
       "Kar/Zarar": 273.3661448
     },
     {
-      "Musteri No": "2427.0",
+      "Musteri No": "2427",
       "Musteri Adi": "ruken buluc",
       "Ulke": "United Kingdom",
       "Paket Sayisi": 81,
@@ -2632,7 +2654,7 @@
       "Kar/Zarar": 314.66
     },
     {
-      "Musteri No": "1964.0",
+      "Musteri No": "1964",
       "Musteri Adi": "NILDISA AHMET SAHIN",
       "Ulke": "Canada",
       "Paket Sayisi": 108,
@@ -2642,17 +2664,7 @@
       "Kar/Zarar": 359.76382040000004
     },
     {
-      "Musteri No": "2753.0",
-      "Musteri Adi": "İrfan Çiftçi",
-      "Ulke": "Canada",
-      "Paket Sayisi": 32,
-      "Eslesen Sayisi": 31,
-      "Gelir": 1008.59,
-      "Gider": 591.1991102000002,
-      "Kar/Zarar": 401.3908897999999
-    },
-    {
-      "Musteri No": "2830.0",
+      "Musteri No": "2830",
       "Musteri Adi": "Baki BOZKURT",
       "Ulke": "United Kingdom",
       "Paket Sayisi": 85,
@@ -2662,7 +2674,7 @@
       "Kar/Zarar": 446.83999999999963
     },
     {
-      "Musteri No": "1964.0",
+      "Musteri No": "1964",
       "Musteri Adi": "NILDISA AHMET SAHIN",
       "Ulke": "United Kingdom",
       "Paket Sayisi": 141,
@@ -2672,7 +2684,7 @@
       "Kar/Zarar": 509.81999999999994
     },
     {
-      "Musteri No": "1990.0",
+      "Musteri No": "1990",
       "Musteri Adi": "EDİBE ERDEM UTMA",
       "Ulke": "Canada",
       "Paket Sayisi": 170,
@@ -2682,7 +2694,7 @@
       "Kar/Zarar": 924.095275
     },
     {
-      "Musteri No": "2245.0",
+      "Musteri No": "2245",
       "Musteri Adi": "Talha Yasin Gokduman",
       "Ulke": "Canada",
       "Paket Sayisi": 103,
@@ -2692,7 +2704,7 @@
       "Kar/Zarar": 1137.2345400999998
     },
     {
-      "Musteri No": "2397.0",
+      "Musteri No": "2397",
       "Musteri Adi": "BETUL GOKMEN TURANOGLU",
       "Ulke": "United Kingdom",
       "Paket Sayisi": 354,
@@ -2702,17 +2714,27 @@
       "Kar/Zarar": 1189.5200000000016
     },
     {
-      "Musteri No": "2434.0",
-      "Musteri Adi": "WHITE UNICORN",
+      "Musteri No": "2896",
+      "Musteri Adi": "LUNASUN",
       "Ulke": "Canada",
-      "Paket Sayisi": 183,
-      "Eslesen Sayisi": 183,
-      "Gelir": 3289.64,
-      "Gider": 2054.907904300001,
-      "Kar/Zarar": 1234.732095699999
+      "Paket Sayisi": 348,
+      "Eslesen Sayisi": 331,
+      "Gelir": 4226.82,
+      "Gider": 2838.067301100001,
+      "Kar/Zarar": 1220.112698899999
     },
     {
-      "Musteri No": "2239.0",
+      "Musteri No": "2415",
+      "Musteri Adi": "ONEROSE",
+      "Ulke": "Canada",
+      "Paket Sayisi": 466,
+      "Eslesen Sayisi": 413,
+      "Gelir": 4579.02,
+      "Gider": 2906.3122695999978,
+      "Kar/Zarar": 1222.847730399999
+    },
+    {
+      "Musteri No": "2239",
       "Musteri Adi": "Gulay TOMA",
       "Ulke": "Canada",
       "Paket Sayisi": 171,
@@ -2722,7 +2744,7 @@
       "Kar/Zarar": 1243.9340434000005
     },
     {
-      "Musteri No": "2765.0",
+      "Musteri No": "2765",
       "Musteri Adi": "Cihat Pamuk",
       "Ulke": "Canada",
       "Paket Sayisi": 580,
@@ -2732,7 +2754,7 @@
       "Kar/Zarar": 2128.6924152000006
     },
     {
-      "Musteri No": "1033.0",
+      "Musteri No": "1033",
       "Musteri Adi": "9GEEK LLC",
       "Ulke": "Canada",
       "Paket Sayisi": 511,
@@ -2742,7 +2764,7 @@
       "Kar/Zarar": 3060.3680798999994
     },
     {
-      "Musteri No": "2754.0",
+      "Musteri No": "2754",
       "Musteri Adi": "ABDULLAH TOLGA KARAMAN",
       "Ulke": "Canada",
       "Paket Sayisi": 549,
@@ -2752,7 +2774,7 @@
       "Kar/Zarar": 3301.163498400004
     },
     {
-      "Musteri No": "2765.0",
+      "Musteri No": "2765",
       "Musteri Adi": "Cihat Pamuk",
       "Ulke": "United Kingdom",
       "Paket Sayisi": 1005,
@@ -2760,6 +2782,26 @@
       "Gelir": 10216.29,
       "Gider": 6144.310000000043,
       "Kar/Zarar": 3899.7800000000248
+    },
+    {
+      "Musteri No": "2753",
+      "Musteri Adi": "Smyrna",
+      "Ulke": "Canada",
+      "Paket Sayisi": 2418,
+      "Eslesen Sayisi": 2242,
+      "Gelir": 23802.24,
+      "Gider": 16134.13296300009,
+      "Kar/Zarar": 6149.037036999962
+    },
+    {
+      "Musteri No": "2434",
+      "Musteri Adi": "WHITE UNICORN",
+      "Ulke": "Canada",
+      "Paket Sayisi": 3638,
+      "Eslesen Sayisi": 3419,
+      "Gelir": 41188.79,
+      "Gider": 27534.765736700112,
+      "Kar/Zarar": 11641.924263299972
     }
   ]
 }

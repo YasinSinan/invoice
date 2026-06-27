@@ -32,6 +32,43 @@ from github_storage import GithubStorageError, delete_report, list_saved_reports
 st.set_page_config(page_title="Gelir-Gider Karsilastirma", layout="wide")
 
 
+def _hex_to_rgba(hex_renk, alpha):
+    hex_renk = hex_renk.lstrip("#")
+    r, g, b = int(hex_renk[0:2], 16), int(hex_renk[2:4], 16), int(hex_renk[4:6], 16)
+    return f"rgba({r},{g},{b},{alpha})"
+
+
+def renkli_kart(etiket, deger, renk, icon=""):
+    """Varsayilan st.metric yerine renkli, ikonlu bir kart gosterir."""
+    arka_plan = _hex_to_rgba(renk, 0.12)
+    st.markdown(
+        f"""
+        <div style="
+            background: {arka_plan};
+            border-left: 5px solid {renk};
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin-bottom: 10px;
+        ">
+            <div style="font-size: 13px; font-weight: 600; opacity: 0.75; letter-spacing: 0.02em;">{icon} {etiket}</div>
+            <div style="font-size: 28px; font-weight: 800; color: {renk}; margin-top: 2px;">{deger}</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def kar_zarar_stil(val):
+    """Kar/zarar hucresini pozitifse yesil, negatifse kirmizi vurgular."""
+    if pd.isna(val):
+        return ""
+    if val < 0:
+        return "background-color: rgba(239, 68, 68, 0.16); color: #dc2626; font-weight: 700;"
+    if val > 0:
+        return "background-color: rgba(16, 185, 129, 0.16); color: #059669; font-weight: 700;"
+    return ""
+
+
 def indirme_butonlari(df, dosya_adi, key_prefix):
     """Bir tablo icin CSV ve Excel indirme butonlarini yan yana gosterir."""
     col_csv, col_excel = st.columns(2)
@@ -102,41 +139,64 @@ with st.expander("Gecmis analizler (aylik kayitlar)", expanded=False):
                     st.caption(f"Kayit tarihi: {rapor.get('saved_at', '-')}")
 
                     s = rapor["summary"]
-                    st.metric("Toplam Paket Sayisi", f"{s['toplam_gonderi']:,}")
+                    renkli_kart("Toplam Paket Sayisi", f"{s['toplam_gonderi']:,}", "#6366f1", "📦")
 
                     st.markdown("")
                     g_gelir, g_gider = st.columns(2)
                     with g_gelir:
-                        st.markdown("**Gelir**")
-                        st.metric("Toplam Gelir", f"${s['toplam_gelir']:,.2f}")
+                        st.markdown("**💰 Gelir**")
+                        renkli_kart("Toplam Gelir", f"${s['toplam_gelir']:,.2f}", "#10b981", "💵")
                         if s.get("manuel_gelir"):
-                            st.metric("Manuel Gelir", f"${s['manuel_gelir']:,.2f}")
+                            renkli_kart("Manuel Gelir", f"${s['manuel_gelir']:,.2f}", "#14b8a6", "✍️")
                     with g_gider:
-                        st.markdown("**Gider**")
-                        st.metric("Kargo Gideri", f"${s['toplam_gider_kargo']:,.2f}")
-                        st.metric("Vergi/Gumruk Gideri", f"${s['toplam_gider_tax']:,.2f}")
-                        st.metric("Toplam Gider", f"${s['toplam_gider_eslesen']:,.2f}")
+                        st.markdown("**💸 Gider**")
+                        renkli_kart("Kargo Gideri", f"${s['toplam_gider_kargo']:,.2f}", "#f59e0b", "🚚")
+                        renkli_kart("Vergi/Gumruk Gideri", f"${s['toplam_gider_tax']:,.2f}", "#f97316", "🛂")
+                        renkli_kart("Toplam Gider", f"${s['toplam_gider_eslesen']:,.2f}", "#ef4444", "🧾")
                         if s.get("genel_gider"):
-                            st.metric("Genel Gider", f"${s['genel_gider']:,.2f}")
+                            renkli_kart("Genel Gider", f"${s['genel_gider']:,.2f}", "#dc2626", "⚠️")
 
                     st.markdown("")
                     _, g_kar_orta, _ = st.columns([1, 1, 1])
                     with g_kar_orta:
-                        st.metric("Net Kar", f"${s['net_kar']:,.2f}")
+                        g_net_kar_renk = "#10b981" if s["net_kar"] >= 0 else "#dc2626"
+                        g_net_kar_icon = "📈" if s["net_kar"] >= 0 else "📉"
+                        renkli_kart("Net Kar", f"${s['net_kar']:,.2f}", g_net_kar_renk, g_net_kar_icon)
 
-                    st.markdown("**Kargo firmalarina gore analiz**")
+                    st.markdown("**🚚 Kargo firmalarina gore analiz**")
                     gecmis_carrier_df = pd.DataFrame(rapor["carrier_table"])
-                    st.dataframe(gecmis_carrier_df, use_container_width=True, hide_index=True)
+                    gecmis_carrier_kar_kolonlari = [c for c in ["Kar/Zarar", "Paket Basi Kar/Zarar"] if c in gecmis_carrier_df.columns]
+                    st.dataframe(
+                        gecmis_carrier_df.style.map(kar_zarar_stil, subset=gecmis_carrier_kar_kolonlari)
+                        if gecmis_carrier_kar_kolonlari
+                        else gecmis_carrier_df,
+                        use_container_width=True,
+                        hide_index=True,
+                    )
                     indirme_butonlari(gecmis_carrier_df, f"{goruntulenecek_donem}_kargo_firmasi", "gecmis_carrier")
 
-                    st.markdown("**Ulkeye gore analiz**")
+                    st.markdown("**🌍 Ulkeye gore analiz**")
                     gecmis_country_df = pd.DataFrame(rapor["country_table"])
-                    st.dataframe(gecmis_country_df, use_container_width=True, hide_index=True)
+                    gecmis_country_kar_kolonlari = [c for c in ["Kar", "Paket_Basi_Kar"] if c in gecmis_country_df.columns]
+                    st.dataframe(
+                        gecmis_country_df.style.map(kar_zarar_stil, subset=gecmis_country_kar_kolonlari)
+                        if gecmis_country_kar_kolonlari
+                        else gecmis_country_df,
+                        use_container_width=True,
+                        hide_index=True,
+                    )
                     indirme_butonlari(gecmis_country_df, f"{goruntulenecek_donem}_ulke", "gecmis_country")
 
-                    st.markdown("**Musteriye gore analiz**")
+                    st.markdown("**👥 Musteriye gore analiz**")
                     gecmis_customer_df = pd.DataFrame(rapor["customer_table"])
-                    st.dataframe(gecmis_customer_df, use_container_width=True, hide_index=True)
+                    gecmis_customer_kar_kolonlari = [c for c in ["Kar/Zarar", "Paket Basi Kar/Zarar"] if c in gecmis_customer_df.columns]
+                    st.dataframe(
+                        gecmis_customer_df.style.map(kar_zarar_stil, subset=gecmis_customer_kar_kolonlari)
+                        if gecmis_customer_kar_kolonlari
+                        else gecmis_customer_df,
+                        use_container_width=True,
+                        hide_index=True,
+                    )
                     indirme_butonlari(gecmis_customer_df, f"{goruntulenecek_donem}_musteri", "gecmis_customer")
                 except Exception as e:
                     st.error(f"Rapor yuklenemedi: {e}")
@@ -301,21 +361,21 @@ if st.session_state.get("hesapla_tiklandi") and income_file is not None:
     summary = summarize(merged, genel_gider=toplam_genel_gider, manuel_gelir=manuel_gelir_toplam)
 
     st.divider()
-    st.subheader("Ozet")
+    st.subheader("📊 Ozet")
 
-    st.metric("Toplam Paket Sayisi", f"{summary['toplam_gonderi']:,}")
+    renkli_kart("Toplam Paket Sayisi", f"{summary['toplam_gonderi']:,}", "#6366f1", "📦")
 
     st.markdown("")
     col_gelir, col_gider = st.columns(2)
     with col_gelir:
-        st.markdown("**Gelir**")
-        st.metric("Toplam Gelir", f"${summary['toplam_gelir']:,.2f}")
+        st.markdown("**💰 Gelir**")
+        renkli_kart("Toplam Gelir", f"${summary['toplam_gelir']:,.2f}", "#10b981", "💵")
 
     with col_gider:
-        st.markdown("**Gider**")
-        st.metric("Kargo Gideri", f"${summary['toplam_gider_kargo']:,.2f}")
-        st.metric("Vergi/Gumruk Gideri", f"${summary['toplam_gider_tax']:,.2f}")
-        st.metric("Toplam Gider", f"${summary['toplam_gider_eslesen']:,.2f}")
+        st.markdown("**💸 Gider**")
+        renkli_kart("Kargo Gideri", f"${summary['toplam_gider_kargo']:,.2f}", "#f59e0b", "🚚")
+        renkli_kart("Vergi/Gumruk Gideri", f"${summary['toplam_gider_tax']:,.2f}", "#f97316", "🛂")
+        renkli_kart("Toplam Gider", f"${summary['toplam_gider_eslesen']:,.2f}", "#ef4444", "🧾")
 
     gecerli_paket_basi = manual_carrier_expenses_df.dropna(subset=["Kargo Firmasi", "Paket Basi Tutar"])
     gecerli_paket_basi = gecerli_paket_basi[gecerli_paket_basi["Kargo Firmasi"].astype(str).str.strip() != ""]
@@ -324,16 +384,18 @@ if st.session_state.get("hesapla_tiklandi") and income_file is not None:
     if toplam_genel_gider or manuel_gelir_toplam:
         col_gelir2, col_gider2 = st.columns(2)
         with col_gelir2:
-            st.metric(
+            renkli_kart(
                 "Manuel Gelir",
                 f"${summary['manuel_gelir']:,.2f}",
-                help="Pakete baglanmayan, elle girilen gelir kalemleri.",
+                "#14b8a6",
+                "✍️",
             )
         with col_gider2:
-            st.metric(
+            renkli_kart(
                 "Genel Gider",
                 f"${summary['genel_gider']:,.2f}",
-                help="Takip numarasi olmayan vergi/komisyon satirlari (orn. UPS Brokerage/Government Charges) ile manuel girilen giderlerin toplami.",
+                "#dc2626",
+                "⚠️",
             )
 
     gecerli_manuel_gelir = manual_income_df.dropna(subset=["Aciklama", "Tutar"])
@@ -372,7 +434,9 @@ if st.session_state.get("hesapla_tiklandi") and income_file is not None:
     st.markdown("")
     _, kar_orta, _ = st.columns([1, 1, 1])
     with kar_orta:
-        st.metric("Net Kar", f"${summary['net_kar']:,.2f}")
+        net_kar_renk = "#10b981" if summary["net_kar"] >= 0 else "#dc2626"
+        net_kar_icon = "📈" if summary["net_kar"] >= 0 else "📉"
+        renkli_kart("Net Kar", f"${summary['net_kar']:,.2f}", net_kar_renk, net_kar_icon)
 
     if genel_gider_detay or has_per_package_fee:
         with st.expander("Detay: pakete baglanamayan vergi/komisyon ve paket basi gider hesabi"):
@@ -416,7 +480,7 @@ if st.session_state.get("hesapla_tiklandi") and income_file is not None:
         f"{summary['takip_no_yok_sayisi']} takip no yok"
     )
 
-    st.subheader("Kargo Firmalarina Gore Analiz")
+    st.subheader("🚚 Kargo Firmalarina Gore Analiz")
     st.caption(
         "Kargo firmasi (gelir dosyasindaki Carrier Name) bazinda paket sayisi, "
         "gelir, gider ve kar/zarar dagilimi."
@@ -432,7 +496,7 @@ if st.session_state.get("hesapla_tiklandi") and income_file is not None:
                 "Kar/Zarar": "${:,.2f}",
                 "Paket Basi Kar/Zarar": "${:,.2f}",
             }
-        ),
+        ).map(kar_zarar_stil, subset=["Kar/Zarar", "Paket Basi Kar/Zarar"]),
         use_container_width=True,
         hide_index=True,
     )
@@ -452,7 +516,7 @@ if st.session_state.get("hesapla_tiklandi") and income_file is not None:
         )
         indirme_butonlari(full_breakdown, "kargo_vergi_siniflandirma", "full_breakdown")
 
-    st.subheader("Ulkeye gore analiz")
+    st.subheader("🌍 Ulkeye gore analiz")
     st.caption(
         "Toplam gelir ve gonderi sayisi tum gonderileri kapsar. Kargo/Vergi/Kar "
         "sutunlari sadece gider dosyasinda eslesen gonderilerden gelir."
@@ -468,7 +532,7 @@ if st.session_state.get("hesapla_tiklandi") and income_file is not None:
                 "Kar": "${:,.2f}",
                 "Paket_Basi_Kar": "${:,.2f}",
             }
-        ),
+        ).map(kar_zarar_stil, subset=["Kar", "Paket_Basi_Kar"]),
         use_container_width=True,
         hide_index=True,
     )
@@ -476,7 +540,7 @@ if st.session_state.get("hesapla_tiklandi") and income_file is not None:
 
     st.divider()
 
-    st.subheader("Musteriye gore analiz")
+    st.subheader("👥 Musteriye gore analiz")
     st.caption(
         "Gelir dosyasindaki User No / User Name'e gore musteri bazinda paket "
         "sayisi, bize odedigi tutar, firmaya odedigimiz tutar, kar/zarar ve "
@@ -492,7 +556,7 @@ if st.session_state.get("hesapla_tiklandi") and income_file is not None:
                 "Kar/Zarar": "${:,.2f}",
                 "Paket Basi Kar/Zarar": "${:,.2f}",
             }
-        ),
+        ).map(kar_zarar_stil, subset=["Kar/Zarar", "Paket Basi Kar/Zarar"]),
         use_container_width=True,
         hide_index=True,
     )
@@ -511,7 +575,7 @@ if st.session_state.get("hesapla_tiklandi") and income_file is not None:
                 "Gider": "${:,.2f}",
                 "Kar/Zarar": "${:,.2f}",
             }
-        ),
+        ).map(kar_zarar_stil, subset=["Kar/Zarar"]),
         use_container_width=True,
         hide_index=True,
     )
@@ -519,7 +583,9 @@ if st.session_state.get("hesapla_tiklandi") and income_file is not None:
 
     st.divider()
 
-    tab1, tab2, tab3 = st.tabs(["Detayli rapor", "Gider bulunamayanlar", "Eslesmeyen gider (fatura listesinde var, gelirde yok)"])
+    tab1, tab2, tab3 = st.tabs(
+        ["📋 Detayli rapor", "🔍 Gider bulunamayanlar", "⚖️ Eslesmeyen gider (fatura listesinde var, gelirde yok)"]
+    )
 
     with tab1:
         detayli_rapor_df = merged.sort_values("Added Date")[
@@ -542,7 +608,13 @@ if st.session_state.get("hesapla_tiklandi") and income_file is not None:
                 "Gider_Kalemleri": "Gider Kalemleri",
             }
         )
-        st.dataframe(detayli_rapor_df, use_container_width=True, hide_index=True)
+        st.dataframe(
+            detayli_rapor_df.style.format(
+                {"Invoice Amount": "${:,.2f}", "Kargo Gideri": "${:,.2f}", "Vergi/Gumruk": "${:,.2f}", "Toplam Gider": "${:,.2f}", "Kar": "${:,.2f}"}
+            ).map(kar_zarar_stil, subset=["Kar"]),
+            use_container_width=True,
+            hide_index=True,
+        )
         indirme_butonlari(detayli_rapor_df, "detayli_rapor", "tab1")
 
     with tab2:
