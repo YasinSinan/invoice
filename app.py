@@ -438,37 +438,37 @@ if st.session_state.get("hesapla_tiklandi") and income_file is not None:
         net_kar_icon = "📈" if summary["net_kar"] >= 0 else "📉"
         renkli_kart("Net Kar", f"${summary['net_kar']:,.2f}", net_kar_renk, net_kar_icon)
 
-    if genel_gider_detay or has_per_package_fee:
-        with st.expander("Detay: pakete baglanamayan vergi/komisyon ve paket basi gider hesabi"):
-            if genel_gider_detay:
-                st.write("Pakete baglanamayan vergi/komisyon (firma/dosya bazinda):")
-                st.dataframe(
-                    pd.DataFrame(genel_gider_detay, columns=["Kargo Firmasi", "Dosya", "Genel Gider"]),
-                    use_container_width=True,
-                    hide_index=True,
-                )
-            if has_per_package_fee:
-                st.write(
-                    "Paket basina eklenen ek gider (firma bazinda, paket sayisiyla "
-                    "carpilmis hali - bu tutar zaten yukaridaki Net Kar rakamina "
-                    "islenmis durumda):"
-                )
-                detay_satirlari = []
-                for _, r in gecerli_paket_basi.iterrows():
-                    etkilenen = int(((merged["Carrier Name"] == r["Kargo Firmasi"]) & merged["Takip_Var_Mi"]).sum())
-                    toplam_eklenen = etkilenen * float(r["Paket Basi Tutar"])
-                    detay_satirlari.append(
-                        (r["Kargo Firmasi"], r.get("Aciklama", ""), r["Paket Basi Tutar"], etkilenen, toplam_eklenen)
-                    )
-                detay_df = pd.DataFrame(
-                    detay_satirlari,
-                    columns=["Kargo Firmasi", "Aciklama", "Paket Basi Tutar", "Etkilenen Paket Sayisi", "Toplam Eklenen Gider"],
-                )
-                st.dataframe(
-                    detay_df.style.format({"Paket Basi Tutar": "${:,.2f}", "Toplam Eklenen Gider": "${:,.2f}"}),
-                    use_container_width=True,
-                    hide_index=True,
-                )
+    if genel_gider_detay:
+        st.caption("⚠️ Pakete baglanamayan vergi/komisyon - otomatik tespit edilen (firma/dosya bazinda):")
+        st.dataframe(
+            pd.DataFrame(genel_gider_detay, columns=["Kargo Firmasi", "Dosya", "Genel Gider"]).style.format(
+                {"Genel Gider": "${:,.2f}"}
+            ),
+            use_container_width=True,
+            hide_index=True,
+        )
+
+    if has_per_package_fee:
+        st.caption(
+            "📦 Paket basina eklenen ek gider - kac pakete uygulandigi ve toplam tutar "
+            "(bu zaten yukaridaki Net Kar rakamina islenmis durumda, Genel Gider'e dahil degil):"
+        )
+        detay_satirlari = []
+        for _, r in gecerli_paket_basi.iterrows():
+            etkilenen = int(((merged["Carrier Name"] == r["Kargo Firmasi"]) & merged["Takip_Var_Mi"]).sum())
+            toplam_eklenen = etkilenen * float(r["Paket Basi Tutar"])
+            detay_satirlari.append(
+                (r["Kargo Firmasi"], r.get("Aciklama", ""), r["Paket Basi Tutar"], etkilenen, toplam_eklenen)
+            )
+        detay_df = pd.DataFrame(
+            detay_satirlari,
+            columns=["Kargo Firmasi", "Aciklama", "Paket Basi Tutar", "Etkilenen Paket Sayisi", "Toplam Eklenen Gider"],
+        )
+        st.dataframe(
+            detay_df.style.format({"Paket Basi Tutar": "${:,.2f}", "Toplam Eklenen Gider": "${:,.2f}"}),
+            use_container_width=True,
+            hide_index=True,
+        )
 
     eslesme_orani = summary["eslesen_sayisi"] / summary["toplam_gonderi"] * 100 if summary["toplam_gonderi"] else 0
     st.caption(f"Eslesme orani: %{eslesme_orani:.1f}")
