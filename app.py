@@ -444,12 +444,14 @@ if st.session_state.get("hesapla_tiklandi") and income_file is not None:
         renkli_kart("Net Kar", f"${summary['net_kar']:,.2f}", net_kar_renk, net_kar_icon)
 
     if not genel_gider_kategori_detay.empty:
-        st.caption(
-            "⚠️ Pakete baglanamayan vergi/komisyon - otomatik tespit edilen "
-            "(hangi kategorinin dosyadaki hangi sutundan geldigi ile birlikte):"
-        )
+        st.caption("⚠️ Pakete baglanamayan vergi/komisyon - otomatik tespit edilen:")
+
+        kaynaklar = genel_gider_kategori_detay[["Kargo Firmasi", "Kaynak Sutun"]].drop_duplicates()
+        for _, kr in kaynaklar.iterrows():
+            st.caption(f"📂 {kr['Kargo Firmasi']} icin kaynak kolon: *{kr['Kaynak Sutun']}*")
+
         st.dataframe(
-            genel_gider_kategori_detay.style.format({"Genel Gider": "${:,.2f}"}),
+            genel_gider_kategori_detay.drop(columns=["Kaynak Sutun"]).style.format({"Genel Gider": "${:,.2f}"}),
             use_container_width=True,
             hide_index=True,
         )
