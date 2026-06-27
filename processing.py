@@ -573,6 +573,115 @@ def summarize(merged, genel_gider=0.0, manuel_gelir=0.0):
     }
 
 
+# Ulke adindan ISO 3166-1 alpha-2 koduna esleme (bayrak emoji uretmek icin).
+# Kucuk harfle karsilastirilir. Kapsamli degil ama uluslararasi kargo
+# gonderimlerinde sik gorulen ulkelerin cogunu icerir - eslesme bulunamazsa
+# ulke adi sadece bayraksiz gosterilir, hata vermez.
+COUNTRY_TO_ISO = {
+    "united states": "US", "usa": "US", "us": "US",
+    "canada": "CA",
+    "united kingdom": "GB", "uk": "GB", "great britain": "GB",
+    "france": "FR",
+    "germany": "DE",
+    "spain": "ES",
+    "italy": "IT",
+    "portugal": "PT",
+    "netherlands": "NL", "netherlands the": "NL", "the netherlands": "NL",
+    "belgium": "BE",
+    "switzerland": "CH",
+    "austria": "AT",
+    "ireland": "IE",
+    "australia": "AU",
+    "singapore": "SG",
+    "new zealand": "NZ",
+    "japan": "JP",
+    "south korea": "KR", "korea south": "KR", "korea": "KR",
+    "china": "CN",
+    "hong kong": "HK",
+    "taiwan": "TW",
+    "mexico": "MX",
+    "brazil": "BR",
+    "sweden": "SE",
+    "norway": "NO",
+    "denmark": "DK",
+    "finland": "FI",
+    "poland": "PL",
+    "czech republic": "CZ", "czechia": "CZ",
+    "greece": "GR",
+    "turkey": "TR", "turkiye": "TR",
+    "israel": "IL",
+    "united arab emirates": "AE", "uae": "AE",
+    "saudi arabia": "SA",
+    "south africa": "ZA",
+    "india": "IN",
+    "indonesia": "ID",
+    "malaysia": "MY",
+    "thailand": "TH",
+    "vietnam": "VN",
+    "philippines": "PH",
+    "argentina": "AR",
+    "chile": "CL",
+    "colombia": "CO",
+    "peru": "PE",
+    "russia": "RU",
+    "ukraine": "UA",
+    "romania": "RO",
+    "hungary": "HU",
+    "bulgaria": "BG",
+    "croatia": "HR",
+    "slovenia": "SI",
+    "slovakia": "SK",
+    "estonia": "EE",
+    "latvia": "LV",
+    "lithuania": "LT",
+    "luxembourg": "LU",
+    "iceland": "IS",
+    "malta": "MT",
+    "cyprus": "CY",
+    "egypt": "EG",
+    "morocco": "MA",
+    "nigeria": "NG",
+    "kenya": "KE",
+    "pakistan": "PK",
+    "bangladesh": "BD",
+    "sri lanka": "LK",
+    "qatar": "QA",
+    "kuwait": "KW",
+    "bahrain": "BH",
+    "oman": "OM",
+    "jordan": "JO",
+    "lebanon": "LB",
+    "serbia": "RS",
+    "bosnia and herzegovina": "BA",
+    "north macedonia": "MK",
+    "albania": "AL",
+    "georgia": "GE",
+    "armenia": "AM",
+    "azerbaijan": "AZ",
+    "kazakhstan": "KZ",
+}
+
+
+def _country_flag(country_name):
+    """Ulke adina karsilik gelen bayrak emojisini dondurur. Eslesme yoksa
+    bos string doner (bayraksiz gosterilir, hata vermez)."""
+    if pd.isna(country_name):
+        return ""
+    iso = COUNTRY_TO_ISO.get(str(country_name).strip().lower())
+    if not iso:
+        return ""
+    return "".join(chr(0x1F1E6 + ord(c) - ord("A")) for c in iso)
+
+
+def format_country_with_flag(country_name):
+    """'Canada' -> '🇨🇦 Canada' gibi bayrakli gosterim uretir. Eslesme
+    bulunamazsa ulke adini degistirmeden dondurur."""
+    if pd.isna(country_name):
+        return country_name
+    flag = _country_flag(country_name)
+    return f"{flag} {country_name}" if flag else str(country_name)
+
+
 def country_breakdown(merged):
     """Ulkeye gore gelir, kargo gideri, vergi ve kar dagilimi.
 
@@ -598,6 +707,7 @@ def country_breakdown(merged):
         .sort_values("Toplam_Gelir", ascending=False)
         .reset_index(drop=True)
     )
+    out["Ulke"] = out["Ulke"].apply(format_country_with_flag)
     out["Paket_Basi_Kar"] = [
         (kar / sayi) if sayi > 0 else 0.0
         for kar, sayi in zip(out["Kar"], out["Eslesen_Sayisi"])
@@ -709,7 +819,10 @@ def customer_breakdown(merged):
                 "Bize Odenen (Gelir)": ("Invoice Amount", "sum"),
                 "Firmaya Odenen (Gider)": ("Gider", "sum"),
                 "Kar/Zarar": ("Kar", "sum"),
-                "Gonderdigi Ulkeler": ("Receiver Country", lambda x: ", ".join(sorted(set(x.dropna())))),
+                "Gonderdigi Ulkeler": (
+                    "Receiver Country",
+                    lambda x: ", ".join(format_country_with_flag(u) for u in sorted(set(x.dropna()))),
+                ),
             }
         )
         .rename(columns={"User No": "Musteri No", "User Name": "Musteri Adi"})
@@ -748,6 +861,7 @@ def customer_country_breakdown(merged):
         .sort_values("Kar/Zarar")
         .reset_index(drop=True)
     )
+    out["Ulke"] = out["Ulke"].apply(format_country_with_flag)
     return out
 
 
