@@ -263,6 +263,16 @@ with col2:
             "Purolator, FedEx, UPS) otomatik ayri ayri islenir."
         )
 
+    dahil_et_genel_gider = st.checkbox(
+        "Pakete baglanamayan vergi/komisyon giderlerini hesaba dahil et",
+        value=True,
+        help=(
+            "Takip numarasina baglanamayan vergi/komisyon satirlari (orn. UPS'in "
+            "Brokerage Charges, Government Charges gibi kalemleri). Isaretliyse net "
+            "kardan dusulur, isaretli degilse hesaba hic katilmaz."
+        ),
+    )
+
     st.markdown("**Manuel gider (opsiyonel)**")
     st.caption(
         "Hicbir pakete baglanmayan, dogrudan net kardan dusulecek giderler "
@@ -320,7 +330,7 @@ if st.session_state.get("hesapla_tiklandi") and income_file is not None:
 
     cost_dfs = []
     warnings = []
-    toplam_genel_gider = 0.0
+    carrier_overhead_toplam = 0.0
     breakdown_dfs = []
     for f in cost_files or []:
         try:
@@ -330,7 +340,7 @@ if st.session_state.get("hesapla_tiklandi") and income_file is not None:
                 cost_dfs.extend(group_cost_dfs)
                 warnings.extend(group_warnings)
                 if group_genel_gider:
-                    toplam_genel_gider += group_genel_gider
+                    carrier_overhead_toplam += group_genel_gider
                 for bd in group_breakdown_dfs:
                     breakdown_dfs.append(bd)
             else:
@@ -339,7 +349,7 @@ if st.session_state.get("hesapla_tiklandi") and income_file is not None:
                 if warning:
                     warnings.append(warning)
                 if genel_gider:
-                    toplam_genel_gider += genel_gider
+                    carrier_overhead_toplam += genel_gider
                 if not breakdown_df.empty:
                     breakdown_dfs.append(breakdown_df)
         except ValueError as e:
@@ -349,8 +359,9 @@ if st.session_state.get("hesapla_tiklandi") and income_file is not None:
     for w in warnings:
         st.warning(w)
 
+    efektif_carrier_overhead = carrier_overhead_toplam if dahil_et_genel_gider else 0.0
     manuel_gider_toplam = manual_expense_total(manual_expenses_df)
-    toplam_genel_gider += manuel_gider_toplam
+    toplam_genel_gider = efektif_carrier_overhead + manuel_gider_toplam
     manuel_gelir_toplam = manual_expense_total(manual_income_df)
 
     full_breakdown = pd.concat(breakdown_dfs, ignore_index=True) if breakdown_dfs else pd.DataFrame()
@@ -444,7 +455,13 @@ if st.session_state.get("hesapla_tiklandi") and income_file is not None:
         renkli_kart("Net Kar", f"${summary['net_kar']:,.2f}", net_kar_renk, net_kar_icon)
 
     if not genel_gider_kategori_detay.empty:
-        st.caption("⚠️ Pakete baglanamayan vergi/komisyon - otomatik tespit edilen:")
+        if dahil_et_genel_gider:
+            st.caption("⚠️ Pakete baglanamayan vergi/komisyon - otomatik tespit edilen (Net Kar'a dahil):")
+        else:
+            st.caption(
+                "⚠️ Pakete baglanamayan vergi/komisyon - otomatik tespit edilen "
+                "(su an Net Kar'a DAHIL EDILMIYOR - yukaridaki kutucuktan acabilirsin):"
+            )
 
         kaynaklar = genel_gider_kategori_detay[["Kargo Firmasi", "Kaynak Sutun"]].drop_duplicates()
         for _, kr in kaynaklar.iterrows():
