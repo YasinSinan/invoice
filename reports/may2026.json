@@ -1,18 +1,18 @@
 {
-  "saved_at": "2026-06-26T15:50:33.068376+00:00",
+  "saved_at": "2026-06-29T21:34:57.383102+00:00",
   "summary": {
     "toplam_gelir": 157016.81,
-    "toplam_gider_kargo": 106337.02332849575,
+    "toplam_gider_kargo": 106697.32603389592,
     "toplam_gider_tax": 3333.8899999999985,
-    "toplam_gider_eslesen": 109670.91332849597,
-    "toplam_kar": 42098.52667150008,
-    "genel_gider": 31981.96,
+    "toplam_gider_eslesen": 110031.21603389611,
+    "toplam_kar": 41808.74396610012,
+    "genel_gider": 24911.71,
     "manuel_gelir": 177.0,
-    "net_kar": 10293.566671500084,
+    "net_kar": 17074.03396610012,
     "toplam_gonderi": 12188,
-    "eslesen_sayisi": 11674,
+    "eslesen_sayisi": 11680,
     "takip_no_yok_sayisi": 0,
-    "gider_bulunamadi_sayisi": 514
+    "gider_bulunamadi_sayisi": 508
   },
   "carrier_table": [
     {
@@ -20,22 +20,22 @@
       "Paket Sayisi": 7289,
       "Eslesen Sayisi": 7289,
       "Toplam Gelir": 74321.5,
-      "Kargo Gideri": 48931.52880610057,
+      "Kargo Gideri": 49233.381511500535,
       "Vergi Gideri": 3.93,
-      "Toplam Gider": 48935.45880610057,
-      "Kar/Zarar": 25386.041193900484,
-      "Paket Basi Kar/Zarar": 3.482787926176497
+      "Toplam Gider": 49237.311511500535,
+      "Kar/Zarar": 25084.188488500462,
+      "Paket Basi Kar/Zarar": 3.441375838729656
     },
     {
       "Kargo Firmasi": "Asendia",
       "Paket Sayisi": 1939,
-      "Eslesen Sayisi": 1890,
+      "Eslesen Sayisi": 1896,
       "Toplam Gelir": 27761.09,
-      "Kargo Gideri": 19257.04063539996,
+      "Kargo Gideri": 19315.490635399958,
       "Vergi Gideri": 633.3600000000002,
-      "Toplam Gider": 19890.400635399936,
-      "Kar/Zarar": 7221.309364600003,
-      "Paket Basi Kar/Zarar": 3.8207986056084673
+      "Toplam Gider": 19948.850635399933,
+      "Kar/Zarar": 7233.379364600003,
+      "Paket Basi Kar/Zarar": 3.815073504535867
     },
     {
       "Kargo Firmasi": "ePost Global",
@@ -139,18 +139,18 @@
   ],
   "country_table": [
     {
-      "Ulke": "Canada",
+      "Ulke": "🇨🇦 Canada",
       "Gonderi_Sayisi": 9438,
-      "Eslesen_Sayisi": 8966,
+      "Eslesen_Sayisi": 8972,
       "Toplam_Gelir": 114265.69,
-      "Kargo_Gideri": 74773.62332850012,
+      "Kargo_Gideri": 75133.92603390006,
       "Vergi_Gideri": 742.97,
-      "Toplam_Gider": 75516.59332850006,
-      "Kar": 34483.20667150072,
-      "Paket_Basi_Kar": 3.8459967289204458
+      "Toplam_Gider": 75876.89603390003,
+      "Kar": 34193.42396610072,
+      "Paket_Basi_Kar": 3.8111261665292826
     },
     {
-      "Ulke": "United Kingdom",
+      "Ulke": "🇬🇧 United Kingdom",
       "Gonderi_Sayisi": 1870,
       "Eslesen_Sayisi": 1843,
       "Toplam_Gelir": 21117.83,
@@ -161,7 +161,7 @@
       "Paket_Basi_Kar": 3.7576939772110607
     },
     {
-      "Ulke": "Spain",
+      "Ulke": "🇪🇸 Spain",
       "Gonderi_Sayisi": 132,
       "Eslesen_Sayisi": 129,
       "Toplam_Gelir": 4174.36,
@@ -172,7 +172,7 @@
       "Paket_Basi_Kar": -0.7572868217054273
     },
     {
-      "Ulke": "France",
+      "Ulke": "🇫🇷 France",
       "Gonderi_Sayisi": 169,
       "Eslesen_Sayisi": 167,
       "Toplam_Gelir": 3656.32,
@@ -183,7 +183,7 @@
       "Paket_Basi_Kar": -2.5479640718562893
     },
     {
-      "Ulke": "Germany",
+      "Ulke": "🇩🇪 Germany",
       "Gonderi_Sayisi": 142,
       "Eslesen_Sayisi": 141,
       "Toplam_Gelir": 3432.05,
@@ -194,7 +194,7 @@
       "Paket_Basi_Kar": -0.07170212765957416
     },
     {
-      "Ulke": "Belgium",
+      "Ulke": "🇧🇪 Belgium",
       "Gonderi_Sayisi": 69,
       "Eslesen_Sayisi": 65,
       "Toplam_Gelir": 2193.93,
@@ -205,7 +205,7 @@
       "Paket_Basi_Kar": 5.382923076923076
     },
     {
-      "Ulke": "Netherlands The",
+      "Ulke": "🇳🇱 Netherlands The",
       "Gonderi_Sayisi": 72,
       "Eslesen_Sayisi": 71,
       "Toplam_Gelir": 1784.3899999999999,
@@ -216,7 +216,7 @@
       "Paket_Basi_Kar": 3.156056338028169
     },
     {
-      "Ulke": "Australia",
+      "Ulke": "🇦🇺 Australia",
       "Gonderi_Sayisi": 97,
       "Eslesen_Sayisi": 96,
       "Toplam_Gelir": 1483.61,
@@ -227,7 +227,7 @@
       "Paket_Basi_Kar": 3.9914583333333344
     },
     {
-      "Ulke": "Singapore",
+      "Ulke": "🇸🇬 Singapore",
       "Gonderi_Sayisi": 66,
       "Eslesen_Sayisi": 65,
       "Toplam_Gelir": 1266.1,
@@ -238,7 +238,7 @@
       "Paket_Basi_Kar": 3.5381538461538433
     },
     {
-      "Ulke": "Italy",
+      "Ulke": "🇮🇹 Italy",
       "Gonderi_Sayisi": 33,
       "Eslesen_Sayisi": 32,
       "Toplam_Gelir": 1220.17,
@@ -249,7 +249,7 @@
       "Paket_Basi_Kar": 0.1681250000000003
     },
     {
-      "Ulke": "Portugal",
+      "Ulke": "🇵🇹 Portugal",
       "Gonderi_Sayisi": 11,
       "Eslesen_Sayisi": 11,
       "Toplam_Gelir": 513.12,
@@ -260,7 +260,7 @@
       "Paket_Basi_Kar": 0.9763636363636382
     },
     {
-      "Ulke": "United States",
+      "Ulke": "🇺🇸 United States",
       "Gonderi_Sayisi": 44,
       "Eslesen_Sayisi": 44,
       "Toplam_Gelir": 474.82,
@@ -271,7 +271,7 @@
       "Paket_Basi_Kar": 1.3945454545454548
     },
     {
-      "Ulke": "Ireland",
+      "Ulke": "🇮🇪 Ireland",
       "Gonderi_Sayisi": 11,
       "Eslesen_Sayisi": 11,
       "Toplam_Gelir": 371.67,
@@ -282,7 +282,7 @@
       "Paket_Basi_Kar": 1.034545454545453
     },
     {
-      "Ulke": "Switzerland",
+      "Ulke": "🇨🇭 Switzerland",
       "Gonderi_Sayisi": 10,
       "Eslesen_Sayisi": 10,
       "Toplam_Gelir": 248.47,
@@ -293,7 +293,7 @@
       "Paket_Basi_Kar": 3.546000000000002
     },
     {
-      "Ulke": "Austria",
+      "Ulke": "🇦🇹 Austria",
       "Gonderi_Sayisi": 6,
       "Eslesen_Sayisi": 6,
       "Toplam_Gelir": 219.18,
@@ -304,7 +304,7 @@
       "Paket_Basi_Kar": -21.23
     },
     {
-      "Ulke": "Cyprus",
+      "Ulke": "🇨🇾 Cyprus",
       "Gonderi_Sayisi": 4,
       "Eslesen_Sayisi": 4,
       "Toplam_Gelir": 139.3,
@@ -315,7 +315,7 @@
       "Paket_Basi_Kar": 6.127499999999998
     },
     {
-      "Ulke": "Japan",
+      "Ulke": "🇯🇵 Japan",
       "Gonderi_Sayisi": 3,
       "Eslesen_Sayisi": 3,
       "Toplam_Gelir": 124.15,
@@ -326,7 +326,7 @@
       "Paket_Basi_Kar": -1.0899999999999952
     },
     {
-      "Ulke": "Slovenia",
+      "Ulke": "🇸🇮 Slovenia",
       "Gonderi_Sayisi": 2,
       "Eslesen_Sayisi": 2,
       "Toplam_Gelir": 98.0,
@@ -337,7 +337,7 @@
       "Paket_Basi_Kar": 1.2150000000000007
     },
     {
-      "Ulke": "Denmark",
+      "Ulke": "🇩🇰 Denmark",
       "Gonderi_Sayisi": 1,
       "Eslesen_Sayisi": 1,
       "Toplam_Gelir": 59.01,
@@ -348,7 +348,7 @@
       "Paket_Basi_Kar": 13.859999999999992
     },
     {
-      "Ulke": "Poland",
+      "Ulke": "🇵🇱 Poland",
       "Gonderi_Sayisi": 1,
       "Eslesen_Sayisi": 1,
       "Toplam_Gelir": 33.59,
@@ -359,7 +359,7 @@
       "Paket_Basi_Kar": 2.0000000000000036
     },
     {
-      "Ulke": "Greece",
+      "Ulke": "🇬🇷 Greece",
       "Gonderi_Sayisi": 1,
       "Eslesen_Sayisi": 1,
       "Toplam_Gelir": 33.18,
@@ -370,7 +370,7 @@
       "Paket_Basi_Kar": -8.810000000000002
     },
     {
-      "Ulke": "Norway",
+      "Ulke": "🇳🇴 Norway",
       "Gonderi_Sayisi": 1,
       "Eslesen_Sayisi": 1,
       "Toplam_Gelir": 25.09,
@@ -381,7 +381,7 @@
       "Paket_Basi_Kar": 3.0
     },
     {
-      "Ulke": "Sweden",
+      "Ulke": "🇸🇪 Sweden",
       "Gonderi_Sayisi": 1,
       "Eslesen_Sayisi": 1,
       "Toplam_Gelir": 23.78,
@@ -392,7 +392,7 @@
       "Paket_Basi_Kar": -8.919999999999995
     },
     {
-      "Ulke": "Turkey",
+      "Ulke": "🇹🇷 Turkey",
       "Gonderi_Sayisi": 1,
       "Eslesen_Sayisi": 1,
       "Toplam_Gelir": 20.52,
@@ -403,7 +403,7 @@
       "Paket_Basi_Kar": 3.0199999999999996
     },
     {
-      "Ulke": "Romania",
+      "Ulke": "🇷🇴 Romania",
       "Gonderi_Sayisi": 1,
       "Eslesen_Sayisi": 1,
       "Toplam_Gelir": 17.95,
@@ -414,7 +414,7 @@
       "Paket_Basi_Kar": 8.41
     },
     {
-      "Ulke": "Mexico",
+      "Ulke": "🇲🇽 Mexico",
       "Gonderi_Sayisi": 1,
       "Eslesen_Sayisi": 0,
       "Toplam_Gelir": 11.82,
@@ -425,7 +425,7 @@
       "Paket_Basi_Kar": 0.0
     },
     {
-      "Ulke": "New Zealand",
+      "Ulke": "🇳🇿 New Zealand",
       "Gonderi_Sayisi": 1,
       "Eslesen_Sayisi": 1,
       "Toplam_Gelir": 8.71,
@@ -441,23 +441,23 @@
       "Musteri No": "2434",
       "Musteri Adi": "WHITE UNICORN",
       "Paket Sayisi": 3638,
-      "Eslesen Sayisi": 3419,
+      "Eslesen Sayisi": 3420,
       "Bize Odenen (Gelir)": 41188.79,
-      "Firmaya Odenen (Gider)": 27534.765736700112,
-      "Kar/Zarar": 11641.924263299972,
-      "Gonderdigi Ulkeler": "Canada",
-      "Paket Basi Kar/Zarar": 3.4050670556595413
+      "Firmaya Odenen (Gider)": 27595.41501710011,
+      "Kar/Zarar": 11596.064982899976,
+      "Gonderdigi Ulkeler": "🇨🇦 Canada",
+      "Paket Basi Kar/Zarar": 3.3906622757017475
     },
     {
       "Musteri No": "2753",
       "Musteri Adi": "Smyrna",
       "Paket Sayisi": 2418,
-      "Eslesen Sayisi": 2242,
+      "Eslesen Sayisi": 2245,
       "Bize Odenen (Gelir)": 23802.24,
-      "Firmaya Odenen (Gider)": 16134.13296300009,
-      "Kar/Zarar": 6149.037036999962,
-      "Gonderdigi Ulkeler": "Canada",
-      "Paket Basi Kar/Zarar": 2.7426570191792874
+      "Firmaya Odenen (Gider)": 16208.553215600092,
+      "Kar/Zarar": 6104.526784399961,
+      "Gonderdigi Ulkeler": "🇨🇦 Canada",
+      "Paket Basi Kar/Zarar": 2.7191656055233677
     },
     {
       "Musteri No": "2765",
@@ -465,21 +465,21 @@
       "Paket Sayisi": 1646,
       "Eslesen Sayisi": 1631,
       "Bize Odenen (Gelir)": 17244.88,
-      "Firmaya Odenen (Gider)": 10873.51758479998,
-      "Kar/Zarar": 6199.162415200005,
-      "Gonderdigi Ulkeler": "Australia, Canada, United Kingdom",
-      "Paket Basi Kar/Zarar": 3.800835325076643
+      "Firmaya Odenen (Gider)": 10929.630561999977,
+      "Kar/Zarar": 6143.0494380000055,
+      "Gonderdigi Ulkeler": "🇦🇺 Australia, 🇨🇦 Canada, 🇬🇧 United Kingdom",
+      "Paket Basi Kar/Zarar": 3.7664312924586176
     },
     {
       "Musteri No": "2754",
       "Musteri Adi": "ABDULLAH TOLGA KARAMAN",
       "Paket Sayisi": 549,
-      "Eslesen Sayisi": 547,
+      "Eslesen Sayisi": 549,
       "Bize Odenen (Gelir)": 9655.48,
-      "Firmaya Odenen (Gider)": 6328.496501600003,
-      "Kar/Zarar": 3301.163498400004,
-      "Gonderdigi Ulkeler": "Canada",
-      "Paket Basi Kar/Zarar": 6.035033817915912
+      "Firmaya Odenen (Gider)": 6375.976219100002,
+      "Kar/Zarar": 3279.503780900003,
+      "Gonderdigi Ulkeler": "🇨🇦 Canada",
+      "Paket Basi Kar/Zarar": 5.973595229326053
     },
     {
       "Musteri No": "1033",
@@ -487,10 +487,10 @@
       "Paket Sayisi": 511,
       "Eslesen Sayisi": 509,
       "Bize Odenen (Gelir)": 8270.31,
-      "Firmaya Odenen (Gider)": 5166.031920100005,
-      "Kar/Zarar": 3060.3680798999994,
-      "Gonderdigi Ulkeler": "Canada",
-      "Paket Basi Kar/Zarar": 6.0125109624754405
+      "Firmaya Odenen (Gider)": 5213.0309976000035,
+      "Kar/Zarar": 3013.3690023999993,
+      "Gonderdigi Ulkeler": "🇨🇦 Canada",
+      "Paket Basi Kar/Zarar": 5.920174857367385
     },
     {
       "Musteri No": "2886",
@@ -500,7 +500,7 @@
       "Bize Odenen (Gelir)": 4735.58,
       "Firmaya Odenen (Gider)": 4638.760000000001,
       "Kar/Zarar": -3.479999999999876,
-      "Gonderdigi Ulkeler": "Belgium, France, Germany, Italy, Netherlands The, Portugal, Spain, United Kingdom",
+      "Gonderdigi Ulkeler": "🇧🇪 Belgium, 🇫🇷 France, 🇩🇪 Germany, 🇮🇹 Italy, 🇳🇱 Netherlands The, 🇵🇹 Portugal, 🇪🇸 Spain, 🇬🇧 United Kingdom",
       "Paket Basi Kar/Zarar": -0.02230769230769151
     },
     {
@@ -509,10 +509,10 @@
       "Paket Sayisi": 466,
       "Eslesen Sayisi": 413,
       "Bize Odenen (Gelir)": 4579.02,
-      "Firmaya Odenen (Gider)": 2906.3122695999978,
-      "Kar/Zarar": 1222.847730399999,
-      "Gonderdigi Ulkeler": "Canada",
-      "Paket Basi Kar/Zarar": 2.960890388377721
+      "Firmaya Odenen (Gider)": 2914.4502222999986,
+      "Kar/Zarar": 1214.7097776999992,
+      "Gonderdigi Ulkeler": "🇨🇦 Canada",
+      "Paket Basi Kar/Zarar": 2.9411859024213056
     },
     {
       "Musteri No": "2896",
@@ -522,7 +522,7 @@
       "Bize Odenen (Gelir)": 4226.82,
       "Firmaya Odenen (Gider)": 2838.067301100001,
       "Kar/Zarar": 1220.112698899999,
-      "Gonderdigi Ulkeler": "Canada",
+      "Gonderdigi Ulkeler": "🇨🇦 Canada",
       "Paket Basi Kar/Zarar": 3.686141084290027
     },
     {
@@ -533,7 +533,7 @@
       "Bize Odenen (Gelir)": 3426.93,
       "Firmaya Odenen (Gider)": 2289.6954598999996,
       "Kar/Zarar": 1137.2345400999998,
-      "Gonderdigi Ulkeler": "Canada",
+      "Gonderdigi Ulkeler": "🇨🇦 Canada",
       "Paket Basi Kar/Zarar": 11.041112039805823
     },
     {
@@ -544,7 +544,7 @@
       "Bize Odenen (Gelir)": 3290.98,
       "Firmaya Odenen (Gider)": 2040.2899999999995,
       "Kar/Zarar": 1189.5200000000016,
-      "Gonderdigi Ulkeler": "United Kingdom",
+      "Gonderdigi Ulkeler": "🇬🇧 United Kingdom",
       "Paket Basi Kar/Zarar": 3.4280115273775262
     },
     {
@@ -553,10 +553,10 @@
       "Paket Sayisi": 171,
       "Eslesen Sayisi": 171,
       "Bize Odenen (Gelir)": 3081.72,
-      "Firmaya Odenen (Gider)": 1837.7859565999995,
-      "Kar/Zarar": 1243.9340434000005,
-      "Gonderdigi Ulkeler": "Canada",
-      "Paket Basi Kar/Zarar": 7.274468090058482
+      "Firmaya Odenen (Gider)": 1878.2328465999992,
+      "Kar/Zarar": 1203.4871534000004,
+      "Gonderdigi Ulkeler": "🇨🇦 Canada",
+      "Paket Basi Kar/Zarar": 7.037936569590645
     },
     {
       "Musteri No": "2820",
@@ -566,7 +566,7 @@
       "Bize Odenen (Gelir)": 2910.11,
       "Firmaya Odenen (Gider)": 2780.690000000001,
       "Kar/Zarar": 75.09999999999988,
-      "Gonderdigi Ulkeler": "Belgium, France, Netherlands The, Spain",
+      "Gonderdigi Ulkeler": "🇧🇪 Belgium, 🇫🇷 France, 🇳🇱 Netherlands The, 🇪🇸 Spain",
       "Paket Basi Kar/Zarar": 0.915853658536584
     },
     {
@@ -577,7 +577,7 @@
       "Bize Odenen (Gelir)": 2543.16,
       "Firmaya Odenen (Gider)": 2428.7545566,
       "Kar/Zarar": 82.53544340000003,
-      "Gonderdigi Ulkeler": "Canada, France, United Kingdom",
+      "Gonderdigi Ulkeler": "🇨🇦 Canada, 🇫🇷 France, 🇬🇧 United Kingdom",
       "Paket Basi Kar/Zarar": 0.4232586841025643
     },
     {
@@ -586,10 +586,10 @@
       "Paket Sayisi": 249,
       "Eslesen Sayisi": 249,
       "Bize Odenen (Gelir)": 2449.28,
-      "Firmaya Odenen (Gider)": 1579.6961796,
-      "Kar/Zarar": 869.5838203999997,
-      "Gonderdigi Ulkeler": "Canada, United Kingdom",
-      "Paket Basi Kar/Zarar": 3.4923044995983923
+      "Firmaya Odenen (Gider)": 1583.8303246,
+      "Kar/Zarar": 865.4496753999997,
+      "Gonderdigi Ulkeler": "🇨🇦 Canada, 🇬🇧 United Kingdom",
+      "Paket Basi Kar/Zarar": 3.475701507630521
     },
     {
       "Musteri No": "1990",
@@ -597,10 +597,10 @@
       "Paket Sayisi": 171,
       "Eslesen Sayisi": 170,
       "Bize Odenen (Gelir)": 2338.37,
-      "Firmaya Odenen (Gider)": 1402.454725,
-      "Kar/Zarar": 924.095275,
-      "Gonderdigi Ulkeler": "Canada, Mexico",
-      "Paket Basi Kar/Zarar": 5.43585455882353
+      "Firmaya Odenen (Gider)": 1421.0226149999999,
+      "Kar/Zarar": 905.527385,
+      "Gonderdigi Ulkeler": "🇨🇦 Canada, 🇲🇽 Mexico",
+      "Paket Basi Kar/Zarar": 5.326631676470588
     },
     {
       "Musteri No": "2902",
@@ -610,7 +610,7 @@
       "Bize Odenen (Gelir)": 1917.52,
       "Firmaya Odenen (Gider)": 1788.6300000000003,
       "Kar/Zarar": 17.44000000000005,
-      "Gonderdigi Ulkeler": "Austria, Belgium, France, Germany, Ireland, Netherlands The, Spain, Sweden, Switzerland",
+      "Gonderdigi Ulkeler": "🇦🇹 Austria, 🇧🇪 Belgium, 🇫🇷 France, 🇩🇪 Germany, 🇮🇪 Ireland, 🇳🇱 Netherlands The, 🇪🇸 Spain, 🇸🇪 Sweden, 🇨🇭 Switzerland",
       "Paket Basi Kar/Zarar": 0.3559183673469398
     },
     {
@@ -621,7 +621,7 @@
       "Bize Odenen (Gelir)": 1876.42,
       "Firmaya Odenen (Gider)": 1787.95,
       "Kar/Zarar": 88.46999999999997,
-      "Gonderdigi Ulkeler": "Austria, Cyprus, Denmark, Germany, Greece, Ireland, Portugal, Romania, Slovenia, Switzerland, United Kingdom",
+      "Gonderdigi Ulkeler": "🇦🇹 Austria, 🇨🇾 Cyprus, 🇩🇰 Denmark, 🇩🇪 Germany, 🇬🇷 Greece, 🇮🇪 Ireland, 🇵🇹 Portugal, 🇷🇴 Romania, 🇸🇮 Slovenia, 🇨🇭 Switzerland, 🇬🇧 United Kingdom",
       "Paket Basi Kar/Zarar": 1.134230769230769
     },
     {
@@ -632,7 +632,7 @@
       "Bize Odenen (Gelir)": 1751.28,
       "Firmaya Odenen (Gider)": 1457.7999999999997,
       "Kar/Zarar": 232.72999999999996,
-      "Gonderdigi Ulkeler": "Australia, France, Italy, United Kingdom",
+      "Gonderdigi Ulkeler": "🇦🇺 Australia, 🇫🇷 France, 🇮🇹 Italy, 🇬🇧 United Kingdom",
       "Paket Basi Kar/Zarar": 1.9076229508196718
     },
     {
@@ -643,7 +643,7 @@
       "Bize Odenen (Gelir)": 1389.56,
       "Firmaya Odenen (Gider)": 1109.9,
       "Kar/Zarar": 261.98999999999984,
-      "Gonderdigi Ulkeler": "Australia, Singapore",
+      "Gonderdigi Ulkeler": "🇦🇺 Australia, 🇸🇬 Singapore",
       "Paket Basi Kar/Zarar": 3.6899999999999977
     },
     {
@@ -654,7 +654,7 @@
       "Bize Odenen (Gelir)": 1358.13,
       "Firmaya Odenen (Gider)": 822.3822201000006,
       "Kar/Zarar": 535.7477798999996,
-      "Gonderdigi Ulkeler": "Canada, United Kingdom",
+      "Gonderdigi Ulkeler": "🇨🇦 Canada, 🇬🇧 United Kingdom",
       "Paket Basi Kar/Zarar": 5.304433464356432
     },
     {
@@ -665,7 +665,7 @@
       "Bize Odenen (Gelir)": 1201.02,
       "Firmaya Odenen (Gider)": 992.0200000000001,
       "Kar/Zarar": 195.42999999999992,
-      "Gonderdigi Ulkeler": "France, Germany, Italy, Netherlands The",
+      "Gonderdigi Ulkeler": "🇫🇷 France, 🇩🇪 Germany, 🇮🇹 Italy, 🇳🇱 Netherlands The",
       "Paket Basi Kar/Zarar": 4.071458333333331
     },
     {
@@ -676,7 +676,7 @@
       "Bize Odenen (Gelir)": 1054.4,
       "Firmaya Odenen (Gider)": 989.0826227000002,
       "Kar/Zarar": 32.70737729999999,
-      "Gonderdigi Ulkeler": "Canada, Italy, Netherlands The, Spain",
+      "Gonderdigi Ulkeler": "🇨🇦 Canada, 🇮🇹 Italy, 🇳🇱 Netherlands The, 🇪🇸 Spain",
       "Paket Basi Kar/Zarar": 0.7787470785714283
     },
     {
@@ -687,7 +687,7 @@
       "Bize Odenen (Gelir)": 1005.5799999999999,
       "Firmaya Odenen (Gider)": 854.0799999999999,
       "Kar/Zarar": 123.05000000000003,
-      "Gonderdigi Ulkeler": "Belgium, Germany, Netherlands The, United Kingdom",
+      "Gonderdigi Ulkeler": "🇧🇪 Belgium, 🇩🇪 Germany, 🇳🇱 Netherlands The, 🇬🇧 United Kingdom",
       "Paket Basi Kar/Zarar": 3.6191176470588244
     },
     {
@@ -698,7 +698,7 @@
       "Bize Odenen (Gelir)": 942.91,
       "Firmaya Odenen (Gider)": 814.75,
       "Kar/Zarar": 128.16000000000003,
-      "Gonderdigi Ulkeler": "Belgium, Italy, Netherlands The, Spain, United Kingdom",
+      "Gonderdigi Ulkeler": "🇧🇪 Belgium, 🇮🇹 Italy, 🇳🇱 Netherlands The, 🇪🇸 Spain, 🇬🇧 United Kingdom",
       "Paket Basi Kar/Zarar": 4.272000000000001
     },
     {
@@ -709,7 +709,7 @@
       "Bize Odenen (Gelir)": 813.19,
       "Firmaya Odenen (Gider)": 544.7694665999999,
       "Kar/Zarar": 268.4205334,
-      "Gonderdigi Ulkeler": "Canada",
+      "Gonderdigi Ulkeler": "🇨🇦 Canada",
       "Paket Basi Kar/Zarar": 5.477970069387755
     },
     {
@@ -720,7 +720,7 @@
       "Bize Odenen (Gelir)": 804.75,
       "Firmaya Odenen (Gider)": 706.1300000000001,
       "Kar/Zarar": 98.62,
-      "Gonderdigi Ulkeler": "France, Germany, Portugal, Spain, United Kingdom",
+      "Gonderdigi Ulkeler": "🇫🇷 France, 🇩🇪 Germany, 🇵🇹 Portugal, 🇪🇸 Spain, 🇬🇧 United Kingdom",
       "Paket Basi Kar/Zarar": 3.400689655172414
     },
     {
@@ -731,7 +731,7 @@
       "Bize Odenen (Gelir)": 736.01,
       "Firmaya Odenen (Gider)": 462.64385519999996,
       "Kar/Zarar": 273.3661448,
-      "Gonderdigi Ulkeler": "Canada",
+      "Gonderdigi Ulkeler": "🇨🇦 Canada",
       "Paket Basi Kar/Zarar": 9.7630766
     },
     {
@@ -740,10 +740,10 @@
       "Paket Sayisi": 25,
       "Eslesen Sayisi": 25,
       "Bize Odenen (Gelir)": 709.09,
-      "Firmaya Odenen (Gider)": 507.0551087999999,
-      "Kar/Zarar": 202.0348912,
-      "Gonderdigi Ulkeler": "Canada",
-      "Paket Basi Kar/Zarar": 8.081395648
+      "Firmaya Odenen (Gider)": 510.40963129999994,
+      "Kar/Zarar": 198.6803687,
+      "Gonderdigi Ulkeler": "🇨🇦 Canada",
+      "Paket Basi Kar/Zarar": 7.947214748
     },
     {
       "Musteri No": "1908",
@@ -753,7 +753,7 @@
       "Bize Odenen (Gelir)": 597.51,
       "Firmaya Odenen (Gider)": 633.24,
       "Kar/Zarar": -304.26000000000005,
-      "Gonderdigi Ulkeler": "Cyprus, United Kingdom",
+      "Gonderdigi Ulkeler": "🇨🇾 Cyprus, 🇬🇧 United Kingdom",
       "Paket Basi Kar/Zarar": -152.13000000000002
     },
     {
@@ -764,7 +764,7 @@
       "Bize Odenen (Gelir)": 465.96,
       "Firmaya Odenen (Gider)": 461.12999999999994,
       "Kar/Zarar": 4.830000000000014,
-      "Gonderdigi Ulkeler": "Germany, Switzerland, United Kingdom",
+      "Gonderdigi Ulkeler": "🇩🇪 Germany, 🇨🇭 Switzerland, 🇬🇧 United Kingdom",
       "Paket Basi Kar/Zarar": 0.28411764705882436
     },
     {
@@ -775,7 +775,7 @@
       "Bize Odenen (Gelir)": 411.58,
       "Firmaya Odenen (Gider)": 271.1306005,
       "Kar/Zarar": 140.4493995,
-      "Gonderdigi Ulkeler": "Canada",
+      "Gonderdigi Ulkeler": "🇨🇦 Canada",
       "Paket Basi Kar/Zarar": 10.032099964285715
     },
     {
@@ -786,7 +786,7 @@
       "Bize Odenen (Gelir)": 405.27,
       "Firmaya Odenen (Gider)": 257.529313,
       "Kar/Zarar": 147.740687,
-      "Gonderdigi Ulkeler": "Australia, Canada, New Zealand, Norway",
+      "Gonderdigi Ulkeler": "🇦🇺 Australia, 🇨🇦 Canada, 🇳🇿 New Zealand, 🇳🇴 Norway",
       "Paket Basi Kar/Zarar": 7.38703435
     },
     {
@@ -797,7 +797,7 @@
       "Bize Odenen (Gelir)": 394.45,
       "Firmaya Odenen (Gider)": 361.5583794000001,
       "Kar/Zarar": 32.891620600000024,
-      "Gonderdigi Ulkeler": "Canada, Poland, United States",
+      "Gonderdigi Ulkeler": "🇨🇦 Canada, 🇵🇱 Poland, 🇺🇸 United States",
       "Paket Basi Kar/Zarar": 0.9397605885714293
     },
     {
@@ -808,7 +808,7 @@
       "Bize Odenen (Gelir)": 392.02,
       "Firmaya Odenen (Gider)": 168.05796899999999,
       "Kar/Zarar": 223.96203100000002,
-      "Gonderdigi Ulkeler": "Canada",
+      "Gonderdigi Ulkeler": "🇨🇦 Canada",
       "Paket Basi Kar/Zarar": 18.663502583333337
     },
     {
@@ -819,7 +819,7 @@
       "Bize Odenen (Gelir)": 372.62,
       "Firmaya Odenen (Gider)": 313.2300000000001,
       "Kar/Zarar": 59.38999999999999,
-      "Gonderdigi Ulkeler": "Germany, Ireland, Spain, United Kingdom",
+      "Gonderdigi Ulkeler": "🇩🇪 Germany, 🇮🇪 Ireland, 🇪🇸 Spain, 🇬🇧 United Kingdom",
       "Paket Basi Kar/Zarar": 2.6995454545454542
     },
     {
@@ -830,7 +830,7 @@
       "Bize Odenen (Gelir)": 335.19,
       "Firmaya Odenen (Gider)": 256.9607298,
       "Kar/Zarar": 63.6092702,
-      "Gonderdigi Ulkeler": "Canada",
+      "Gonderdigi Ulkeler": "🇨🇦 Canada",
       "Paket Basi Kar/Zarar": 1.98778969375
     },
     {
@@ -841,7 +841,7 @@
       "Bize Odenen (Gelir)": 317.68,
       "Firmaya Odenen (Gider)": 260.46999999999986,
       "Kar/Zarar": 57.21000000000011,
-      "Gonderdigi Ulkeler": "United Kingdom",
+      "Gonderdigi Ulkeler": "🇬🇧 United Kingdom",
       "Paket Basi Kar/Zarar": 8.172857142857158
     },
     {
@@ -852,7 +852,7 @@
       "Bize Odenen (Gelir)": 295.32,
       "Firmaya Odenen (Gider)": 213.4546595,
       "Kar/Zarar": 81.86534049999999,
-      "Gonderdigi Ulkeler": "Canada",
+      "Gonderdigi Ulkeler": "🇨🇦 Canada",
       "Paket Basi Kar/Zarar": 3.5593626304347823
     },
     {
@@ -863,7 +863,7 @@
       "Bize Odenen (Gelir)": 229.08,
       "Firmaya Odenen (Gider)": 190.69000000000003,
       "Kar/Zarar": 38.38999999999997,
-      "Gonderdigi Ulkeler": "Austria, Germany, Portugal, Spain, Switzerland",
+      "Gonderdigi Ulkeler": "🇦🇹 Austria, 🇩🇪 Germany, 🇵🇹 Portugal, 🇪🇸 Spain, 🇨🇭 Switzerland",
       "Paket Basi Kar/Zarar": 4.265555555555553
     },
     {
@@ -874,7 +874,7 @@
       "Bize Odenen (Gelir)": 225.49,
       "Firmaya Odenen (Gider)": 145.3472135,
       "Kar/Zarar": 80.1427865,
-      "Gonderdigi Ulkeler": "Canada",
+      "Gonderdigi Ulkeler": "🇨🇦 Canada",
       "Paket Basi Kar/Zarar": 3.20571146
     },
     {
@@ -885,7 +885,7 @@
       "Bize Odenen (Gelir)": 223.41,
       "Firmaya Odenen (Gider)": 149.51,
       "Kar/Zarar": 73.89999999999999,
-      "Gonderdigi Ulkeler": "United Kingdom",
+      "Gonderdigi Ulkeler": "🇬🇧 United Kingdom",
       "Paket Basi Kar/Zarar": 6.718181818181818
     },
     {
@@ -896,7 +896,7 @@
       "Bize Odenen (Gelir)": 221.92,
       "Firmaya Odenen (Gider)": 142.83638580000002,
       "Kar/Zarar": 79.0836142,
-      "Gonderdigi Ulkeler": "Canada",
+      "Gonderdigi Ulkeler": "🇨🇦 Canada",
       "Paket Basi Kar/Zarar": 4.651977305882353
     },
     {
@@ -907,7 +907,7 @@
       "Bize Odenen (Gelir)": 218.37,
       "Firmaya Odenen (Gider)": 169.50578729999998,
       "Kar/Zarar": 48.8642127,
-      "Gonderdigi Ulkeler": "Canada",
+      "Gonderdigi Ulkeler": "🇨🇦 Canada",
       "Paket Basi Kar/Zarar": 3.25761418
     },
     {
@@ -918,7 +918,7 @@
       "Bize Odenen (Gelir)": 212.85,
       "Firmaya Odenen (Gider)": 122.51000000000002,
       "Kar/Zarar": 90.33999999999999,
-      "Gonderdigi Ulkeler": "Canada, Germany, United Kingdom",
+      "Gonderdigi Ulkeler": "🇨🇦 Canada, 🇩🇪 Germany, 🇬🇧 United Kingdom",
       "Paket Basi Kar/Zarar": 4.1063636363636355
     },
     {
@@ -929,7 +929,7 @@
       "Bize Odenen (Gelir)": 189.6,
       "Firmaya Odenen (Gider)": 155.82,
       "Kar/Zarar": 33.77999999999999,
-      "Gonderdigi Ulkeler": "United Kingdom",
+      "Gonderdigi Ulkeler": "🇬🇧 United Kingdom",
       "Paket Basi Kar/Zarar": 16.889999999999993
     },
     {
@@ -940,7 +940,7 @@
       "Bize Odenen (Gelir)": 157.49,
       "Firmaya Odenen (Gider)": 93.6282199,
       "Kar/Zarar": 63.861780100000004,
-      "Gonderdigi Ulkeler": "Canada",
+      "Gonderdigi Ulkeler": "🇨🇦 Canada",
       "Paket Basi Kar/Zarar": 9.123111442857143
     },
     {
@@ -951,7 +951,7 @@
       "Bize Odenen (Gelir)": 155.79,
       "Firmaya Odenen (Gider)": 291.36,
       "Kar/Zarar": -135.57000000000002,
-      "Gonderdigi Ulkeler": "Spain",
+      "Gonderdigi Ulkeler": "🇪🇸 Spain",
       "Paket Basi Kar/Zarar": -135.57000000000002
     },
     {
@@ -962,7 +962,7 @@
       "Bize Odenen (Gelir)": 149.42000000000002,
       "Firmaya Odenen (Gider)": 120.02000000000001,
       "Kar/Zarar": 29.4,
-      "Gonderdigi Ulkeler": "Australia",
+      "Gonderdigi Ulkeler": "🇦🇺 Australia",
       "Paket Basi Kar/Zarar": 7.35
     },
     {
@@ -973,7 +973,7 @@
       "Bize Odenen (Gelir)": 143.1,
       "Firmaya Odenen (Gider)": 136.26,
       "Kar/Zarar": 6.840000000000002,
-      "Gonderdigi Ulkeler": "Cyprus, Italy, Switzerland",
+      "Gonderdigi Ulkeler": "🇨🇾 Cyprus, 🇮🇹 Italy, 🇨🇭 Switzerland",
       "Paket Basi Kar/Zarar": 2.2800000000000007
     },
     {
@@ -984,7 +984,7 @@
       "Bize Odenen (Gelir)": 140.77,
       "Firmaya Odenen (Gider)": 77.69,
       "Kar/Zarar": 63.08,
-      "Gonderdigi Ulkeler": "United States",
+      "Gonderdigi Ulkeler": "🇺🇸 United States",
       "Paket Basi Kar/Zarar": 4.852307692307692
     },
     {
@@ -995,7 +995,7 @@
       "Bize Odenen (Gelir)": 132.17,
       "Firmaya Odenen (Gider)": 127.33000000000001,
       "Kar/Zarar": 4.839999999999994,
-      "Gonderdigi Ulkeler": "Turkey, United States",
+      "Gonderdigi Ulkeler": "🇹🇷 Turkey, 🇺🇸 United States",
       "Paket Basi Kar/Zarar": 0.2547368421052628
     },
     {
@@ -1006,7 +1006,7 @@
       "Bize Odenen (Gelir)": 127.63,
       "Firmaya Odenen (Gider)": 104.22,
       "Kar/Zarar": 23.410000000000004,
-      "Gonderdigi Ulkeler": "Canada",
+      "Gonderdigi Ulkeler": "🇨🇦 Canada",
       "Paket Basi Kar/Zarar": 7.803333333333335
     },
     {
@@ -1017,7 +1017,7 @@
       "Bize Odenen (Gelir)": 125.17,
       "Firmaya Odenen (Gider)": 85.51469599999999,
       "Kar/Zarar": 39.655304,
-      "Gonderdigi Ulkeler": "Canada",
+      "Gonderdigi Ulkeler": "🇨🇦 Canada",
       "Paket Basi Kar/Zarar": 5.665043428571429
     },
     {
@@ -1028,7 +1028,7 @@
       "Bize Odenen (Gelir)": 124.15,
       "Firmaya Odenen (Gider)": 127.41999999999997,
       "Kar/Zarar": -3.2699999999999854,
-      "Gonderdigi Ulkeler": "Japan",
+      "Gonderdigi Ulkeler": "🇯🇵 Japan",
       "Paket Basi Kar/Zarar": -1.0899999999999952
     },
     {
@@ -1039,7 +1039,7 @@
       "Bize Odenen (Gelir)": 121.37,
       "Firmaya Odenen (Gider)": 103.80999999999999,
       "Kar/Zarar": 17.560000000000013,
-      "Gonderdigi Ulkeler": "United Kingdom",
+      "Gonderdigi Ulkeler": "🇬🇧 United Kingdom",
       "Paket Basi Kar/Zarar": 2.926666666666669
     },
     {
@@ -1050,7 +1050,7 @@
       "Bize Odenen (Gelir)": 95.63,
       "Firmaya Odenen (Gider)": 51.92,
       "Kar/Zarar": 43.71,
-      "Gonderdigi Ulkeler": "United Kingdom",
+      "Gonderdigi Ulkeler": "🇬🇧 United Kingdom",
       "Paket Basi Kar/Zarar": 14.57
     },
     {
@@ -1061,7 +1061,7 @@
       "Bize Odenen (Gelir)": 92.31,
       "Firmaya Odenen (Gider)": 44.620000000000005,
       "Kar/Zarar": 47.69,
-      "Gonderdigi Ulkeler": "Canada, United Kingdom",
+      "Gonderdigi Ulkeler": "🇨🇦 Canada, 🇬🇧 United Kingdom",
       "Paket Basi Kar/Zarar": 7.948333333333333
     },
     {
@@ -1072,7 +1072,7 @@
       "Bize Odenen (Gelir)": 85.72,
       "Firmaya Odenen (Gider)": 61.99469600000002,
       "Kar/Zarar": 23.72530399999998,
-      "Gonderdigi Ulkeler": "Canada, Ireland, United Kingdom",
+      "Gonderdigi Ulkeler": "🇨🇦 Canada, 🇮🇪 Ireland, 🇬🇧 United Kingdom",
       "Paket Basi Kar/Zarar": 4.745060799999996
     },
     {
@@ -1083,7 +1083,7 @@
       "Bize Odenen (Gelir)": 69.58,
       "Firmaya Odenen (Gider)": 47.36000000000001,
       "Kar/Zarar": 22.22,
-      "Gonderdigi Ulkeler": "United Kingdom",
+      "Gonderdigi Ulkeler": "🇬🇧 United Kingdom",
       "Paket Basi Kar/Zarar": 3.174285714285714
     },
     {
@@ -1094,7 +1094,7 @@
       "Bize Odenen (Gelir)": 66.48,
       "Firmaya Odenen (Gider)": 40.400000000000006,
       "Kar/Zarar": 26.08,
-      "Gonderdigi Ulkeler": "United Kingdom",
+      "Gonderdigi Ulkeler": "🇬🇧 United Kingdom",
       "Paket Basi Kar/Zarar": 4.346666666666667
     },
     {
@@ -1105,7 +1105,7 @@
       "Bize Odenen (Gelir)": 61.45,
       "Firmaya Odenen (Gider)": 48.99,
       "Kar/Zarar": 12.459999999999997,
-      "Gonderdigi Ulkeler": "Cyprus, Switzerland",
+      "Gonderdigi Ulkeler": "🇨🇾 Cyprus, 🇨🇭 Switzerland",
       "Paket Basi Kar/Zarar": 4.153333333333332
     },
     {
@@ -1116,7 +1116,7 @@
       "Bize Odenen (Gelir)": 56.86,
       "Firmaya Odenen (Gider)": 10.309999999999999,
       "Kar/Zarar": 7.870000000000001,
-      "Gonderdigi Ulkeler": "Australia",
+      "Gonderdigi Ulkeler": "🇦🇺 Australia",
       "Paket Basi Kar/Zarar": 7.870000000000001
     },
     {
@@ -1127,7 +1127,7 @@
       "Bize Odenen (Gelir)": 43.019999999999996,
       "Firmaya Odenen (Gider)": 23.959999999999997,
       "Kar/Zarar": 19.06,
-      "Gonderdigi Ulkeler": "United States",
+      "Gonderdigi Ulkeler": "🇺🇸 United States",
       "Paket Basi Kar/Zarar": 3.812
     },
     {
@@ -1138,7 +1138,7 @@
       "Bize Odenen (Gelir)": 36.9,
       "Firmaya Odenen (Gider)": 26.0002508,
       "Kar/Zarar": 10.899749200000002,
-      "Gonderdigi Ulkeler": "Canada, United States",
+      "Gonderdigi Ulkeler": "🇨🇦 Canada, 🇺🇸 United States",
       "Paket Basi Kar/Zarar": 2.7249373000000006
     },
     {
@@ -1149,7 +1149,7 @@
       "Bize Odenen (Gelir)": 32.81,
       "Firmaya Odenen (Gider)": 19.189999999999998,
       "Kar/Zarar": 13.620000000000005,
-      "Gonderdigi Ulkeler": "Spain",
+      "Gonderdigi Ulkeler": "🇪🇸 Spain",
       "Paket Basi Kar/Zarar": 13.620000000000005
     },
     {
@@ -1160,7 +1160,7 @@
       "Bize Odenen (Gelir)": 31.93,
       "Firmaya Odenen (Gider)": 38.48,
       "Kar/Zarar": -6.549999999999997,
-      "Gonderdigi Ulkeler": "United States",
+      "Gonderdigi Ulkeler": "🇺🇸 United States",
       "Paket Basi Kar/Zarar": -3.2749999999999986
     },
     {
@@ -1171,7 +1171,7 @@
       "Bize Odenen (Gelir)": 30.66,
       "Firmaya Odenen (Gider)": 12.33,
       "Kar/Zarar": 18.33,
-      "Gonderdigi Ulkeler": "United States",
+      "Gonderdigi Ulkeler": "🇺🇸 United States",
       "Paket Basi Kar/Zarar": 18.33
     },
     {
@@ -1182,7 +1182,7 @@
       "Bize Odenen (Gelir)": 29.94,
       "Firmaya Odenen (Gider)": 16.93,
       "Kar/Zarar": 13.010000000000002,
-      "Gonderdigi Ulkeler": "Canada",
+      "Gonderdigi Ulkeler": "🇨🇦 Canada",
       "Paket Basi Kar/Zarar": 13.010000000000002
     },
     {
@@ -1193,7 +1193,7 @@
       "Bize Odenen (Gelir)": 24.79,
       "Firmaya Odenen (Gider)": 13.82,
       "Kar/Zarar": 10.969999999999999,
-      "Gonderdigi Ulkeler": "United Kingdom",
+      "Gonderdigi Ulkeler": "🇬🇧 United Kingdom",
       "Paket Basi Kar/Zarar": 3.6566666666666663
     },
     {
@@ -1204,7 +1204,7 @@
       "Bize Odenen (Gelir)": 23.49,
       "Firmaya Odenen (Gider)": 18.74,
       "Kar/Zarar": 4.75,
-      "Gonderdigi Ulkeler": "Switzerland",
+      "Gonderdigi Ulkeler": "🇨🇭 Switzerland",
       "Paket Basi Kar/Zarar": 4.75
     },
     {
@@ -1215,7 +1215,7 @@
       "Bize Odenen (Gelir)": 15.25,
       "Firmaya Odenen (Gider)": 24.1,
       "Kar/Zarar": -8.850000000000001,
-      "Gonderdigi Ulkeler": "United States",
+      "Gonderdigi Ulkeler": "🇺🇸 United States",
       "Paket Basi Kar/Zarar": -8.850000000000001
     },
     {
@@ -1226,7 +1226,7 @@
       "Bize Odenen (Gelir)": 11.87,
       "Firmaya Odenen (Gider)": 7.18,
       "Kar/Zarar": 4.6899999999999995,
-      "Gonderdigi Ulkeler": "United States",
+      "Gonderdigi Ulkeler": "🇺🇸 United States",
       "Paket Basi Kar/Zarar": 4.6899999999999995
     },
     {
@@ -1237,7 +1237,7 @@
       "Bize Odenen (Gelir)": 9.96,
       "Firmaya Odenen (Gider)": 0,
       "Kar/Zarar": 0,
-      "Gonderdigi Ulkeler": "United Kingdom",
+      "Gonderdigi Ulkeler": "🇬🇧 United Kingdom",
       "Paket Basi Kar/Zarar": 0.0
     },
     {
@@ -1248,7 +1248,7 @@
       "Bize Odenen (Gelir)": 9.25,
       "Firmaya Odenen (Gider)": 7.71,
       "Kar/Zarar": 1.54,
-      "Gonderdigi Ulkeler": "United States",
+      "Gonderdigi Ulkeler": "🇺🇸 United States",
       "Paket Basi Kar/Zarar": 1.54
     }
   ],
@@ -1256,7 +1256,7 @@
     {
       "Musteri No": "2427",
       "Musteri Adi": "ruken buluc",
-      "Ulke": "France",
+      "Ulke": "🇫🇷 France",
       "Paket Sayisi": 77,
       "Eslesen Sayisi": 77,
       "Gelir": 1148.21,
@@ -1266,7 +1266,7 @@
     {
       "Musteri No": "1908",
       "Musteri Adi": "Ahmet Öztürk",
-      "Ulke": "United Kingdom",
+      "Ulke": "🇬🇧 United Kingdom",
       "Paket Sayisi": 2,
       "Eslesen Sayisi": 1,
       "Gelir": 518.3499999999999,
@@ -1276,7 +1276,7 @@
     {
       "Musteri No": "2902",
       "Musteri Adi": "murat furkan bayar",
-      "Ulke": "Austria",
+      "Ulke": "🇦🇹 Austria",
       "Paket Sayisi": 2,
       "Eslesen Sayisi": 2,
       "Gelir": 101.27000000000001,
@@ -1286,7 +1286,7 @@
     {
       "Musteri No": "2436",
       "Musteri Adi": "Önsel Güzel",
-      "Ulke": "Spain",
+      "Ulke": "🇪🇸 Spain",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 1,
       "Gelir": 155.79,
@@ -1296,7 +1296,7 @@
     {
       "Musteri No": "1898",
       "Musteri Adi": "KEREM YENICAY",
-      "Ulke": "France",
+      "Ulke": "🇫🇷 France",
       "Paket Sayisi": 34,
       "Eslesen Sayisi": 34,
       "Gelir": 519.67,
@@ -1306,7 +1306,7 @@
     {
       "Musteri No": "1876",
       "Musteri Adi": "mehmet ali yılmaz",
-      "Ulke": "United States",
+      "Ulke": "🇺🇸 United States",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 1,
       "Gelir": 69.76,
@@ -1316,7 +1316,7 @@
     {
       "Musteri No": "2886",
       "Musteri Adi": "Abdul Rahim YILDIZ",
-      "Ulke": "Italy",
+      "Ulke": "🇮🇹 Italy",
       "Paket Sayisi": 20,
       "Eslesen Sayisi": 20,
       "Gelir": 674.05,
@@ -1326,7 +1326,7 @@
     {
       "Musteri No": "2820",
       "Musteri Adi": "ZEYNEP YILDIZ",
-      "Ulke": "Spain",
+      "Ulke": "🇪🇸 Spain",
       "Paket Sayisi": 65,
       "Eslesen Sayisi": 62,
       "Gelir": 2145.69,
@@ -1336,7 +1336,7 @@
     {
       "Musteri No": "2886",
       "Musteri Adi": "Abdul Rahim YILDIZ",
-      "Ulke": "Germany",
+      "Ulke": "🇩🇪 Germany",
       "Paket Sayisi": 63,
       "Eslesen Sayisi": 62,
       "Gelir": 1794.21,
@@ -1346,7 +1346,7 @@
     {
       "Musteri No": "2886",
       "Musteri Adi": "Abdul Rahim YILDIZ",
-      "Ulke": "Portugal",
+      "Ulke": "🇵🇹 Portugal",
       "Paket Sayisi": 8,
       "Eslesen Sayisi": 8,
       "Gelir": 243.71,
@@ -1356,7 +1356,7 @@
     {
       "Musteri No": "2902",
       "Musteri Adi": "murat furkan bayar",
-      "Ulke": "Ireland",
+      "Ulke": "🇮🇪 Ireland",
       "Paket Sayisi": 6,
       "Eslesen Sayisi": 6,
       "Gelir": 233.61,
@@ -1366,7 +1366,7 @@
     {
       "Musteri No": "2902",
       "Musteri Adi": "murat furkan bayar",
-      "Ulke": "Sweden",
+      "Ulke": "🇸🇪 Sweden",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 1,
       "Gelir": 23.78,
@@ -1376,7 +1376,7 @@
     {
       "Musteri No": "2847",
       "Musteri Adi": "Ramazan Kırkıl",
-      "Ulke": "United States",
+      "Ulke": "🇺🇸 United States",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 1,
       "Gelir": 15.25,
@@ -1386,7 +1386,7 @@
     {
       "Musteri No": "1423",
       "Musteri Adi": "Huseyin Tuna Ozturk Öztürk",
-      "Ulke": "Greece",
+      "Ulke": "🇬🇷 Greece",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 1,
       "Gelir": 33.18,
@@ -1396,7 +1396,7 @@
     {
       "Musteri No": "2392",
       "Musteri Adi": "yasin MOCO",
-      "Ulke": "Germany",
+      "Ulke": "🇩🇪 Germany",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 1,
       "Gelir": 11.04,
@@ -1406,7 +1406,7 @@
     {
       "Musteri No": "2417",
       "Musteri Adi": "Doğukan Şahin",
-      "Ulke": "Germany",
+      "Ulke": "🇩🇪 Germany",
       "Paket Sayisi": 5,
       "Eslesen Sayisi": 5,
       "Gelir": 256.01,
@@ -1416,7 +1416,7 @@
     {
       "Musteri No": "2886",
       "Musteri Adi": "Abdul Rahim YILDIZ",
-      "Ulke": "Spain",
+      "Ulke": "🇪🇸 Spain",
       "Paket Sayisi": 10,
       "Eslesen Sayisi": 10,
       "Gelir": 302.0,
@@ -1426,7 +1426,7 @@
     {
       "Musteri No": "2799",
       "Musteri Adi": "Ersin Saydam",
-      "Ulke": "Germany",
+      "Ulke": "🇩🇪 Germany",
       "Paket Sayisi": 2,
       "Eslesen Sayisi": 2,
       "Gelir": 34.269999999999996,
@@ -1436,7 +1436,7 @@
     {
       "Musteri No": "1423",
       "Musteri Adi": "Huseyin Tuna Ozturk Öztürk",
-      "Ulke": "Germany",
+      "Ulke": "🇩🇪 Germany",
       "Paket Sayisi": 62,
       "Eslesen Sayisi": 62,
       "Gelir": 1085.49,
@@ -1446,7 +1446,7 @@
     {
       "Musteri No": "2435",
       "Musteri Adi": "Fatma Çevlik",
-      "Ulke": "United States",
+      "Ulke": "🇺🇸 United States",
       "Paket Sayisi": 2,
       "Eslesen Sayisi": 2,
       "Gelir": 31.93,
@@ -1456,7 +1456,7 @@
     {
       "Musteri No": "2907",
       "Musteri Adi": "abdullah kutay",
-      "Ulke": "Italy",
+      "Ulke": "🇮🇹 Italy",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 1,
       "Gelir": 42.86,
@@ -1466,7 +1466,7 @@
     {
       "Musteri No": "2799",
       "Musteri Adi": "Ersin Saydam",
-      "Ulke": "Spain",
+      "Ulke": "🇪🇸 Spain",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 1,
       "Gelir": 16.39,
@@ -1476,7 +1476,7 @@
     {
       "Musteri No": "2266",
       "Musteri Adi": "mahsum bozyiğit",
-      "Ulke": "Japan",
+      "Ulke": "🇯🇵 Japan",
       "Paket Sayisi": 3,
       "Eslesen Sayisi": 3,
       "Gelir": 124.15,
@@ -1486,7 +1486,7 @@
     {
       "Musteri No": "2213",
       "Musteri Adi": "SEREN SAHIN",
-      "Ulke": "Italy",
+      "Ulke": "🇮🇹 Italy",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 1,
       "Gelir": 94.06,
@@ -1496,7 +1496,7 @@
     {
       "Musteri No": "2901",
       "Musteri Adi": "İHSAN YETİMOVA",
-      "Ulke": "Italy",
+      "Ulke": "🇮🇹 Italy",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 1,
       "Gelir": 38.58,
@@ -1506,7 +1506,7 @@
     {
       "Musteri No": "2054",
       "Musteri Adi": "Hasan Dilmac",
-      "Ulke": "Netherlands The",
+      "Ulke": "🇳🇱 Netherlands The",
       "Paket Sayisi": 6,
       "Eslesen Sayisi": 6,
       "Gelir": 148.63,
@@ -1516,7 +1516,7 @@
     {
       "Musteri No": "2417",
       "Musteri Adi": "Doğukan Şahin",
-      "Ulke": "Switzerland",
+      "Ulke": "🇨🇭 Switzerland",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 1,
       "Gelir": 18.95,
@@ -1526,7 +1526,7 @@
     {
       "Musteri No": "1423",
       "Musteri Adi": "Huseyin Tuna Ozturk Öztürk",
-      "Ulke": "Austria",
+      "Ulke": "🇦🇹 Austria",
       "Paket Sayisi": 2,
       "Eslesen Sayisi": 2,
       "Gelir": 52.83,
@@ -1536,7 +1536,7 @@
     {
       "Musteri No": "2885",
       "Musteri Adi": "MUSTAFA MERT YAZICI",
-      "Ulke": "United Kingdom",
+      "Ulke": "🇬🇧 United Kingdom",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 0,
       "Gelir": 9.96,
@@ -1546,7 +1546,7 @@
     {
       "Musteri No": "1990",
       "Musteri Adi": "EDİBE ERDEM UTMA",
-      "Ulke": "Mexico",
+      "Ulke": "🇲🇽 Mexico",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 0,
       "Gelir": 11.82,
@@ -1556,7 +1556,7 @@
     {
       "Musteri No": "2392",
       "Musteri Adi": "yasin MOCO",
-      "Ulke": "Netherlands The",
+      "Ulke": "🇳🇱 Netherlands The",
       "Paket Sayisi": 19,
       "Eslesen Sayisi": 19,
       "Gelir": 397.81,
@@ -1566,7 +1566,7 @@
     {
       "Musteri No": "2903",
       "Musteri Adi": "Tuncay Hura",
-      "Ulke": "Portugal",
+      "Ulke": "🇵🇹 Portugal",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 1,
       "Gelir": 14.7,
@@ -1576,7 +1576,7 @@
     {
       "Musteri No": "2902",
       "Musteri Adi": "murat furkan bayar",
-      "Ulke": "Switzerland",
+      "Ulke": "🇨🇭 Switzerland",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 1,
       "Gelir": 41.82,
@@ -1586,7 +1586,7 @@
     {
       "Musteri No": "2784",
       "Musteri Adi": "ALİ YILDIZHAN",
-      "Ulke": "United States",
+      "Ulke": "🇺🇸 United States",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 1,
       "Gelir": 9.25,
@@ -1596,7 +1596,7 @@
     {
       "Musteri No": "2824",
       "Musteri Adi": "HACER ILHAN",
-      "Ulke": "United States",
+      "Ulke": "🇺🇸 United States",
       "Paket Sayisi": 18,
       "Eslesen Sayisi": 18,
       "Gelir": 111.64999999999999,
@@ -1606,7 +1606,7 @@
     {
       "Musteri No": "2886",
       "Musteri Adi": "Abdul Rahim YILDIZ",
-      "Ulke": "France",
+      "Ulke": "🇫🇷 France",
       "Paket Sayisi": 30,
       "Eslesen Sayisi": 28,
       "Gelir": 880.18,
@@ -1616,7 +1616,7 @@
     {
       "Musteri No": "1876",
       "Musteri Adi": "mehmet ali yılmaz",
-      "Ulke": "Poland",
+      "Ulke": "🇵🇱 Poland",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 1,
       "Gelir": 33.59,
@@ -1626,7 +1626,7 @@
     {
       "Musteri No": "2829",
       "Musteri Adi": "OZGE ALKAN",
-      "Ulke": "Germany",
+      "Ulke": "🇩🇪 Germany",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 1,
       "Gelir": 30.73,
@@ -1636,7 +1636,7 @@
     {
       "Musteri No": "1423",
       "Musteri Adi": "Huseyin Tuna Ozturk Öztürk",
-      "Ulke": "Slovenia",
+      "Ulke": "🇸🇮 Slovenia",
       "Paket Sayisi": 2,
       "Eslesen Sayisi": 2,
       "Gelir": 98.0,
@@ -1646,7 +1646,7 @@
     {
       "Musteri No": "1423",
       "Musteri Adi": "Huseyin Tuna Ozturk Öztürk",
-      "Ulke": "Ireland",
+      "Ulke": "🇮🇪 Ireland",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 1,
       "Gelir": 23.62,
@@ -1656,7 +1656,7 @@
     {
       "Musteri No": "2284",
       "Musteri Adi": "SUKRU YASİN AYDOGAN",
-      "Ulke": "Canada",
+      "Ulke": "🇨🇦 Canada",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 1,
       "Gelir": 8.94,
@@ -1666,7 +1666,7 @@
     {
       "Musteri No": "2848",
       "Musteri Adi": "ahmet aykal",
-      "Ulke": "United States",
+      "Ulke": "🇺🇸 United States",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 1,
       "Gelir": 10.66,
@@ -1676,7 +1676,7 @@
     {
       "Musteri No": "1040",
       "Musteri Adi": "vedat yıldırım",
-      "Ulke": "New Zealand",
+      "Ulke": "🇳🇿 New Zealand",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 1,
       "Gelir": 8.71,
@@ -1686,7 +1686,7 @@
     {
       "Musteri No": "1040",
       "Musteri Adi": "vedat yıldırım",
-      "Ulke": "Norway",
+      "Ulke": "🇳🇴 Norway",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 1,
       "Gelir": 25.09,
@@ -1696,7 +1696,7 @@
     {
       "Musteri No": "2824",
       "Musteri Adi": "HACER ILHAN",
-      "Ulke": "Turkey",
+      "Ulke": "🇹🇷 Turkey",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 1,
       "Gelir": 20.52,
@@ -1706,7 +1706,7 @@
     {
       "Musteri No": "2054",
       "Musteri Adi": "Hasan Dilmac",
-      "Ulke": "Spain",
+      "Ulke": "🇪🇸 Spain",
       "Paket Sayisi": 24,
       "Eslesen Sayisi": 24,
       "Gelir": 629.59,
@@ -1716,7 +1716,7 @@
     {
       "Musteri No": "2282",
       "Musteri Adi": "İBRAHİM YALÇIN",
-      "Ulke": "Cyprus",
+      "Ulke": "🇨🇾 Cyprus",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 1,
       "Gelir": 18.58,
@@ -1726,7 +1726,7 @@
     {
       "Musteri No": "2213",
       "Musteri Adi": "SEREN SAHIN",
-      "Ulke": "Cyprus",
+      "Ulke": "🇨🇾 Cyprus",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 1,
       "Gelir": 18.84,
@@ -1736,7 +1736,7 @@
     {
       "Musteri No": "2054",
       "Musteri Adi": "Hasan Dilmac",
-      "Ulke": "Italy",
+      "Ulke": "🇮🇹 Italy",
       "Paket Sayisi": 5,
       "Eslesen Sayisi": 4,
       "Gelir": 159.69,
@@ -1746,7 +1746,7 @@
     {
       "Musteri No": "2829",
       "Musteri Adi": "OZGE ALKAN",
-      "Ulke": "Portugal",
+      "Ulke": "🇵🇹 Portugal",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 1,
       "Gelir": 18.0,
@@ -1756,7 +1756,7 @@
     {
       "Musteri No": "1423",
       "Musteri Adi": "Huseyin Tuna Ozturk Öztürk",
-      "Ulke": "Cyprus",
+      "Ulke": "🇨🇾 Cyprus",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 1,
       "Gelir": 22.72,
@@ -1766,7 +1766,7 @@
     {
       "Musteri No": "2545",
       "Musteri Adi": "tuncay baytar",
-      "Ulke": "United States",
+      "Ulke": "🇺🇸 United States",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 1,
       "Gelir": 11.87,
@@ -1776,7 +1776,7 @@
     {
       "Musteri No": "2306",
       "Musteri Adi": "Bediha Feyzi",
-      "Ulke": "Switzerland",
+      "Ulke": "🇨🇭 Switzerland",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 1,
       "Gelir": 23.49,
@@ -1786,7 +1786,7 @@
     {
       "Musteri No": "2903",
       "Musteri Adi": "Tuncay Hura",
-      "Ulke": "Spain",
+      "Ulke": "🇪🇸 Spain",
       "Paket Sayisi": 2,
       "Eslesen Sayisi": 2,
       "Gelir": 56.760000000000005,
@@ -1796,7 +1796,7 @@
     {
       "Musteri No": "2902",
       "Musteri Adi": "murat furkan bayar",
-      "Ulke": "France",
+      "Ulke": "🇫🇷 France",
       "Paket Sayisi": 4,
       "Eslesen Sayisi": 4,
       "Gelir": 261.11,
@@ -1806,7 +1806,7 @@
     {
       "Musteri No": "2213",
       "Musteri Adi": "SEREN SAHIN",
-      "Ulke": "Switzerland",
+      "Ulke": "🇨🇭 Switzerland",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 1,
       "Gelir": 30.2,
@@ -1816,7 +1816,7 @@
     {
       "Musteri No": "2907",
       "Musteri Adi": "abdullah kutay",
-      "Ulke": "Spain",
+      "Ulke": "🇪🇸 Spain",
       "Paket Sayisi": 8,
       "Eslesen Sayisi": 8,
       "Gelir": 235.44,
@@ -1826,7 +1826,7 @@
     {
       "Musteri No": "2886",
       "Musteri Adi": "Abdul Rahim YILDIZ",
-      "Ulke": "Netherlands The",
+      "Ulke": "🇳🇱 Netherlands The",
       "Paket Sayisi": 3,
       "Eslesen Sayisi": 3,
       "Gelir": 80.97,
@@ -1836,7 +1836,7 @@
     {
       "Musteri No": "2907",
       "Musteri Adi": "abdullah kutay",
-      "Ulke": "United Kingdom",
+      "Ulke": "🇬🇧 United Kingdom",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 1,
       "Gelir": 75.2,
@@ -1846,7 +1846,7 @@
     {
       "Musteri No": "2829",
       "Musteri Adi": "OZGE ALKAN",
-      "Ulke": "Spain",
+      "Ulke": "🇪🇸 Spain",
       "Paket Sayisi": 9,
       "Eslesen Sayisi": 9,
       "Gelir": 260.27,
@@ -1856,7 +1856,7 @@
     {
       "Musteri No": "1689",
       "Musteri Adi": "Egenur Bakkal",
-      "Ulke": "Germany",
+      "Ulke": "🇩🇪 Germany",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 1,
       "Gelir": 20.68,
@@ -1866,7 +1866,7 @@
     {
       "Musteri No": "1423",
       "Musteri Adi": "Huseyin Tuna Ozturk Öztürk",
-      "Ulke": "Switzerland",
+      "Ulke": "🇨🇭 Switzerland",
       "Paket Sayisi": 2,
       "Eslesen Sayisi": 2,
       "Gelir": 52.94,
@@ -1876,7 +1876,7 @@
     {
       "Musteri No": "2889",
       "Musteri Adi": "OSMAN ARISOY",
-      "Ulke": "Australia",
+      "Ulke": "🇦🇺 Australia",
       "Paket Sayisi": 2,
       "Eslesen Sayisi": 1,
       "Gelir": 56.86,
@@ -1886,7 +1886,7 @@
     {
       "Musteri No": "2903",
       "Musteri Adi": "Tuncay Hura",
-      "Ulke": "Germany",
+      "Ulke": "🇩🇪 Germany",
       "Paket Sayisi": 2,
       "Eslesen Sayisi": 2,
       "Gelir": 54.34,
@@ -1896,7 +1896,7 @@
     {
       "Musteri No": "1689",
       "Musteri Adi": "Egenur Bakkal",
-      "Ulke": "Canada",
+      "Ulke": "🇨🇦 Canada",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 1,
       "Gelir": 10.43,
@@ -1906,7 +1906,7 @@
     {
       "Musteri No": "2848",
       "Musteri Adi": "ahmet aykal",
-      "Ulke": "Canada",
+      "Ulke": "🇨🇦 Canada",
       "Paket Sayisi": 3,
       "Eslesen Sayisi": 3,
       "Gelir": 26.240000000000002,
@@ -1916,7 +1916,7 @@
     {
       "Musteri No": "2799",
       "Musteri Adi": "Ersin Saydam",
-      "Ulke": "Ireland",
+      "Ulke": "🇮🇪 Ireland",
       "Paket Sayisi": 3,
       "Eslesen Sayisi": 3,
       "Gelir": 70.5,
@@ -1926,7 +1926,7 @@
     {
       "Musteri No": "1423",
       "Musteri Adi": "Huseyin Tuna Ozturk Öztürk",
-      "Ulke": "Romania",
+      "Ulke": "🇷🇴 Romania",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 1,
       "Gelir": 17.95,
@@ -1936,7 +1936,7 @@
     {
       "Musteri No": "2282",
       "Musteri Adi": "İBRAHİM YALÇIN",
-      "Ulke": "Switzerland",
+      "Ulke": "🇨🇭 Switzerland",
       "Paket Sayisi": 2,
       "Eslesen Sayisi": 2,
       "Gelir": 42.870000000000005,
@@ -1946,7 +1946,7 @@
     {
       "Musteri No": "2820",
       "Musteri Adi": "ZEYNEP YILDIZ",
-      "Ulke": "Netherlands The",
+      "Ulke": "🇳🇱 Netherlands The",
       "Paket Sayisi": 3,
       "Eslesen Sayisi": 3,
       "Gelir": 82.87,
@@ -1956,7 +1956,7 @@
     {
       "Musteri No": "2903",
       "Musteri Adi": "Tuncay Hura",
-      "Ulke": "Switzerland",
+      "Ulke": "🇨🇭 Switzerland",
       "Paket Sayisi": 2,
       "Eslesen Sayisi": 2,
       "Gelir": 38.2,
@@ -1966,7 +1966,7 @@
     {
       "Musteri No": "1040",
       "Musteri Adi": "vedat yıldırım",
-      "Ulke": "Australia",
+      "Ulke": "🇦🇺 Australia",
       "Paket Sayisi": 3,
       "Eslesen Sayisi": 3,
       "Gelir": 31.48,
@@ -1976,7 +1976,7 @@
     {
       "Musteri No": "2284",
       "Musteri Adi": "SUKRU YASİN AYDOGAN",
-      "Ulke": "Ireland",
+      "Ulke": "🇮🇪 Ireland",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 1,
       "Gelir": 43.94,
@@ -1986,7 +1986,7 @@
     {
       "Musteri No": "2907",
       "Musteri Adi": "abdullah kutay",
-      "Ulke": "Netherlands The",
+      "Ulke": "🇳🇱 Netherlands The",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 1,
       "Gelir": 49.36,
@@ -1996,7 +1996,7 @@
     {
       "Musteri No": "2275",
       "Musteri Adi": "Muhammed Alp Çeçen",
-      "Ulke": "United Kingdom",
+      "Ulke": "🇬🇧 United Kingdom",
       "Paket Sayisi": 3,
       "Eslesen Sayisi": 3,
       "Gelir": 24.79,
@@ -2006,7 +2006,7 @@
     {
       "Musteri No": "2284",
       "Musteri Adi": "SUKRU YASİN AYDOGAN",
-      "Ulke": "United Kingdom",
+      "Ulke": "🇬🇧 United Kingdom",
       "Paket Sayisi": 3,
       "Eslesen Sayisi": 3,
       "Gelir": 32.84,
@@ -2016,7 +2016,7 @@
     {
       "Musteri No": "2902",
       "Musteri Adi": "murat furkan bayar",
-      "Ulke": "Germany",
+      "Ulke": "🇩🇪 Germany",
       "Paket Sayisi": 3,
       "Eslesen Sayisi": 3,
       "Gelir": 83.92999999999999,
@@ -2026,7 +2026,7 @@
     {
       "Musteri No": "1908",
       "Musteri Adi": "Ahmet Öztürk",
-      "Ulke": "Cyprus",
+      "Ulke": "🇨🇾 Cyprus",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 1,
       "Gelir": 79.16,
@@ -2036,7 +2036,7 @@
     {
       "Musteri No": "2460",
       "Musteri Adi": "Koray  Merki",
-      "Ulke": "Canada",
+      "Ulke": "🇨🇦 Canada",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 1,
       "Gelir": 28.38,
@@ -2046,7 +2046,7 @@
     {
       "Musteri No": "2122",
       "Musteri Adi": "Tugce Saymaz",
-      "Ulke": "Canada",
+      "Ulke": "🇨🇦 Canada",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 1,
       "Gelir": 29.94,
@@ -2056,7 +2056,7 @@
     {
       "Musteri No": "2417",
       "Musteri Adi": "Doğukan Şahin",
-      "Ulke": "United Kingdom",
+      "Ulke": "🇬🇧 United Kingdom",
       "Paket Sayisi": 11,
       "Eslesen Sayisi": 11,
       "Gelir": 191.0,
@@ -2066,7 +2066,7 @@
     {
       "Musteri No": "2829",
       "Musteri Adi": "OZGE ALKAN",
-      "Ulke": "France",
+      "Ulke": "🇫🇷 France",
       "Paket Sayisi": 5,
       "Eslesen Sayisi": 5,
       "Gelir": 162.85,
@@ -2076,7 +2076,7 @@
     {
       "Musteri No": "2546",
       "Musteri Adi": "Erdi BALTA",
-      "Ulke": "Spain",
+      "Ulke": "🇪🇸 Spain",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 1,
       "Gelir": 32.81,
@@ -2086,7 +2086,7 @@
     {
       "Musteri No": "1423",
       "Musteri Adi": "Huseyin Tuna Ozturk Öztürk",
-      "Ulke": "Denmark",
+      "Ulke": "🇩🇰 Denmark",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 1,
       "Gelir": 59.01,
@@ -2096,7 +2096,7 @@
     {
       "Musteri No": "2901",
       "Musteri Adi": "İHSAN YETİMOVA",
-      "Ulke": "Germany",
+      "Ulke": "🇩🇪 Germany",
       "Paket Sayisi": 2,
       "Eslesen Sayisi": 2,
       "Gelir": 61.35,
@@ -2106,7 +2106,7 @@
     {
       "Musteri No": "1423",
       "Musteri Adi": "Huseyin Tuna Ozturk Öztürk",
-      "Ulke": "Portugal",
+      "Ulke": "🇵🇹 Portugal",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 1,
       "Gelir": 236.71,
@@ -2116,7 +2116,7 @@
     {
       "Musteri No": "2903",
       "Musteri Adi": "Tuncay Hura",
-      "Ulke": "Austria",
+      "Ulke": "🇦🇹 Austria",
       "Paket Sayisi": 2,
       "Eslesen Sayisi": 2,
       "Gelir": 65.08,
@@ -2126,7 +2126,7 @@
     {
       "Musteri No": "2787",
       "Musteri Adi": "MUSTAFA TOMA",
-      "Ulke": "United Kingdom",
+      "Ulke": "🇬🇧 United Kingdom",
       "Paket Sayisi": 6,
       "Eslesen Sayisi": 6,
       "Gelir": 121.37,
@@ -2136,7 +2136,7 @@
     {
       "Musteri No": "2811",
       "Musteri Adi": "murat yalavuz",
-      "Ulke": "United States",
+      "Ulke": "🇺🇸 United States",
       "Paket Sayisi": 1,
       "Eslesen Sayisi": 1,
       "Gelir": 30.66,
@@ -2146,7 +2146,7 @@
     {
       "Musteri No": "2886",
       "Musteri Adi": "Abdul Rahim YILDIZ",
-      "Ulke": "Belgium",
+      "Ulke": "🇧🇪 Belgium",
       "Paket Sayisi": 12,
       "Eslesen Sayisi": 12,
       "Gelir": 341.66,
@@ -2156,7 +2156,7 @@
     {
       "Musteri No": "2466",
       "Musteri Adi": "Mushap Mucahhit Sezer",
-      "Ulke": "United States",
+      "Ulke": "🇺🇸 United States",
       "Paket Sayisi": 5,
       "Eslesen Sayisi": 5,
       "Gelir": 43.019999999999996,
@@ -2166,7 +2166,7 @@
     {
       "Musteri No": "2426",
       "Musteri Adi": "Sevil  Kenar ",
-      "Ulke": "United Kingdom",
+      "Ulke": "🇬🇧 United Kingdom",
       "Paket Sayisi": 7,
       "Eslesen Sayisi": 7,
       "Gelir": 69.58,
@@ -2176,7 +2176,7 @@
     {
       "Musteri No": "2415",
       "Musteri Adi": "ONEROSE birgül uzunurgancı",
-      "Ulke": "Canada",
+      "Ulke": "🇨🇦 Canada",
       "Paket Sayisi": 3,
       "Eslesen Sayisi": 3,
       "Gelir": 127.63,
@@ -2186,7 +2186,7 @@
     {
       "Musteri No": "2878",
       "Musteri Adi": "Selim Turgan",
-      "Ulke": "United Kingdom",
+      "Ulke": "🇬🇧 United Kingdom",
       "Paket Sayisi": 6,
       "Eslesen Sayisi": 6,
       "Gelir": 66.48,
@@ -2196,7 +2196,7 @@
     {
       "Musteri No": "2054",
       "Musteri Adi": "Hasan Dilmac",
-      "Ulke": "Canada",
+      "Ulke": "🇨🇦 Canada",
       "Paket Sayisi": 8,
       "Eslesen Sayisi": 8,
       "Gelir": 116.49,
@@ -2206,7 +2206,7 @@
     {
       "Musteri No": "2898",
       "Musteri Adi": "HAKAN CEYLAN",
-      "Ulke": "Australia",
+      "Ulke": "🇦🇺 Australia",
       "Paket Sayisi": 4,
       "Eslesen Sayisi": 4,
       "Gelir": 149.42000000000002,
@@ -2216,7 +2216,7 @@
     {
       "Musteri No": "2820",
       "Musteri Adi": "ZEYNEP YILDIZ",
-      "Ulke": "France",
+      "Ulke": "🇫🇷 France",
       "Paket Sayisi": 10,
       "Eslesen Sayisi": 10,
       "Gelir": 455.86,
@@ -2226,7 +2226,7 @@
     {
       "Musteri No": "2543",
       "Musteri Adi": "TEMEL ARDA KARSLI",
-      "Ulke": "Australia",
+      "Ulke": "🇦🇺 Australia",
       "Paket Sayisi": 6,
       "Eslesen Sayisi": 6,
       "Gelir": 123.46000000000001,
@@ -2236,7 +2236,7 @@
     {
       "Musteri No": "2901",
       "Musteri Adi": "İHSAN YETİMOVA",
-      "Ulke": "France",
+      "Ulke": "🇫🇷 France",
       "Paket Sayisi": 9,
       "Eslesen Sayisi": 9,
       "Gelir": 228.44,
@@ -2246,7 +2246,7 @@
     {
       "Musteri No": "1905",
       "Musteri Adi": "Gülhan Ayça Çalışkan",
-      "Ulke": "United Kingdom",
+      "Ulke": "🇬🇧 United Kingdom",
       "Paket Sayisi": 2,
       "Eslesen Sayisi": 2,
       "Gelir": 189.6,
@@ -2256,7 +2256,7 @@
     {
       "Musteri No": "2460",
       "Musteri Adi": "Koray  Merki",
-      "Ulke": "United Kingdom",
+      "Ulke": "🇬🇧 United Kingdom",
       "Paket Sayisi": 5,
       "Eslesen Sayisi": 5,
       "Gelir": 63.93,
@@ -2266,7 +2266,7 @@
     {
       "Musteri No": "2902",
       "Musteri Adi": "murat furkan bayar",
-      "Ulke": "Spain",
+      "Ulke": "🇪🇸 Spain",
       "Paket Sayisi": 11,
       "Eslesen Sayisi": 11,
       "Gelir": 339.62,
@@ -2276,7 +2276,7 @@
     {
       "Musteri No": "2036",
       "Musteri Adi": "MUHAMMED EMIN ACAR",
-      "Ulke": "Canada",
+      "Ulke": "🇨🇦 Canada",
       "Paket Sayisi": 7,
       "Eslesen Sayisi": 7,
       "Gelir": 125.17,
@@ -2286,7 +2286,7 @@
     {
       "Musteri No": "2886",
       "Musteri Adi": "Abdul Rahim YILDIZ",
-      "Ulke": "United Kingdom",
+      "Ulke": "🇬🇧 United Kingdom",
       "Paket Sayisi": 13,
       "Eslesen Sayisi": 13,
       "Gelir": 418.8,
@@ -2296,7 +2296,7 @@
     {
       "Musteri No": "1898",
       "Musteri Adi": "KEREM YENICAY",
-      "Ulke": "Italy",
+      "Ulke": "🇮🇹 Italy",
       "Paket Sayisi": 5,
       "Eslesen Sayisi": 5,
       "Gelir": 210.93,
@@ -2306,7 +2306,7 @@
     {
       "Musteri No": "2900",
       "Musteri Adi": "Fatma  Turkkaya",
-      "Ulke": "United Kingdom",
+      "Ulke": "🇬🇧 United Kingdom",
       "Paket Sayisi": 3,
       "Eslesen Sayisi": 3,
       "Gelir": 95.63,
@@ -2316,7 +2316,7 @@
     {
       "Musteri No": "2392",
       "Musteri Adi": "yasin MOCO",
-      "Ulke": "United Kingdom",
+      "Ulke": "🇬🇧 United Kingdom",
       "Paket Sayisi": 5,
       "Eslesen Sayisi": 5,
       "Gelir": 190.48,
@@ -2326,7 +2326,7 @@
     {
       "Musteri No": "2119",
       "Musteri Adi": "METIN TOMAR",
-      "Ulke": "Canada",
+      "Ulke": "🇨🇦 Canada",
       "Paket Sayisi": 15,
       "Eslesen Sayisi": 15,
       "Gelir": 218.37,
@@ -2336,7 +2336,7 @@
     {
       "Musteri No": "1423",
       "Musteri Adi": "Huseyin Tuna Ozturk Öztürk",
-      "Ulke": "United Kingdom",
+      "Ulke": "🇬🇧 United Kingdom",
       "Paket Sayisi": 4,
       "Eslesen Sayisi": 4,
       "Gelir": 193.97,
@@ -2346,7 +2346,7 @@
     {
       "Musteri No": "2902",
       "Musteri Adi": "murat furkan bayar",
-      "Ulke": "Netherlands The",
+      "Ulke": "🇳🇱 Netherlands The",
       "Paket Sayisi": 3,
       "Eslesen Sayisi": 3,
       "Gelir": 152.1,
@@ -2356,7 +2356,7 @@
     {
       "Musteri No": "2258",
       "Musteri Adi": "Semih Çınar",
-      "Ulke": "United Kingdom",
+      "Ulke": "🇬🇧 United Kingdom",
       "Paket Sayisi": 7,
       "Eslesen Sayisi": 7,
       "Gelir": 317.68,
@@ -2366,7 +2366,7 @@
     {
       "Musteri No": "2820",
       "Musteri Adi": "ZEYNEP YILDIZ",
-      "Ulke": "Belgium",
+      "Ulke": "🇧🇪 Belgium",
       "Paket Sayisi": 7,
       "Eslesen Sayisi": 7,
       "Gelir": 225.69,
@@ -2376,7 +2376,7 @@
     {
       "Musteri No": "2799",
       "Musteri Adi": "Ersin Saydam",
-      "Ulke": "United Kingdom",
+      "Ulke": "🇬🇧 United Kingdom",
       "Paket Sayisi": 16,
       "Eslesen Sayisi": 16,
       "Gelir": 251.46,
@@ -2386,7 +2386,7 @@
     {
       "Musteri No": "2494",
       "Musteri Adi": "Fatih Kaplan",
-      "Ulke": "United States",
+      "Ulke": "🇺🇸 United States",
       "Paket Sayisi": 13,
       "Eslesen Sayisi": 13,
       "Gelir": 140.77,
@@ -2396,7 +2396,7 @@
     {
       "Musteri No": "2081",
       "Musteri Adi": "MyAmi  STORE",
-      "Ulke": "Canada",
+      "Ulke": "🇨🇦 Canada",
       "Paket Sayisi": 33,
       "Eslesen Sayisi": 32,
       "Gelir": 335.19,
@@ -2406,7 +2406,7 @@
     {
       "Musteri No": "2379",
       "Musteri Adi": "Hıdır Murat Pehlivan",
-      "Ulke": "Canada",
+      "Ulke": "🇨🇦 Canada",
       "Paket Sayisi": 7,
       "Eslesen Sayisi": 7,
       "Gelir": 157.49,
@@ -2416,7 +2416,7 @@
     {
       "Musteri No": "1876",
       "Musteri Adi": "mehmet ali yılmaz",
-      "Ulke": "Canada",
+      "Ulke": "🇨🇦 Canada",
       "Paket Sayisi": 33,
       "Eslesen Sayisi": 33,
       "Gelir": 291.1,
@@ -2426,7 +2426,7 @@
     {
       "Musteri No": "2829",
       "Musteri Adi": "OZGE ALKAN",
-      "Ulke": "United Kingdom",
+      "Ulke": "🇬🇧 United Kingdom",
       "Paket Sayisi": 13,
       "Eslesen Sayisi": 13,
       "Gelir": 332.9,
@@ -2436,7 +2436,7 @@
     {
       "Musteri No": "2857",
       "Musteri Adi": "Muhammed Mustafa  Eraslan ",
-      "Ulke": "United Kingdom",
+      "Ulke": "🇬🇧 United Kingdom",
       "Paket Sayisi": 11,
       "Eslesen Sayisi": 11,
       "Gelir": 223.41,
@@ -2446,7 +2446,7 @@
     {
       "Musteri No": "2902",
       "Musteri Adi": "murat furkan bayar",
-      "Ulke": "Belgium",
+      "Ulke": "🇧🇪 Belgium",
       "Paket Sayisi": 21,
       "Eslesen Sayisi": 18,
       "Gelir": 680.28,
@@ -2456,7 +2456,7 @@
     {
       "Musteri No": "1689",
       "Musteri Adi": "Egenur Bakkal",
-      "Ulke": "United Kingdom",
+      "Ulke": "🇬🇧 United Kingdom",
       "Paket Sayisi": 20,
       "Eslesen Sayisi": 20,
       "Gelir": 181.74,
@@ -2466,7 +2466,7 @@
     {
       "Musteri No": "1981",
       "Musteri Adi": "Ayhan ekinci",
-      "Ulke": "Canada",
+      "Ulke": "🇨🇦 Canada",
       "Paket Sayisi": 17,
       "Eslesen Sayisi": 17,
       "Gelir": 221.92,
@@ -2476,7 +2476,7 @@
     {
       "Musteri No": "2050",
       "Musteri Adi": "LIFOSALE  OMER SAHIN",
-      "Ulke": "Canada",
+      "Ulke": "🇨🇦 Canada",
       "Paket Sayisi": 25,
       "Eslesen Sayisi": 25,
       "Gelir": 225.49,
@@ -2486,7 +2486,7 @@
     {
       "Musteri No": "2413",
       "Musteri Adi": "GULTEKIN CINARLIDERE chinari Store",
-      "Ulke": "Canada",
+      "Ulke": "🇨🇦 Canada",
       "Paket Sayisi": 23,
       "Eslesen Sayisi": 23,
       "Gelir": 295.32,
@@ -2496,7 +2496,7 @@
     {
       "Musteri No": "2392",
       "Musteri Adi": "yasin MOCO",
-      "Ulke": "Belgium",
+      "Ulke": "🇧🇪 Belgium",
       "Paket Sayisi": 10,
       "Eslesen Sayisi": 9,
       "Gelir": 406.25,
@@ -2506,7 +2506,7 @@
     {
       "Musteri No": "2830",
       "Musteri Adi": "Baki BOZKURT",
-      "Ulke": "Canada",
+      "Ulke": "🇨🇦 Canada",
       "Paket Sayisi": 16,
       "Eslesen Sayisi": 16,
       "Gelir": 236.5,
@@ -2516,7 +2516,7 @@
     {
       "Musteri No": "2907",
       "Musteri Adi": "abdullah kutay",
-      "Ulke": "Belgium",
+      "Ulke": "🇧🇪 Belgium",
       "Paket Sayisi": 19,
       "Eslesen Sayisi": 19,
       "Gelir": 540.05,
@@ -2526,7 +2526,7 @@
     {
       "Musteri No": "1040",
       "Musteri Adi": "vedat yıldırım",
-      "Ulke": "Canada",
+      "Ulke": "🇨🇦 Canada",
       "Paket Sayisi": 15,
       "Eslesen Sayisi": 15,
       "Gelir": 339.99,
@@ -2536,7 +2536,7 @@
     {
       "Musteri No": "1898",
       "Musteri Adi": "KEREM YENICAY",
-      "Ulke": "Australia",
+      "Ulke": "🇦🇺 Australia",
       "Paket Sayisi": 21,
       "Eslesen Sayisi": 21,
       "Gelir": 384.49,
@@ -2546,7 +2546,7 @@
     {
       "Musteri No": "2896",
       "Musteri Adi": "Tulay Gunes",
-      "Ulke": "Canada",
+      "Ulke": "🇨🇦 Canada",
       "Paket Sayisi": 14,
       "Eslesen Sayisi": 14,
       "Gelir": 411.58,
@@ -2556,7 +2556,7 @@
     {
       "Musteri No": "2427",
       "Musteri Adi": "ruken buluc",
-      "Ulke": "Canada",
+      "Ulke": "🇨🇦 Canada",
       "Paket Sayisi": 39,
       "Eslesen Sayisi": 37,
       "Gelir": 505.87,
@@ -2566,7 +2566,7 @@
     {
       "Musteri No": "2901",
       "Musteri Adi": "İHSAN YETİMOVA",
-      "Ulke": "Netherlands The",
+      "Ulke": "🇳🇱 Netherlands The",
       "Paket Sayisi": 37,
       "Eslesen Sayisi": 36,
       "Gelir": 872.65,
@@ -2576,7 +2576,7 @@
     {
       "Musteri No": "2765",
       "Musteri Adi": "Cihat Pamuk",
-      "Ulke": "Australia",
+      "Ulke": "🇦🇺 Australia",
       "Paket Sayisi": 61,
       "Eslesen Sayisi": 61,
       "Gelir": 737.9,
@@ -2586,7 +2586,7 @@
     {
       "Musteri No": "1898",
       "Musteri Adi": "KEREM YENICAY",
-      "Ulke": "United Kingdom",
+      "Ulke": "🇬🇧 United Kingdom",
       "Paket Sayisi": 65,
       "Eslesen Sayisi": 62,
       "Gelir": 636.19,
@@ -2596,17 +2596,17 @@
     {
       "Musteri No": "2153",
       "Musteri Adi": "Tuğrul Mete Akgül",
-      "Ulke": "Canada",
+      "Ulke": "🇨🇦 Canada",
       "Paket Sayisi": 25,
       "Eslesen Sayisi": 25,
       "Gelir": 709.09,
-      "Gider": 507.0551087999999,
-      "Kar/Zarar": 202.0348912
+      "Gider": 510.40963129999994,
+      "Kar/Zarar": 198.6803687
     },
     {
       "Musteri No": "2906",
       "Musteri Adi": "fikret Topuz",
-      "Ulke": "Canada",
+      "Ulke": "🇨🇦 Canada",
       "Paket Sayisi": 12,
       "Eslesen Sayisi": 12,
       "Gelir": 392.02,
@@ -2616,7 +2616,7 @@
     {
       "Musteri No": "2543",
       "Musteri Adi": "TEMEL ARDA KARSLI",
-      "Ulke": "Singapore",
+      "Ulke": "🇸🇬 Singapore",
       "Paket Sayisi": 66,
       "Eslesen Sayisi": 65,
       "Gelir": 1266.1,
@@ -2626,7 +2626,7 @@
     {
       "Musteri No": "2259",
       "Musteri Adi": "SERWIRE SERKAN MARAL",
-      "Ulke": "Canada",
+      "Ulke": "🇨🇦 Canada",
       "Paket Sayisi": 49,
       "Eslesen Sayisi": 49,
       "Gelir": 813.19,
@@ -2636,7 +2636,7 @@
     {
       "Musteri No": "2269",
       "Musteri Adi": "Mehmet Salih KUTLU",
-      "Ulke": "Canada",
+      "Ulke": "🇨🇦 Canada",
       "Paket Sayisi": 28,
       "Eslesen Sayisi": 28,
       "Gelir": 736.01,
@@ -2646,7 +2646,7 @@
     {
       "Musteri No": "2427",
       "Musteri Adi": "ruken buluc",
-      "Ulke": "United Kingdom",
+      "Ulke": "🇬🇧 United Kingdom",
       "Paket Sayisi": 81,
       "Eslesen Sayisi": 81,
       "Gelir": 889.08,
@@ -2656,17 +2656,17 @@
     {
       "Musteri No": "1964",
       "Musteri Adi": "NILDISA AHMET SAHIN",
-      "Ulke": "Canada",
+      "Ulke": "🇨🇦 Canada",
       "Paket Sayisi": 108,
       "Eslesen Sayisi": 108,
       "Gelir": 1054.79,
-      "Gider": 695.0261796000002,
-      "Kar/Zarar": 359.76382040000004
+      "Gider": 699.1603246000003,
+      "Kar/Zarar": 355.6296754
     },
     {
       "Musteri No": "2830",
       "Musteri Adi": "Baki BOZKURT",
-      "Ulke": "United Kingdom",
+      "Ulke": "🇬🇧 United Kingdom",
       "Paket Sayisi": 85,
       "Eslesen Sayisi": 85,
       "Gelir": 1121.63,
@@ -2676,7 +2676,7 @@
     {
       "Musteri No": "1964",
       "Musteri Adi": "NILDISA AHMET SAHIN",
-      "Ulke": "United Kingdom",
+      "Ulke": "🇬🇧 United Kingdom",
       "Paket Sayisi": 141,
       "Eslesen Sayisi": 141,
       "Gelir": 1394.49,
@@ -2686,17 +2686,17 @@
     {
       "Musteri No": "1990",
       "Musteri Adi": "EDİBE ERDEM UTMA",
-      "Ulke": "Canada",
+      "Ulke": "🇨🇦 Canada",
       "Paket Sayisi": 170,
       "Eslesen Sayisi": 170,
       "Gelir": 2326.55,
-      "Gider": 1402.454725,
-      "Kar/Zarar": 924.095275
+      "Gider": 1421.0226149999999,
+      "Kar/Zarar": 905.527385
     },
     {
       "Musteri No": "2245",
       "Musteri Adi": "Talha Yasin Gokduman",
-      "Ulke": "Canada",
+      "Ulke": "🇨🇦 Canada",
       "Paket Sayisi": 103,
       "Eslesen Sayisi": 103,
       "Gelir": 3426.93,
@@ -2706,7 +2706,7 @@
     {
       "Musteri No": "2397",
       "Musteri Adi": "BETUL GOKMEN TURANOGLU",
-      "Ulke": "United Kingdom",
+      "Ulke": "🇬🇧 United Kingdom",
       "Paket Sayisi": 354,
       "Eslesen Sayisi": 347,
       "Gelir": 3290.98,
@@ -2714,9 +2714,29 @@
       "Kar/Zarar": 1189.5200000000016
     },
     {
+      "Musteri No": "2239",
+      "Musteri Adi": "Gulay TOMA",
+      "Ulke": "🇨🇦 Canada",
+      "Paket Sayisi": 171,
+      "Eslesen Sayisi": 171,
+      "Gelir": 3081.72,
+      "Gider": 1878.2328465999992,
+      "Kar/Zarar": 1203.4871534000004
+    },
+    {
+      "Musteri No": "2415",
+      "Musteri Adi": "ONEROSE",
+      "Ulke": "🇨🇦 Canada",
+      "Paket Sayisi": 466,
+      "Eslesen Sayisi": 413,
+      "Gelir": 4579.02,
+      "Gider": 2914.4502222999986,
+      "Kar/Zarar": 1214.7097776999992
+    },
+    {
       "Musteri No": "2896",
       "Musteri Adi": "LUNASUN",
-      "Ulke": "Canada",
+      "Ulke": "🇨🇦 Canada",
       "Paket Sayisi": 348,
       "Eslesen Sayisi": 331,
       "Gelir": 4226.82,
@@ -2724,59 +2744,39 @@
       "Kar/Zarar": 1220.112698899999
     },
     {
-      "Musteri No": "2415",
-      "Musteri Adi": "ONEROSE",
-      "Ulke": "Canada",
-      "Paket Sayisi": 466,
-      "Eslesen Sayisi": 413,
-      "Gelir": 4579.02,
-      "Gider": 2906.3122695999978,
-      "Kar/Zarar": 1222.847730399999
-    },
-    {
-      "Musteri No": "2239",
-      "Musteri Adi": "Gulay TOMA",
-      "Ulke": "Canada",
-      "Paket Sayisi": 171,
-      "Eslesen Sayisi": 171,
-      "Gelir": 3081.72,
-      "Gider": 1837.7859565999995,
-      "Kar/Zarar": 1243.9340434000005
-    },
-    {
       "Musteri No": "2765",
       "Musteri Adi": "Cihat Pamuk",
-      "Ulke": "Canada",
+      "Ulke": "🇨🇦 Canada",
       "Paket Sayisi": 580,
       "Eslesen Sayisi": 580,
       "Gelir": 6290.69,
-      "Gider": 4161.997584800003,
-      "Kar/Zarar": 2128.6924152000006
+      "Gider": 4218.110562000005,
+      "Kar/Zarar": 2072.5794380000007
     },
     {
       "Musteri No": "1033",
       "Musteri Adi": "9GEEK LLC",
-      "Ulke": "Canada",
+      "Ulke": "🇨🇦 Canada",
       "Paket Sayisi": 511,
       "Eslesen Sayisi": 509,
       "Gelir": 8270.31,
-      "Gider": 5166.031920100005,
-      "Kar/Zarar": 3060.3680798999994
+      "Gider": 5213.0309976000035,
+      "Kar/Zarar": 3013.3690023999993
     },
     {
       "Musteri No": "2754",
       "Musteri Adi": "ABDULLAH TOLGA KARAMAN",
-      "Ulke": "Canada",
+      "Ulke": "🇨🇦 Canada",
       "Paket Sayisi": 549,
-      "Eslesen Sayisi": 547,
+      "Eslesen Sayisi": 549,
       "Gelir": 9655.48,
-      "Gider": 6328.496501600003,
-      "Kar/Zarar": 3301.163498400004
+      "Gider": 6375.976219100002,
+      "Kar/Zarar": 3279.503780900003
     },
     {
       "Musteri No": "2765",
       "Musteri Adi": "Cihat Pamuk",
-      "Ulke": "United Kingdom",
+      "Ulke": "🇬🇧 United Kingdom",
       "Paket Sayisi": 1005,
       "Eslesen Sayisi": 990,
       "Gelir": 10216.29,
@@ -2786,22 +2786,22 @@
     {
       "Musteri No": "2753",
       "Musteri Adi": "Smyrna",
-      "Ulke": "Canada",
+      "Ulke": "🇨🇦 Canada",
       "Paket Sayisi": 2418,
-      "Eslesen Sayisi": 2242,
+      "Eslesen Sayisi": 2245,
       "Gelir": 23802.24,
-      "Gider": 16134.13296300009,
-      "Kar/Zarar": 6149.037036999962
+      "Gider": 16208.553215600092,
+      "Kar/Zarar": 6104.526784399961
     },
     {
       "Musteri No": "2434",
       "Musteri Adi": "WHITE UNICORN",
-      "Ulke": "Canada",
+      "Ulke": "🇨🇦 Canada",
       "Paket Sayisi": 3638,
-      "Eslesen Sayisi": 3419,
+      "Eslesen Sayisi": 3420,
       "Gelir": 41188.79,
-      "Gider": 27534.765736700112,
-      "Kar/Zarar": 11641.924263299972
+      "Gider": 27595.41501710011,
+      "Kar/Zarar": 11596.064982899976
     }
   ]
 }
