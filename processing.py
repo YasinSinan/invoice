@@ -690,19 +690,22 @@ def format_country_with_flag(country_name):
 def country_breakdown(merged):
     """Ulkeye gore gelir, kargo gideri, vergi ve kar dagilimi.
 
-    Toplam gelir ve gonderi sayisi TUM gonderileri kapsar (eslesen/eslesmeyen).
-    Kargo/Vergi/Toplam Gider/Kar sutunlari sadece ESLESEN gonderilerden gelir
-    (pandas sum() varsayilan olarak NaN'lari atlar, bu yuzden eslesmeyenler
-    bu sutunlarda otomatik olarak hesaba katilmaz).
+    Gonderi Sayisi ve Toplam Gelir (Tum) TUM gonderileri kapsar.
+    Eslesen Gelir, Kargo/Vergi/Toplam Gider ve Kar sutunlari sadece
+    ESLESEN gonderilerden gelir.
 
-    Paket Basi Kar = Kar / Eslesen Sayisi (eslesen yoksa 0 gosterilir).
+    Kar = Eslesen Gelir - Toplam Gider (tutarli karsilastirma icin).
     """
+    merged = merged.copy()
+    merged["_eslesen_gelir"] = merged["Invoice Amount"].where(merged["Durum"] == "Eslesti")
+
     out = (
         merged.groupby("Receiver Country", as_index=False)
         .agg(
             Gonderi_Sayisi=("Shipment No", "count"),
             Eslesen_Sayisi=("Durum", lambda x: (x == "Eslesti").sum()),
             Toplam_Gelir=("Invoice Amount", "sum"),
+            Eslesen_Gelir=("_eslesen_gelir", "sum"),
             Kargo_Gideri=("Gider_Kargo", "sum"),
             Vergi_Gideri=("Gider_Tax", "sum"),
             Toplam_Gider=("Gider", "sum"),
@@ -724,17 +727,15 @@ def carrier_breakdown(merged):
     """Kargo firmasina (gelir dosyasindaki Carrier Name) gore paket sayisi,
     gelir, gider ve kar/zarar dagilimi.
 
-    Paket Sayisi ve Toplam Gelir TUM gonderileri kapsar. Eslesen Sayisi, Kargo
-    Gideri, Vergi Gideri, Toplam Gider ve Kar/Zarar sutunlari sadece ESLESEN
-    gonderilerden gelir (pandas sum() varsayilan olarak NaN'lari atlar).
+    Paket Sayisi ve Toplam Gelir TUM gonderileri kapsar.
+    Eslesen Gelir, Kargo Gideri, Vergi Gideri, Toplam Gider ve Kar/Zarar
+    sutunlari sadece ESLESEN gonderilerden gelir.
 
-    Carrier Name bos olan gonderiler (henuz kargo firmasi atanmamis) "Atanmamis"
-    olarak ayri bir satirda gosterilir, sessizce atilmaz.
-
-    Paket Basi Kar/Zarar = Kar/Zarar / Eslesen Sayisi (eslesen yoksa 0 gosterilir).
+    Kar/Zarar = Eslesen Gelir - Toplam Gider (tutarli karsilastirma icin).
     """
     merged = merged.copy()
     merged["Carrier Name"] = merged["Carrier Name"].fillna("Atanmamis")
+    merged["_eslesen_gelir"] = merged["Invoice Amount"].where(merged["Durum"] == "Eslesti")
 
     out = (
         merged.groupby("Carrier Name", as_index=False)
@@ -742,7 +743,8 @@ def carrier_breakdown(merged):
             **{
                 "Paket Sayisi": ("Shipment No", "count"),
                 "Eslesen Sayisi": ("Durum", lambda x: (x == "Eslesti").sum()),
-                "Toplam Gelir": ("Invoice Amount", "sum"),
+                "Toplam Gelir (Tum)": ("Invoice Amount", "sum"),
+                "Eslesen Gelir": ("_eslesen_gelir", "sum"),
                 "Kargo Gideri": ("Gider_Kargo", "sum"),
                 "Vergi Gideri": ("Gider_Tax", "sum"),
                 "Toplam Gider": ("Gider", "sum"),
@@ -750,7 +752,7 @@ def carrier_breakdown(merged):
             }
         )
         .rename(columns={"Carrier Name": "Kargo Firmasi"})
-        .sort_values("Toplam Gelir", ascending=False)
+        .sort_values("Toplam Gelir (Tum)", ascending=False)
         .reset_index(drop=True)
     )
     out["Paket Basi Kar/Zarar"] = [

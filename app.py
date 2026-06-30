@@ -515,7 +515,8 @@ if st.session_state.get("hesapla_tiklandi") and income_file is not None:
     st.dataframe(
         carrier_table.style.format(
             {
-                "Toplam Gelir": "${:,.2f}",
+                "Toplam Gelir (Tum)": "${:,.2f}",
+                "Eslesen Gelir": "${:,.2f}",
                 "Kargo Gideri": "${:,.2f}",
                 "Vergi Gideri": "${:,.2f}",
                 "Toplam Gider": "${:,.2f}",
@@ -551,6 +552,7 @@ if st.session_state.get("hesapla_tiklandi") and income_file is not None:
         cb.style.format(
             {
                 "Toplam_Gelir": "${:,.2f}",
+                "Eslesen_Gelir": "${:,.2f}",
                 "Kargo_Gideri": "${:,.2f}",
                 "Vergi_Gideri": "${:,.2f}",
                 "Toplam_Gider": "${:,.2f}",
