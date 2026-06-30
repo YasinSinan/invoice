@@ -21,6 +21,7 @@ from processing import (
     country_breakdown,
     customer_breakdown,
     customer_country_breakdown,
+    europe_summary,
     load_byelabel_group,
     load_cost_file,
     load_income_file,
@@ -564,6 +565,31 @@ if st.session_state.get("hesapla_tiklandi") and income_file is not None:
         hide_index=True,
     )
     indirme_butonlari(cb, "ulkeye_gore_analiz", "country_table")
+
+    eu = europe_summary(merged)
+    if eu:
+        st.markdown("**🌍 Avrupa Toplam Ozeti**")
+        st.caption(
+            "UK, Turkiye, Kıbrıs, İsrail dahil tum Avrupa ulkelerine ait gonderilerin toplu ozeti. "
+            "Dahil edilen ulkeler: " + " · ".join(eu["ulkeler"])
+        )
+        eu_col1, eu_col2, eu_col3 = st.columns(3)
+        with eu_col1:
+            renkli_kart("Gonderi Sayisi (Tum)", f"{eu['gonderi_sayisi']:,}", "#6366f1", "📦")
+            renkli_kart("Eslesen Sayisi", f"{eu['eslesen_sayisi']:,}", "#8b5cf6", "✅")
+        with eu_col2:
+            renkli_kart("Toplam Gelir (Tum)", f"${eu['toplam_gelir']:,.2f}", "#10b981", "💵")
+            renkli_kart("Eslesen Gelir", f"${eu['eslesen_gelir']:,.2f}", "#34d399", "💵")
+        with eu_col3:
+            renkli_kart("Kargo Gideri", f"${eu['kargo_gideri']:,.2f}", "#f59e0b", "🚚")
+            renkli_kart("Vergi/Gumruk", f"${eu['vergi_gideri']:,.2f}", "#f97316", "🛂")
+        eu_col4, eu_col5 = st.columns(2)
+        with eu_col4:
+            renkli_kart("Toplam Gider", f"${eu['toplam_gider']:,.2f}", "#ef4444", "🧾")
+        with eu_col5:
+            eu_renk = "#10b981" if eu["kar_zarar"] >= 0 else "#dc2626"
+            eu_icon = "📈" if eu["kar_zarar"] >= 0 else "📉"
+            renkli_kart("Kar/Zarar", f"${eu['kar_zarar']:,.2f}", eu_renk, eu_icon)
 
     st.divider()
 

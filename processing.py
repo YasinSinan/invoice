@@ -886,3 +886,59 @@ def manual_expense_total(manual_df):
     if valid.empty:
         return 0.0
     return float(pd.to_numeric(valid["Tutar"], errors="coerce").fillna(0).sum())
+
+
+# Avrupa bolgesine dahil edilen ulkeler (UK, Turkiye, Cyprus, Israel dahil).
+# Receiver Country kolonu ile karsilastirilir (kucuk harfe indirgenerek).
+EUROPE_COUNTRIES = {
+    "united kingdom", "uk", "great britain",
+    "france", "germany", "spain", "italy", "portugal",
+    "netherlands", "netherlands the", "the netherlands",
+    "belgium", "switzerland", "austria", "ireland",
+    "sweden", "norway", "denmark", "finland",
+    "poland", "czech republic", "czechia",
+    "greece", "turkey", "turkiye",
+    "cyprus", "israel",
+    "romania", "hungary", "bulgaria", "croatia",
+    "slovenia", "slovakia", "estonia", "latvia", "lithuania",
+    "luxembourg", "iceland", "malta",
+    "serbia", "bosnia and herzegovina", "north macedonia",
+    "albania", "georgia", "armenia", "azerbaijan",
+    "ukraine", "russia",
+}
+
+
+def europe_summary(merged):
+    """Avrupa ulkelerine ait gonderileri toplu olarak ozetler.
+
+    Tek bir ozet satiri dondurur: toplam gonderi/eslesen sayisi, toplam
+    gelir (tum), eslesen gelir, kargo gideri, vergi/gumruk gideri,
+    toplam gider ve kar/zarar.
+
+    Avrupa'ya dahil edilen ulkeler EUROPE_COUNTRIES setinde tanimlidir
+    (UK, Turkiye, Cyprus, Israel dahil).
+    """
+    merged = merged.copy()
+    merged["_is_europe"] = merged["Receiver Country"].apply(
+        lambda c: str(c).strip().lower() in EUROPE_COUNTRIES if not pd.isna(c) else False
+    )
+    eu = merged[merged["_is_europe"]]
+    eslesen = eu[eu["Durum"] == "Eslesti"]
+
+    if eu.empty:
+        return None
+
+    ulkeler = sorted(eu["Receiver Country"].dropna().unique())
+
+    return {
+        "ulkeler": [format_country_with_flag(u) for u in ulkeler],
+        "gonderi_sayisi": len(eu),
+        "eslesen_sayisi": int((eu["Durum"] == "Eslesti").sum()),
+        "toplam_gelir": float(eu["Invoice Amount"].sum()),
+        "eslesen_gelir": float(eslesen["Invoice Amount"].sum()),
+        "kargo_gideri": float(eslesen["Gider_Kargo"].sum()),
+        "vergi_gideri": float(eslesen["Gider_Tax"].sum()),
+        "toplam_gider": float(eslesen["Gider"].sum()),
+        "kar_zarar": float(eslesen["Kar"].sum()),
+    }
+
