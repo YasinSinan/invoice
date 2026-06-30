@@ -43,7 +43,7 @@ CARRIER_PROFILES = {
         "invoice_col": "Invoice Number",
         "charge_is_money_text": True,
         "tax_category_col": "Shipping System / Adjustment",
-        "tax_category_values": ["US Customs Duties", "Government Charges", "Brokerage Charges"],
+        "tax_category_values": ["US Customs Duties", "Government Charges", "Brokerage Charges", "Import Shipment Detail"],
     },
     "Asendia - Vergi/Gumruk": {
         # Asendia'nin ayri Duty & Tax raporu. Sadece "2026" sayfasi islenir;
