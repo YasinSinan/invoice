@@ -532,15 +532,6 @@ if st.session_state.get("hesapla_tiklandi") and "income_df_cache" in st.session_
                     use_container_width=True,
                     hide_index=True,
                 )
-            if has_per_package_fee:
-                st.caption("Paket basina eklenen gider (firma bazinda):")
-                st.dataframe(
-                    gecerli_paket_basi[["Kargo Firmasi", "Aciklama", "Paket Basi Tutar"]].style.format(
-                        {"Paket Basi Tutar": "${:,.2f}"}
-                    ),
-                    use_container_width=True,
-                    hide_index=True,
-                )
 
     st.markdown("")
     _, kar_orta, _ = st.columns([1, 1, 1])
@@ -562,28 +553,6 @@ if st.session_state.get("hesapla_tiklandi") and "income_df_cache" in st.session_
             hide_index=True,
         )
         indirme_butonlari(genel_gider_kategori_detay, "genel_gider_detayi", "genel_gider_detay")
-
-    if has_per_package_fee:
-        st.caption(
-            "📦 Paket basina eklenen ek gider - kac pakete uygulandigi ve toplam tutar "
-            "(bu zaten yukaridaki Net Kar rakamina islenmis durumda, Genel Gider'e dahil degil):"
-        )
-        detay_satirlari = []
-        for _, r in gecerli_paket_basi.iterrows():
-            etkilenen = int(((merged["Carrier Name"] == r["Kargo Firmasi"]) & merged["Takip_Var_Mi"]).sum())
-            toplam_eklenen = etkilenen * float(r["Paket Basi Tutar"])
-            detay_satirlari.append(
-                (r["Kargo Firmasi"], r.get("Aciklama", ""), r["Paket Basi Tutar"], etkilenen, toplam_eklenen)
-            )
-        detay_df = pd.DataFrame(
-            detay_satirlari,
-            columns=["Kargo Firmasi", "Aciklama", "Paket Basi Tutar", "Etkilenen Paket Sayisi", "Toplam Eklenen Gider"],
-        )
-        st.dataframe(
-            detay_df.style.format({"Paket Basi Tutar": "${:,.2f}", "Toplam Eklenen Gider": "${:,.2f}"}),
-            use_container_width=True,
-            hide_index=True,
-        )
 
     eslesme_orani = summary["eslesen_sayisi"] / summary["toplam_gonderi"] * 100 if summary["toplam_gonderi"] else 0
     st.caption(f"Eslesme orani: %{eslesme_orani:.1f}")
