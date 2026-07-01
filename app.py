@@ -446,7 +446,10 @@ if st.session_state.get("hesapla_tiklandi") and "income_df_cache" in st.session_
     st.session_state["otomatik_genel_gider_satirlari"] = otomatik_satirlar
 
     manuel_gider_toplam = manual_expense_total(manual_expenses_df)
-    toplam_genel_gider = carrier_overhead_toplam + manuel_gider_toplam
+    # carrier_overhead_toplam buraya EKLENMIYOR — onun yarisi zaten
+    # manuel_expenses_df'e otomatik satir olarak eklendi, manual_expense_total
+    # onu zaten sayiyor. Tam tutari ayrica eklemek cift sayima yol acar.
+    toplam_genel_gider = manuel_gider_toplam
     manuel_gelir_toplam = manual_expense_total(manual_income_df)
 
     full_breakdown = full_breakdown_erken
