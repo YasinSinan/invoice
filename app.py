@@ -118,10 +118,26 @@ with st.expander("Gecmis analizler (aylik kayitlar)", expanded=False):
         else:
             secilen_donem = st.selectbox("Bir donem secin", options=saved_periods, key="gecmis_donem_secimi")
 
-            col_goruntule, col_sil = st.columns([1, 1])
+            col_goruntule, col_yukle, col_sil = st.columns([1, 1, 1])
             with col_goruntule:
                 if st.button("Goruntule", key="gecmis_goruntule_buton"):
                     st.session_state["gecmis_goruntulenecek_donem"] = secilen_donem
+            with col_yukle:
+                if st.button("⬇️ Parametreleri yukle", key="gecmis_yukle_buton"):
+                    try:
+                        rapor = load_report(secilen_donem)
+                        params = rapor.get("parametreler")
+                        if not params:
+                            st.warning("Bu kayıtta parametre bilgisi yok (eski format).")
+                        else:
+                            st.session_state["yuklu_parametreler"] = params
+                            st.session_state["yuklu_donem"] = secilen_donem
+                            st.success(
+                                f"'{secilen_donem}' parametreleri yuklendi. "
+                                "Asagida dosyalarini yukleyip 'Hesapla'ya bas."
+                            )
+                    except Exception as e:
+                        st.error(f"Parametreler yuklenemedi: {e}")
             with col_sil:
                 if st.button("Sil (geri alinamaz)", key="gecmis_sil_buton"):
                     try:
@@ -132,6 +148,9 @@ with st.expander("Gecmis analizler (aylik kayitlar)", expanded=False):
                         st.rerun()
                     except Exception as e:
                         st.error(f"Silinemedi: {e}")
+
+            if st.session_state.get("yuklu_donem"):
+                st.info(f"📥 '{st.session_state['yuklu_donem']}' donemine ait parametreler yuklu — asagida dosyalarini yukleyip 'Hesapla'ya bas.")
 
             goruntulenecek_donem = st.session_state.get("gecmis_goruntulenecek_donem")
             if goruntulenecek_donem and goruntulenecek_donem in saved_periods:
@@ -204,6 +223,9 @@ with st.expander("Gecmis analizler (aylik kayitlar)", expanded=False):
 
 st.divider()
 
+# Yuklu parametreler varsa widget varsayilan degerlerine uygula
+_params = st.session_state.get("yuklu_parametreler", {})
+
 # ---------------------------------------------------------------- yukleme ---
 col1, col2 = st.columns(2)
 
@@ -213,12 +235,12 @@ with col1:
     income_file = st.file_uploader("Gelir Excel dosyasini secin", type=["xlsx"], key="income")
     only_paid = st.checkbox(
         "Sadece odenmis gonderileri dahil et (Status = Paid)",
-        value=True,
+        value=_params.get("only_paid", True),
         help="Isaretliyse User Cancelled, New Shipment, Payment Waiting gibi durumlar disarida tutulur.",
     )
     exclude_unassigned_carrier = st.checkbox(
         "Kargo firmasi atanmamis gonderileri haric tut",
-        value=True,
+        value=_params.get("exclude_unassigned_carrier", True),
         help="Isaretliyse Carrier Name (kargo firmasi) bos olan gonderiler analize hic dahil edilmez.",
     )
 
@@ -227,8 +249,11 @@ with col1:
         "Hicbir pakete baglanmayan, dogrudan net kara eklenecek gelirler "
         "(orn. depo kirasi geliri, danismanlik geliri)."
     )
+    _gelir_default = pd.DataFrame(_params.get("manuel_gelir", [])) if _params else pd.DataFrame({"Aciklama": pd.Series(dtype="str"), "Tutar": pd.Series(dtype="float")})
+    if _gelir_default.empty or list(_gelir_default.columns) != ["Aciklama", "Tutar"]:
+        _gelir_default = pd.DataFrame({"Aciklama": pd.Series(dtype="str"), "Tutar": pd.Series(dtype="float")})
     manual_income_df = st.data_editor(
-        pd.DataFrame({"Aciklama": pd.Series(dtype="str"), "Tutar": pd.Series(dtype="float")}),
+        _gelir_default,
         num_rows="dynamic",
         column_config={
             "Aciklama": st.column_config.TextColumn("Aciklama"),
@@ -266,7 +291,7 @@ with col2:
 
     dahil_et_genel_gider = st.checkbox(
         "Pakete baglanamayan vergi/komisyon giderlerini hesaba dahil et",
-        value=True,
+        value=_params.get("dahil_et_genel_gider", True),
         help=(
             "Takip numarasina baglanamayan vergi/komisyon satirlari (orn. UPS'in "
             "Brokerage Charges, Government Charges gibi kalemleri). Isaretliyse net "
@@ -279,8 +304,11 @@ with col2:
         "Hicbir pakete baglanmayan, dogrudan net kardan dusulecek giderler "
         "(orn. depo kirasi, personel maasi, internet faturasi)."
     )
+    _gider_default = pd.DataFrame(_params.get("manuel_gider", [])) if _params else pd.DataFrame({"Aciklama": pd.Series(dtype="str"), "Tutar": pd.Series(dtype="float")})
+    if _gider_default.empty or list(_gider_default.columns) != ["Aciklama", "Tutar"]:
+        _gider_default = pd.DataFrame({"Aciklama": pd.Series(dtype="str"), "Tutar": pd.Series(dtype="float")})
     manual_expenses_df = st.data_editor(
-        pd.DataFrame({"Aciklama": pd.Series(dtype="str"), "Tutar": pd.Series(dtype="float")}),
+        _gider_default,
         num_rows="dynamic",
         column_config={
             "Aciklama": st.column_config.TextColumn("Aciklama"),
@@ -298,14 +326,12 @@ with col2:
         "(ulke, firma, musteri) otomatik yansir. Gideri eslesmemis paketler "
         "bu tutari aldiktan sonra 'eslesti' sayilir."
     )
+    _paket_cols = {"Kargo Firmasi": pd.Series(dtype="str"), "Aciklama": pd.Series(dtype="str"), "Paket Basi Tutar": pd.Series(dtype="float")}
+    _paket_default = pd.DataFrame(_params.get("paket_basi_gider", [])) if _params else pd.DataFrame(_paket_cols)
+    if _paket_default.empty or list(_paket_default.columns) != list(_paket_cols.keys()):
+        _paket_default = pd.DataFrame(_paket_cols)
     manual_carrier_expenses_df = st.data_editor(
-        pd.DataFrame(
-            {
-                "Kargo Firmasi": pd.Series(dtype="str"),
-                "Aciklama": pd.Series(dtype="str"),
-                "Paket Basi Tutar": pd.Series(dtype="float"),
-            }
-        ),
+        _paket_default,
         num_rows="dynamic",
         column_config={
             "Kargo Firmasi": st.column_config.SelectboxColumn("Kargo Firmasi", options=KNOWN_CARRIERS),
@@ -760,7 +786,7 @@ if st.session_state.get("hesapla_tiklandi") and "income_df_cache" in st.session_
     st.caption(
         "Bu hesaplamayi bir donem etiketiyle (orn. 2026-06) GitHub reposuna "
         "kaydeder. Daha sonra sayfanin en ustundeki 'Gecmis analizler' "
-        "bolumunden tekrar goruntuleyebilirsin."
+        "bolumunden tekrar goruntuleyebilir, parametreleri geri yukleyebilirsin."
     )
     varsayilan_donem = datetime.now().strftime("%Y-%m")
     donem_etiketi = st.text_input("Donem etiketi", value=varsayilan_donem, key="kayit_donem_etiketi")
@@ -773,9 +799,17 @@ if st.session_state.get("hesapla_tiklandi") and "income_df_cache" in st.session_
                 "country_table": cb.to_dict("records"),
                 "customer_table": cust_table.to_dict("records"),
                 "customer_country_table": cust_country_table.to_dict("records"),
+                "parametreler": {
+                    "only_paid": only_paid,
+                    "exclude_unassigned_carrier": exclude_unassigned_carrier,
+                    "dahil_et_genel_gider": dahil_et_genel_gider,
+                    "manuel_gelir": manual_income_df.to_dict("records"),
+                    "manuel_gider": manual_expenses_df.to_dict("records"),
+                    "paket_basi_gider": manual_carrier_expenses_df.to_dict("records"),
+                },
             }
             save_report(donem_etiketi, payload)
-            st.success(f"'{donem_etiketi}' donemi olarak kaydedildi.")
+            st.success(f"'{donem_etiketi}' donemi kaydedildi. Parametreler de saklandı.")
         except GithubStorageError as e:
             st.error(str(e))
         except Exception as e:
