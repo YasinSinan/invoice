@@ -520,10 +520,15 @@ if st.session_state.get("hesapla_tiklandi") and "income_df_cache" in st.session_
                     hide_index=True,
                 )
         with col_mgid:
-            if not gecerli_manuel_gider_gosterim.empty:
+            if not gecerli_manuel_gider_gosterim.empty or otomatik_satirlar:
                 st.caption("Manuel gider kalemleri:")
+                _goster_df = gecerli_manuel_gider_gosterim.copy()
+                if otomatik_satirlar:
+                    _goster_df = pd.concat(
+                        [_goster_df, pd.DataFrame(otomatik_satirlar)], ignore_index=True
+                    )
                 st.dataframe(
-                    gecerli_manuel_gider_gosterim.style.format({"Tutar": "${:,.2f}"}),
+                    _goster_df.style.format({"Tutar": "${:,.2f}"}),
                     use_container_width=True,
                     hide_index=True,
                 )
@@ -555,10 +560,6 @@ if st.session_state.get("hesapla_tiklandi") and "income_df_cache" in st.session_
             genel_gider_kategori_detay.drop(columns=["Kaynak Sutun"]).style.format({"Genel Gider": "${:,.2f}"}),
             use_container_width=True,
             hide_index=True,
-        )
-        st.caption(
-            f"**Toplam pakete baglanamayan gider: ${carrier_overhead_toplam:,.2f}** "
-            f"— yarisi (${carrier_overhead_toplam / 2:,.2f}) otomatik olarak asagidaki Manuel Gider listesine eklenmistir."
         )
         indirme_butonlari(genel_gider_kategori_detay, "genel_gider_detayi", "genel_gider_detay")
 
