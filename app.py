@@ -300,14 +300,16 @@ with col2:
     if _gider_default.empty or list(_gider_default.columns) != ["Aciklama", "Tutar"]:
         _gider_default = pd.DataFrame({"Aciklama": pd.Series(dtype="str"), "Tutar": pd.Series(dtype="float")})
 
-    # Hesaplamadan gelen otomatik satiri tablonun en altina ekle
-    if "otomatik_eklenen_genel_gider" in st.session_state:
-        yeni_satir = pd.DataFrame([st.session_state["otomatik_eklenen_genel_gider"]])
-        # Ayni aciklamada tekrar eklememek icin once varsa kaldir, sonra sona ekle
+    # Otomatik satirlari en alta ekle (onceki otomatik satirlari temizle, yenileri ekle)
+    otomatik_satirlar = st.session_state.get("otomatik_genel_gider_satirlari", [])
+    if otomatik_satirlar:
+        otomatik_aciklamalar = {s["Aciklama"] for s in otomatik_satirlar}
         _gider_default = _gider_default[
-            _gider_default["Aciklama"].astype(str) != yeni_satir["Aciklama"].iloc[0]
+            ~_gider_default["Aciklama"].astype(str).isin(otomatik_aciklamalar)
         ]
-        _gider_default = pd.concat([_gider_default, yeni_satir], ignore_index=True)
+        _gider_default = pd.concat(
+            [_gider_default, pd.DataFrame(otomatik_satirlar)], ignore_index=True
+        )
 
     manual_expenses_df = st.data_editor(
         _gider_default,
@@ -424,19 +426,30 @@ if st.session_state.get("hesapla_tiklandi") and "income_df_cache" in st.session_
     for w in st.session_state.get("warnings_cache", []):
         st.warning(w)
 
-    # Pakete baglanamayan giderlerin yarisi otomatik olarak
-    # manuel giderler listesine eklenir (her hesaplamada guncellenir).
-    yarim_carrier_overhead = round(carrier_overhead_toplam / 2, 2)
-    st.session_state["otomatik_eklenen_genel_gider"] = {
-        "Aciklama": f"Genel gider (yarisi) - otomatik",
-        "Tutar": yarim_carrier_overhead,
-    }
+    # Pakete baglanamayan giderlerin her kalemi ayrı satır olarak,
+    # yarı tutarıyla otomatik manuel gider listesine eklenir.
+    full_breakdown_erken = pd.concat(breakdown_dfs, ignore_index=True) if breakdown_dfs else pd.DataFrame()
+    if not full_breakdown_erken.empty:
+        genel_gider_satirlari = full_breakdown_erken[
+            full_breakdown_erken["Siniflandirma"] == "Genel Gider (pakete baglanamiyor)"
+        ][["Kategori/Sutun", "Tutar"]]
+        otomatik_satirlar = [
+            {
+                "Aciklama": f"{row['Kategori/Sutun']} (yarisi) - otomatik",
+                "Tutar": round(row["Tutar"] / 2, 2),
+            }
+            for _, row in genel_gider_satirlari.iterrows()
+            if row["Tutar"] > 0
+        ]
+    else:
+        otomatik_satirlar = []
+    st.session_state["otomatik_genel_gider_satirlari"] = otomatik_satirlar
 
     manuel_gider_toplam = manual_expense_total(manual_expenses_df)
     toplam_genel_gider = carrier_overhead_toplam + manuel_gider_toplam
     manuel_gelir_toplam = manual_expense_total(manual_income_df)
 
-    full_breakdown = pd.concat(breakdown_dfs, ignore_index=True) if breakdown_dfs else pd.DataFrame()
+    full_breakdown = full_breakdown_erken
     if not full_breakdown.empty:
         genel_gider_kategori_detay = full_breakdown[
             full_breakdown["Siniflandirma"] == "Genel Gider (pakete baglanamiyor)"
@@ -490,8 +503,13 @@ if st.session_state.get("hesapla_tiklandi") and "income_df_cache" in st.session_
     gecerli_manuel_gelir = gecerli_manuel_gelir[gecerli_manuel_gelir["Aciklama"].astype(str).str.strip() != ""]
     gecerli_manuel_gider = manual_expenses_df.dropna(subset=["Aciklama", "Tutar"])
     gecerli_manuel_gider = gecerli_manuel_gider[gecerli_manuel_gider["Aciklama"].astype(str).str.strip() != ""]
+    # Otomatik eklenen satirlari dashboard gosteriminden cikar (sadece kullanicinin yazdiklarini goster)
+    _otomatik_aciklamalar = {s["Aciklama"] for s in st.session_state.get("otomatik_genel_gider_satirlari", [])}
+    gecerli_manuel_gider_gosterim = gecerli_manuel_gider[
+        ~gecerli_manuel_gider["Aciklama"].astype(str).isin(_otomatik_aciklamalar)
+    ]
 
-    if not gecerli_manuel_gelir.empty or not gecerli_manuel_gider.empty or has_per_package_fee:
+    if not gecerli_manuel_gelir.empty or not gecerli_manuel_gider_gosterim.empty or has_per_package_fee:
         col_mg, col_mgid = st.columns(2)
         with col_mg:
             if not gecerli_manuel_gelir.empty:
@@ -502,10 +520,10 @@ if st.session_state.get("hesapla_tiklandi") and "income_df_cache" in st.session_
                     hide_index=True,
                 )
         with col_mgid:
-            if not gecerli_manuel_gider.empty:
+            if not gecerli_manuel_gider_gosterim.empty:
                 st.caption("Manuel gider kalemleri:")
                 st.dataframe(
-                    gecerli_manuel_gider.style.format({"Tutar": "${:,.2f}"}),
+                    gecerli_manuel_gider_gosterim.style.format({"Tutar": "${:,.2f}"}),
                     use_container_width=True,
                     hide_index=True,
                 )
