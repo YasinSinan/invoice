@@ -316,48 +316,84 @@ with col2:
         key="manual_carrier_expenses_editor",
     )
 
-if st.button("Hesapla", type="primary", disabled=income_file is None):
-    st.session_state["hesapla_tiklandi"] = True
-
-# ---------------------------------------------------------------- hesapla ---
-if st.session_state.get("hesapla_tiklandi") and income_file is not None:
-    try:
-        income_df = load_income_file(
-            income_file, only_paid=only_paid, exclude_unassigned_carrier=exclude_unassigned_carrier
-        )
-    except ValueError as e:
-        st.error(f"Gelir dosyasi okunamadi: {e}")
-        st.stop()
-
-    cost_dfs = []
-    warnings = []
-    carrier_overhead_toplam = 0.0
-    breakdown_dfs = []
-    for f in cost_files or []:
+col_hesapla, col_yeniden = st.columns([2, 1])
+with col_hesapla:
+    if st.button("Hesapla", type="primary", disabled=income_file is None):
+        # Dosyalari oku ve session_state'e kaydet
         try:
-            secilen = carrier_for_file[f.name]
-            if secilen == BYELABEL_GROUP_LABEL:
-                group_cost_dfs, group_warnings, group_genel_gider, group_breakdown_dfs = load_byelabel_group(f)
-                cost_dfs.extend(group_cost_dfs)
-                warnings.extend(group_warnings)
-                if group_genel_gider:
-                    carrier_overhead_toplam += group_genel_gider
-                for bd in group_breakdown_dfs:
-                    breakdown_dfs.append(bd)
-            else:
-                cost_df, warning, genel_gider, breakdown_df = load_cost_file(f, secilen)
-                cost_dfs.append(cost_df)
-                if warning:
-                    warnings.append(warning)
-                if genel_gider:
-                    carrier_overhead_toplam += genel_gider
-                if not breakdown_df.empty:
-                    breakdown_dfs.append(breakdown_df)
+            st.session_state["income_df_cache"] = load_income_file(
+                income_file, only_paid=only_paid, exclude_unassigned_carrier=exclude_unassigned_carrier
+            )
         except ValueError as e:
-            st.error(f"{f.name} okunamadi: {e}")
+            st.error(f"Gelir dosyasi okunamadi: {e}")
             st.stop()
 
-    for w in warnings:
+        cost_dfs = []
+        warnings_list = []
+        carrier_overhead_toplam = 0.0
+        breakdown_dfs = []
+        for f in cost_files or []:
+            try:
+                secilen = carrier_for_file[f.name]
+                if secilen == BYELABEL_GROUP_LABEL:
+                    group_cost_dfs, group_warnings, group_genel_gider, group_breakdown_dfs = load_byelabel_group(f)
+                    cost_dfs.extend(group_cost_dfs)
+                    warnings_list.extend(group_warnings)
+                    if group_genel_gider:
+                        carrier_overhead_toplam += group_genel_gider
+                    for bd in group_breakdown_dfs:
+                        breakdown_dfs.append(bd)
+                else:
+                    cost_df, warning, genel_gider, breakdown_df = load_cost_file(f, secilen)
+                    cost_dfs.append(cost_df)
+                    if warning:
+                        warnings_list.append(warning)
+                    if genel_gider:
+                        carrier_overhead_toplam += genel_gider
+                    if not breakdown_df.empty:
+                        breakdown_dfs.append(breakdown_df)
+            except ValueError as e:
+                st.error(f"{f.name} okunamadi: {e}")
+                st.stop()
+
+        st.session_state["cost_dfs_cache"] = cost_dfs
+        st.session_state["breakdown_dfs_cache"] = breakdown_dfs
+        st.session_state["carrier_overhead_cache"] = carrier_overhead_toplam
+        st.session_state["warnings_cache"] = warnings_list
+        st.session_state["hesapla_tiklandi"] = True
+
+with col_yeniden:
+    yeniden_disabled = "income_df_cache" not in st.session_state
+    if st.button(
+        "Yeniden Hesapla",
+        disabled=yeniden_disabled,
+        help="Dosyalari tekrar yuklemeden, sadece filtre/manuel giris degisikliklerini uygular.",
+    ):
+        st.session_state["hesapla_tiklandi"] = True
+
+# ---------------------------------------------------------------- hesapla ---
+if st.session_state.get("hesapla_tiklandi") and "income_df_cache" in st.session_state:
+
+    # Dosyalari her seferinde yeniden yuklemek yerine cache'den al.
+    # Sadece "Hesapla" butonuna basildiginda cache guncellenir.
+    # "Yeniden Hesapla" ise ayni cache'i kullanarak filtre/girdi degisikliklerini uygular.
+    income_df = st.session_state["income_df_cache"]
+    cost_dfs = st.session_state["cost_dfs_cache"]
+    breakdown_dfs = st.session_state["breakdown_dfs_cache"]
+    carrier_overhead_toplam = st.session_state["carrier_overhead_cache"]
+
+    # Filtreler degismisse gelir dosyasini cache'den yeniden isle
+    # (only_paid / exclude_unassigned_carrier degisebilir - bunlar dosya
+    # okumadan ayri hesaplama adimi oldugu icin burada uygulanir)
+    if income_file is not None:
+        try:
+            income_df = load_income_file(
+                income_file, only_paid=only_paid, exclude_unassigned_carrier=exclude_unassigned_carrier
+            )
+        except Exception:
+            pass  # cache'dekini kullanmaya devam et
+
+    for w in st.session_state.get("warnings_cache", []):
         st.warning(w)
 
     efektif_carrier_overhead = carrier_overhead_toplam if dahil_et_genel_gider else 0.0
@@ -745,5 +781,5 @@ if st.session_state.get("hesapla_tiklandi") and income_file is not None:
         except Exception as e:
             st.error(f"Kaydetme sirasinda bir hata olustu: {e}")
 
-elif not income_file:
-    st.info("Baslamak icin once gelir dosyasini yukleyin.")
+elif "income_df_cache" not in st.session_state:
+    st.info("Baslamak icin once gelir dosyasini yukleyin ve 'Hesapla' butonuna basin.")
