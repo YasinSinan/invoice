@@ -289,15 +289,7 @@ with col2:
             "Purolator, FedEx, UPS) otomatik ayri ayri islenir."
         )
 
-    dahil_et_genel_gider = st.checkbox(
-        "Pakete baglanamayan vergi/komisyon giderlerini hesaba dahil et",
-        value=_params.get("dahil_et_genel_gider", True),
-        help=(
-            "Takip numarasina baglanamayan vergi/komisyon satirlari (orn. UPS'in "
-            "Brokerage Charges, Government Charges gibi kalemleri). Isaretliyse net "
-            "kardan dusulur, isaretli degilse hesaba hic katilmaz."
-        ),
-    )
+    dahil_et_genel_gider = True  # Pakete baglanamayan giderler her zaman dahil edilir (yarisı otomatik manuel gidere eklenir)
 
     st.markdown("**Manuel gider (opsiyonel)**")
     st.caption(
@@ -308,9 +300,13 @@ with col2:
     if _gider_default.empty or list(_gider_default.columns) != ["Aciklama", "Tutar"]:
         _gider_default = pd.DataFrame({"Aciklama": pd.Series(dtype="str"), "Tutar": pd.Series(dtype="float")})
 
-    # Butona basilinca otomatik eklenecek satiri tabloya isle
+    # Hesaplamadan gelen otomatik satiri tablonun en altina ekle
     if "otomatik_eklenen_genel_gider" in st.session_state:
-        yeni_satir = pd.DataFrame([st.session_state.pop("otomatik_eklenen_genel_gider")])
+        yeni_satir = pd.DataFrame([st.session_state["otomatik_eklenen_genel_gider"]])
+        # Ayni aciklamada tekrar eklememek icin once varsa kaldir, sonra sona ekle
+        _gider_default = _gider_default[
+            _gider_default["Aciklama"].astype(str) != yeni_satir["Aciklama"].iloc[0]
+        ]
         _gider_default = pd.concat([_gider_default, yeni_satir], ignore_index=True)
 
     manual_expenses_df = st.data_editor(
@@ -428,9 +424,16 @@ if st.session_state.get("hesapla_tiklandi") and "income_df_cache" in st.session_
     for w in st.session_state.get("warnings_cache", []):
         st.warning(w)
 
-    efektif_carrier_overhead = carrier_overhead_toplam if dahil_et_genel_gider else 0.0
+    # Pakete baglanamayan giderlerin yarisi otomatik olarak
+    # manuel giderler listesine eklenir (her hesaplamada guncellenir).
+    yarim_carrier_overhead = round(carrier_overhead_toplam / 2, 2)
+    st.session_state["otomatik_eklenen_genel_gider"] = {
+        "Aciklama": f"Genel gider (yarisi) - otomatik",
+        "Tutar": yarim_carrier_overhead,
+    }
+
     manuel_gider_toplam = manual_expense_total(manual_expenses_df)
-    toplam_genel_gider = efektif_carrier_overhead + manuel_gider_toplam
+    toplam_genel_gider = carrier_overhead_toplam + manuel_gider_toplam
     manuel_gelir_toplam = manual_expense_total(manual_income_df)
 
     full_breakdown = pd.concat(breakdown_dfs, ignore_index=True) if breakdown_dfs else pd.DataFrame()
@@ -524,13 +527,7 @@ if st.session_state.get("hesapla_tiklandi") and "income_df_cache" in st.session_
         renkli_kart("Net Kar", f"${summary['net_kar']:,.2f}", net_kar_renk, net_kar_icon)
 
     if not genel_gider_kategori_detay.empty:
-        if dahil_et_genel_gider:
-            st.caption("⚠️ Pakete baglanamayan vergi/komisyon - otomatik tespit edilen (Net Kar'a dahil):")
-        else:
-            st.caption(
-                "⚠️ Pakete baglanamayan vergi/komisyon - otomatik tespit edilen "
-                "(su an Net Kar'a DAHIL EDILMIYOR - yukaridaki kutucuktan acabilirsin):"
-            )
+        st.caption("⚠️ Pakete baglanamayan vergi/komisyon - otomatik tespit edilen (Net Kar'a dahil):")
 
         kaynaklar = genel_gider_kategori_detay[["Kargo Firmasi", "Kaynak Sutun"]].drop_duplicates()
         for _, kr in kaynaklar.iterrows():
@@ -541,20 +538,11 @@ if st.session_state.get("hesapla_tiklandi") and "income_df_cache" in st.session_
             use_container_width=True,
             hide_index=True,
         )
+        st.caption(
+            f"**Toplam pakete baglanamayan gider: ${carrier_overhead_toplam:,.2f}** "
+            f"— yarisi (${carrier_overhead_toplam / 2:,.2f}) otomatik olarak asagidaki Manuel Gider listesine eklenmistir."
+        )
         indirme_butonlari(genel_gider_kategori_detay, "genel_gider_detayi", "genel_gider_detay")
-
-        yarim_tutar = carrier_overhead_toplam / 2
-        if st.button(
-            f"➕ Toplam genel giderin yarısını (${ yarim_tutar:,.2f}) manuel gidere ekle",
-            key="yarim_genel_gider_ekle",
-            help="Pakete baglanamayan giderlerin yarisini manuel gider tablosuna otomatik ekler. "
-                 "Sonrasinda 'Yeniden Hesapla'ya basmaniz gerekir.",
-        ):
-            st.session_state["otomatik_eklenen_genel_gider"] = {
-                "Aciklama": f"Genel gider (yarisi) - {datetime.now().strftime('%Y-%m')}",
-                "Tutar": round(yarim_tutar, 2),
-            }
-            st.rerun()
 
     if has_per_package_fee:
         st.caption(
@@ -821,7 +809,6 @@ if st.session_state.get("hesapla_tiklandi") and "income_df_cache" in st.session_
                 "parametreler": {
                     "only_paid": only_paid,
                     "exclude_unassigned_carrier": exclude_unassigned_carrier,
-                    "dahil_et_genel_gider": dahil_et_genel_gider,
                     "manuel_gelir": manual_income_df.to_dict("records"),
                     "manuel_gider": manual_expenses_df.to_dict("records"),
                     "paket_basi_gider": manual_carrier_expenses_df.to_dict("records"),
