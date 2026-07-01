@@ -307,6 +307,12 @@ with col2:
     _gider_default = pd.DataFrame(_params.get("manuel_gider", [])) if _params else pd.DataFrame({"Aciklama": pd.Series(dtype="str"), "Tutar": pd.Series(dtype="float")})
     if _gider_default.empty or list(_gider_default.columns) != ["Aciklama", "Tutar"]:
         _gider_default = pd.DataFrame({"Aciklama": pd.Series(dtype="str"), "Tutar": pd.Series(dtype="float")})
+
+    # Butona basilinca otomatik eklenecek satiri tabloya isle
+    if "otomatik_eklenen_genel_gider" in st.session_state:
+        yeni_satir = pd.DataFrame([st.session_state.pop("otomatik_eklenen_genel_gider")])
+        _gider_default = pd.concat([_gider_default, yeni_satir], ignore_index=True)
+
     manual_expenses_df = st.data_editor(
         _gider_default,
         num_rows="dynamic",
@@ -536,6 +542,19 @@ if st.session_state.get("hesapla_tiklandi") and "income_df_cache" in st.session_
             hide_index=True,
         )
         indirme_butonlari(genel_gider_kategori_detay, "genel_gider_detayi", "genel_gider_detay")
+
+        yarim_tutar = carrier_overhead_toplam / 2
+        if st.button(
+            f"➕ Toplam genel giderin yarısını (${ yarim_tutar:,.2f}) manuel gidere ekle",
+            key="yarim_genel_gider_ekle",
+            help="Pakete baglanamayan giderlerin yarisini manuel gider tablosuna otomatik ekler. "
+                 "Sonrasinda 'Yeniden Hesapla'ya basmaniz gerekir.",
+        ):
+            st.session_state["otomatik_eklenen_genel_gider"] = {
+                "Aciklama": f"Genel gider (yarisi) - {datetime.now().strftime('%Y-%m')}",
+                "Tutar": round(yarim_tutar, 2),
+            }
+            st.rerun()
 
     if has_per_package_fee:
         st.caption(
