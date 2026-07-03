@@ -567,170 +567,181 @@ if st.session_state.get("hesapla_tiklandi") and "income_df_cache" in st.session_
         f"{summary['takip_no_yok_sayisi']} takip no yok"
     )
 
-    st.subheader("🚚 Kargo Firmalarina Gore Analiz")
-    st.caption(
-        "Kargo firmasi (gelir dosyasindaki Carrier Name) bazinda paket sayisi, "
-        "gelir, gider ve kar/zarar dagilimi."
-    )
-    carrier_table = carrier_breakdown(merged)
-    st.dataframe(
-        carrier_table.style.format(
-            {
-                "Toplam Gelir (Tum)": "${:,.2f}",
-                "Eslesen Gelir": "${:,.2f}",
-                "Kargo Gideri": "${:,.2f}",
-                "Vergi Gideri": "${:,.2f}",
-                "Toplam Gider": "${:,.2f}",
-                "Kar/Zarar": "${:,.2f}",
-                "Paket Basi Kar/Zarar": "${:,.2f}",
-            }
-        ).map(kar_zarar_stil, subset=["Kar/Zarar", "Paket Basi Kar/Zarar"]),
-        use_container_width=True,
-        hide_index=True,
-    )
-    indirme_butonlari(carrier_table, "kargo_firmasi_analizi", "carrier_table")
-
-    if not full_breakdown.empty:
-        st.caption(
-            "Asagidaki tablo her dosyada hangi kategori/sutunun Kargo, hangisinin "
-            "Vergi, hangisinin (takip numarasi olmadigi icin) Genel Gider sayildigini "
-            "ve ne kadar tutar tasidigini gosterir."
+    with st.sidebar:
+        st.markdown("### 📊 Analiz Secimi")
+        analiz_secimi = st.radio(
+            "",
+            options=[
+                "🚚 Kargo Firmalarina Gore",
+                "🌍 Ulkelere Gore",
+                "🌍 Avrupa Ozeti",
+                "👥 Musterilere Gore",
+                "👥 Musteri x Ulke",
+                "📋 Detayli Rapor",
+                "🔍 Gider Bulunamayanlar",
+                "⚖️ Eslesmeyen Gider",
+            ],
+            key="analiz_secimi",
         )
+
+    st.divider()
+
+    if analiz_secimi == "🚚 Kargo Firmalarina Gore":
+        st.subheader("🚚 Kargo Firmalarina Gore Analiz")
+        st.caption(
+            "Kargo firmasi (gelir dosyasindaki Carrier Name) bazinda paket sayisi, "
+            "gelir, gider ve kar/zarar dagilimi."
+        )
+        carrier_table = carrier_breakdown(merged)
         st.dataframe(
-            full_breakdown.style.format({"Tutar": "${:,.2f}"}),
+            carrier_table.style.format(
+                {
+                    "Toplam Gelir (Tum)": "${:,.2f}",
+                    "Eslesen Gelir": "${:,.2f}",
+                    "Kargo Gideri": "${:,.2f}",
+                    "Vergi Gideri": "${:,.2f}",
+                    "Toplam Gider": "${:,.2f}",
+                    "Kar/Zarar": "${:,.2f}",
+                    "Paket Basi Kar/Zarar": "${:,.2f}",
+                }
+            ).map(kar_zarar_stil, subset=["Kar/Zarar", "Paket Basi Kar/Zarar"]),
             use_container_width=True,
             hide_index=True,
         )
-        indirme_butonlari(full_breakdown, "kargo_vergi_siniflandirma", "full_breakdown")
+        indirme_butonlari(carrier_table, "kargo_firmasi_analizi", "carrier_table")
 
-    st.subheader("🌍 Ulkeye gore analiz")
-    st.caption(
-        "Toplam gelir ve gonderi sayisi tum gonderileri kapsar. Kargo/Vergi/Kar "
-        "sutunlari sadece gider dosyasinda eslesen gonderilerden gelir."
-    )
-    cb = country_breakdown(merged)
-    st.dataframe(
-        cb.style.format(
-            {
-                "Toplam_Gelir": "${:,.2f}",
-                "Eslesen_Gelir": "${:,.2f}",
-                "Kargo_Gideri": "${:,.2f}",
-                "Vergi_Gideri": "${:,.2f}",
-                "Toplam_Gider": "${:,.2f}",
-                "Kar": "${:,.2f}",
-                "Paket_Basi_Kar": "${:,.2f}",
-            }
-        ).map(kar_zarar_stil, subset=["Kar", "Paket_Basi_Kar"]),
-        use_container_width=True,
-        hide_index=True,
-    )
-    indirme_butonlari(cb, "ulkeye_gore_analiz", "country_table")
+        if not full_breakdown.empty:
+            st.caption(
+                "Asagidaki tablo her dosyada hangi kategori/sutunun Kargo, hangisinin "
+                "Vergi, hangisinin (takip numarasi olmadigi icin) Genel Gider sayildigini "
+                "ve ne kadar tutar tasidigini gosterir."
+            )
+            st.dataframe(
+                full_breakdown.style.format({"Tutar": "${:,.2f}"}),
+                use_container_width=True,
+                hide_index=True,
+            )
+            indirme_butonlari(full_breakdown, "kargo_vergi_siniflandirma", "full_breakdown")
 
-    eu = europe_summary(merged)
-    if eu:
-        st.markdown("**🌍 Avrupa Toplam Ozeti**")
+    elif analiz_secimi == "🌍 Ulkelere Gore":
+        st.subheader("🌍 Ulkeye gore analiz")
         st.caption(
-            "UK, Turkiye, Kıbrıs, İsrail dahil tum Avrupa ulkelerine ait gonderilerin toplu ozeti. "
-            "Dahil edilen ulkeler: " + " · ".join(eu["ulkeler"])
+            "Toplam gelir ve gonderi sayisi tum gonderileri kapsar. Kargo/Vergi/Kar "
+            "sutunlari sadece gider dosyasinda eslesen gonderilerden gelir."
         )
-        eu_col1, eu_col2, eu_col3 = st.columns(3)
-        with eu_col1:
-            renkli_kart("Gonderi Sayisi (Tum)", f"{eu['gonderi_sayisi']:,}", "#6366f1", "📦")
-            renkli_kart("Eslesen Sayisi", f"{eu['eslesen_sayisi']:,}", "#8b5cf6", "✅")
-        with eu_col2:
-            renkli_kart("Toplam Gelir (Tum)", f"${eu['toplam_gelir']:,.2f}", "#10b981", "💵")
-            renkli_kart("Eslesen Gelir", f"${eu['eslesen_gelir']:,.2f}", "#34d399", "💵")
-        with eu_col3:
-            renkli_kart("Kargo Gideri", f"${eu['kargo_gideri']:,.2f}", "#f59e0b", "🚚")
-            renkli_kart("Vergi/Gumruk", f"${eu['vergi_gideri']:,.2f}", "#f97316", "🛂")
-        eu_col4, eu_col5 = st.columns(2)
-        with eu_col4:
-            renkli_kart("Toplam Gider", f"${eu['toplam_gider']:,.2f}", "#ef4444", "🧾")
-        with eu_col5:
-            eu_renk = "#10b981" if eu["kar_zarar"] >= 0 else "#dc2626"
-            eu_icon = "📈" if eu["kar_zarar"] >= 0 else "📉"
-            renkli_kart("Kar/Zarar", f"${eu['kar_zarar']:,.2f}", eu_renk, eu_icon)
+        cb = country_breakdown(merged)
+        st.dataframe(
+            cb.style.format(
+                {
+                    "Toplam_Gelir": "${:,.2f}",
+                    "Eslesen_Gelir": "${:,.2f}",
+                    "Kargo_Gideri": "${:,.2f}",
+                    "Vergi_Gideri": "${:,.2f}",
+                    "Toplam_Gider": "${:,.2f}",
+                    "Kar": "${:,.2f}",
+                    "Paket_Basi_Kar": "${:,.2f}",
+                }
+            ).map(kar_zarar_stil, subset=["Kar", "Paket_Basi_Kar"]),
+            use_container_width=True,
+            hide_index=True,
+        )
+        indirme_butonlari(cb, "ulkeye_gore_analiz", "country_table")
 
-    st.divider()
+    elif analiz_secimi == "🌍 Avrupa Ozeti":
+        eu = europe_summary(merged)
+        if eu:
+            st.subheader("🌍 Avrupa Toplam Ozeti")
+            st.caption(
+                "UK, Turkiye, Kibris, Israel dahil tum Avrupa ulkelerine ait gonderilerin toplu ozeti. "
+                "Dahil edilen ulkeler: " + " · ".join(eu["ulkeler"])
+            )
+            eu_col1, eu_col2, eu_col3 = st.columns(3)
+            with eu_col1:
+                renkli_kart("Gonderi Sayisi (Tum)", f"{eu['gonderi_sayisi']:,}", "#6366f1", "📦")
+                renkli_kart("Eslesen Sayisi", f"{eu['eslesen_sayisi']:,}", "#8b5cf6", "✅")
+            with eu_col2:
+                renkli_kart("Toplam Gelir (Tum)", f"${eu['toplam_gelir']:,.2f}", "#10b981", "💵")
+                renkli_kart("Eslesen Gelir", f"${eu['eslesen_gelir']:,.2f}", "#34d399", "💵")
+            with eu_col3:
+                renkli_kart("Kargo Gideri", f"${eu['kargo_gideri']:,.2f}", "#f59e0b", "🚚")
+                renkli_kart("Vergi/Gumruk", f"${eu['vergi_gideri']:,.2f}", "#f97316", "🛂")
+            eu_col4, eu_col5 = st.columns(2)
+            with eu_col4:
+                renkli_kart("Toplam Gider", f"${eu['toplam_gider']:,.2f}", "#ef4444", "🧾")
+            with eu_col5:
+                eu_renk = "#10b981" if eu["kar_zarar"] >= 0 else "#dc2626"
+                eu_icon = "📈" if eu["kar_zarar"] >= 0 else "📉"
+                renkli_kart("Kar/Zarar", f"${eu['kar_zarar']:,.2f}", eu_renk, eu_icon)
+        else:
+            st.info("Avrupa ulkelerine ait gonderi bulunamadi.")
 
-    st.subheader("👥 Musteriye gore analiz")
-    st.caption(
-        "Gelir dosyasindaki User No / User Name'e gore musteri bazinda paket "
-        "sayisi, bize odedigi tutar, firmaya odedigimiz tutar, kar/zarar ve "
-        "gonderdigi ulkeler. Eslesen Sayisi/Firmaya Odenen/Kar sutunlari sadece "
-        "ESLESEN gonderilerden gelir."
-    )
-    cust_table = customer_breakdown(merged)
-    st.dataframe(
-        cust_table.style.format(
-            {
-                "Bize Odenen (Gelir)": "${:,.2f}",
-                "Firmaya Odenen (Gider)": "${:,.2f}",
-                "Kar/Zarar": "${:,.2f}",
-                "Paket Basi Kar/Zarar": "${:,.2f}",
-            }
-        ).map(kar_zarar_stil, subset=["Kar/Zarar", "Paket Basi Kar/Zarar"]),
-        use_container_width=True,
-        hide_index=True,
-    )
-    indirme_butonlari(cust_table, "musteriye_gore_analiz", "cust_table")
+    elif analiz_secimi == "👥 Musterilere Gore":
+        st.subheader("👥 Musteriye gore analiz")
+        st.caption(
+            "Gelir dosyasindaki User No / User Name'e gore musteri bazinda paket "
+            "sayisi, bize odedigi tutar, firmaya odedigimiz tutar, kar/zarar ve "
+            "gonderdigi ulkeler. Eslesen Sayisi/Firmaya Odenen/Kar sutunlari sadece "
+            "ESLESEN gonderilerden gelir."
+        )
+        cust_table = customer_breakdown(merged)
+        st.dataframe(
+            cust_table.style.format(
+                {
+                    "Bize Odenen (Gelir)": "${:,.2f}",
+                    "Firmaya Odenen (Gider)": "${:,.2f}",
+                    "Kar/Zarar": "${:,.2f}",
+                    "Paket Basi Kar/Zarar": "${:,.2f}",
+                }
+            ).map(kar_zarar_stil, subset=["Kar/Zarar", "Paket Basi Kar/Zarar"]),
+            use_container_width=True,
+            hide_index=True,
+        )
+        indirme_butonlari(cust_table, "musteriye_gore_analiz", "cust_table")
 
-    st.caption(
-        "Asagidaki tablo her musterinin HER ULKEDE ayri ayri kar mi zarar mi "
-        "ettirdigini gosterir (en zararli kombinasyonlar basta). Genel toplamda "
-        "kar gibi gorunen bir musteri, bazi ulkelerde zarar ettiriyor olabilir."
-    )
-    cust_country_table = customer_country_breakdown(merged)
-    st.dataframe(
-        cust_country_table.style.format(
-            {
-                "Gelir": "${:,.2f}",
-                "Gider": "${:,.2f}",
-                "Kar/Zarar": "${:,.2f}",
-            }
-        ).map(kar_zarar_stil, subset=["Kar/Zarar"]),
-        use_container_width=True,
-        hide_index=True,
-    )
-    indirme_butonlari(cust_country_table, "musteri_x_ulke_analizi", "cust_country_table")
+    elif analiz_secimi == "👥 Musteri x Ulke":
+        st.subheader("👥 Musteri x Ulke Analizi")
+        st.caption(
+            "Her musterinin HER ULKEDE ayri ayri kar mi zarar mi ettirdigini gosterir "
+            "(en zararli kombinasyonlar basta). Genel toplamda kar gibi gorunen bir "
+            "musteri, bazi ulkelerde zarar ettiriyor olabilir."
+        )
+        cust_country_table = customer_country_breakdown(merged)
+        st.dataframe(
+            cust_country_table.style.format(
+                {
+                    "Gelir": "${:,.2f}",
+                    "Gider": "${:,.2f}",
+                    "Kar/Zarar": "${:,.2f}",
+                }
+            ).map(kar_zarar_stil, subset=["Kar/Zarar"]),
+            use_container_width=True,
+            hide_index=True,
+        )
+        indirme_butonlari(cust_country_table, "musteri_x_ulke_analizi", "cust_country_table")
 
-    st.divider()
-
-    tab1, tab2, tab3 = st.tabs(
-        ["📋 Detayli rapor", "🔍 Gider bulunamayanlar", "⚖️ Eslesmeyen gider (fatura listesinde var, gelirde yok)"]
-    )
-
-    with tab1:
+    elif analiz_secimi == "📋 Detayli Rapor":
+        st.subheader("📋 Detayli Rapor")
         detayli_rapor_df = merged.sort_values("Added Date")[
             [
-                "Shipment No",
-                "Track Number",
-                "Carrier Name",
-                "Invoice Amount",
-                "Gider_Kargo",
-                "Gider_Tax",
-                "Gider",
-                "Gider_Kalemleri",
-                "Kar",
+                "Shipment No", "Track Number", "Carrier Name", "Invoice Amount",
+                "Gider_Kargo", "Gider_Tax", "Gider", "Gider_Kalemleri", "Kar",
             ]
-        ].rename(
-            columns={
-                "Gider_Kargo": "Kargo Gideri",
-                "Gider_Tax": "Vergi/Gumruk",
-                "Gider": "Toplam Gider",
-                "Gider_Kalemleri": "Gider Kalemleri",
-            }
-        )
+        ].rename(columns={
+            "Gider_Kargo": "Kargo Gideri", "Gider_Tax": "Vergi/Gumruk",
+            "Gider": "Toplam Gider", "Gider_Kalemleri": "Gider Kalemleri",
+        })
         st.dataframe(
             detayli_rapor_df.style.format(
-                {"Invoice Amount": "${:,.2f}", "Kargo Gideri": "${:,.2f}", "Vergi/Gumruk": "${:,.2f}", "Toplam Gider": "${:,.2f}", "Kar": "${:,.2f}"}
+                {"Invoice Amount": "${:,.2f}", "Kargo Gideri": "${:,.2f}",
+                 "Vergi/Gumruk": "${:,.2f}", "Toplam Gider": "${:,.2f}", "Kar": "${:,.2f}"}
             ).map(kar_zarar_stil, subset=["Kar"]),
             use_container_width=True,
             hide_index=True,
         )
         indirme_butonlari(detayli_rapor_df, "detayli_rapor", "tab1")
 
-    with tab2:
+    elif analiz_secimi == "🔍 Gider Bulunamayanlar":
+        st.subheader("🔍 Gider Bulunamayanlar")
         not_found = merged[merged["Durum"] == "Gider bulunamadi"]
         st.caption(
             "Bu gonderiler icin takip numarasi var ama yuklenen gider dosyalarinda "
@@ -741,7 +752,8 @@ if st.session_state.get("hesapla_tiklandi") and "income_df_cache" in st.session_
         st.dataframe(not_found_display, use_container_width=True, hide_index=True)
         indirme_butonlari(not_found_display, "gider_bulunamayanlar", "tab2")
 
-    with tab3:
+    elif analiz_secimi == "⚖️ Eslesmeyen Gider":
+        st.subheader("⚖️ Eslesmeyen Gider")
         st.caption(
             "Bu takip numaralari kargo firmasinin fatura listesinde var ama gelir "
             "dosyasinda eslesen bir gonderi bulunamadi. Farkli ay/musteri donemine "
@@ -750,21 +762,29 @@ if st.session_state.get("hesapla_tiklandi") and "income_df_cache" in st.session_
         st.dataframe(unmatched_cost, use_container_width=True, hide_index=True)
         indirme_butonlari(unmatched_cost, "eslesmeyen_gider", "tab3")
 
+
+
     st.divider()
+
+    # Excel export icin tum analizleri hesapla (sidebar seciminden bagimsiz)
+    _carrier_table_export = carrier_breakdown(merged)
+    _cb_export = country_breakdown(merged)
+    _cust_table_export = customer_breakdown(merged)
+    _cust_country_table_export = customer_country_breakdown(merged)
 
     buffer = io.BytesIO()
     with pd.ExcelWriter(buffer, engine="xlsxwriter") as writer:
         merged.drop(columns=["Takip_Var_Mi", "TrackingKey"]).to_excel(writer, sheet_name="Detayli Rapor", index=False)
-        not_found.drop(columns=["Takip_Var_Mi", "TrackingKey"], errors="ignore").to_excel(
+        merged[merged["Durum"] == "Gider bulunamadi"].drop(columns=["Takip_Var_Mi", "TrackingKey"], errors="ignore").to_excel(
             writer, sheet_name="Gider Bulunamayan", index=False
         )
         unmatched_cost.to_excel(writer, sheet_name="Eslesmeyen Gider", index=False)
         if not full_breakdown.empty:
             full_breakdown.to_excel(writer, sheet_name="Kargo-Vergi Detayi", index=False)
-        cb.to_excel(writer, sheet_name="Ulke Bazinda", index=False)
-        carrier_table.to_excel(writer, sheet_name="Kargo Firmasi Bazinda", index=False)
-        cust_table.to_excel(writer, sheet_name="Musteri Bazinda", index=False)
-        cust_country_table.to_excel(writer, sheet_name="Musteri x Ulke", index=False)
+        _cb_export.to_excel(writer, sheet_name="Ulke Bazinda", index=False)
+        _carrier_table_export.to_excel(writer, sheet_name="Kargo Firmasi Bazinda", index=False)
+        _cust_table_export.to_excel(writer, sheet_name="Musteri Bazinda", index=False)
+        _cust_country_table_export.to_excel(writer, sheet_name="Musteri x Ulke", index=False)
         if manuel_gider_toplam:
             manual_expenses_df.to_excel(writer, sheet_name="Manuel Giderler", index=False)
         if has_per_package_fee:
