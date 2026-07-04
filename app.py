@@ -40,164 +40,176 @@ from github_storage import (
 
 st.set_page_config(page_title="Gelir-Gider Karsilastirma", layout="wide")
 
-# Slack tarzı siyah-sarı global tema
+# "Sellivox" tarzi acik panel temasi: koyu genis sidebar + beyaz ana alan +
+# renkli sol-kenarlikli KPI kartlari.
 st.markdown(
     """
     <style>
-    /* Ana arka plan - koyu */
+    :root {
+        --panel-bg: #f4f5f8;
+        --card-bg: #ffffff;
+        --text-dark: #1f2430;
+        --text-muted: #8a90a0;
+        --border-light: #e8eaf0;
+        --accent-blue: #3b82f6;
+        --sidebar-bg: #14161c;
+        --sidebar-bg-2: #1b1e26;
+        --sidebar-text: #9aa0ab;
+    }
+
+    /* Ana arka plan - acik gri */
     .stApp {
-        background-color: #1a1d21 !important;
-        color: #d1d2d3 !important;
+        background-color: var(--panel-bg) !important;
+        color: var(--text-dark) !important;
     }
 
-    /* İçerik alanı */
     .main .block-container {
-        background-color: #1a1d21 !important;
-        padding-top: 1rem !important;
+        background-color: var(--panel-bg) !important;
+        padding-top: 1.5rem !important;
+        max-width: 1400px !important;
     }
 
-    /* Başlıklar - sarı vurgu */
     h1, h2, h3, h4 {
+        color: var(--text-dark) !important;
+        font-weight: 700 !important;
+    }
+
+    p, span, label, .stMarkdown {
+        color: var(--text-dark) !important;
+    }
+
+    .stApp header {
+        background-color: var(--panel-bg) !important;
+    }
+
+    /* Ana butonlar - mavi dolgu */
+    .stButton > button {
+        background-color: var(--accent-blue) !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        box-shadow: 0 1px 2px rgba(16, 24, 40, 0.08) !important;
+    }
+    .stButton > button:hover {
+        background-color: #2563eb !important;
         color: #ffffff !important;
     }
 
-    /* Metrikler ve yazılar */
-    p, span, label, .stMarkdown {
-        color: #d1d2d3 !important;
-    }
-
-    /* Sayfa başlığı */
-    .stApp header {
-        background-color: #1a1d21 !important;
-    }
-
-    /* Butonlar - sarı */
-    .stButton > button {
-        background-color: #f5a623 !important;
-        color: #1a1d21 !important;
-        border: none !important;
-        border-radius: 6px !important;
-        font-weight: 700 !important;
-    }
-    .stButton > button:hover {
-        background-color: #e09610 !important;
-        color: #1a1d21 !important;
-    }
-
-    /* Download butonları - daha ince */
+    /* Indirme butonlari - Export Report tarzi acik mavi outline */
     [data-testid="stDownloadButton"] > button {
-        background-color: #2d3139 !important;
-        color: #f5a623 !important;
-        border: 1px solid #f5a623 !important;
-        border-radius: 6px !important;
+        background-color: #eef4ff !important;
+        color: var(--accent-blue) !important;
+        border: 1px solid #cfe0fd !important;
+        border-radius: 8px !important;
         font-weight: 600 !important;
     }
     [data-testid="stDownloadButton"] > button:hover {
-        background-color: #f5a623 !important;
-        color: #1a1d21 !important;
+        background-color: #dbe8fe !important;
+        color: var(--accent-blue) !important;
     }
 
-    /* Tablolar */
-    .stDataFrame, [data-testid="stDataFrame"] {
-        background-color: #222529 !important;
-    }
-    [data-testid="stDataFrameResizable"] {
-        background: #222529 !important;
+    /* Tablolar - beyaz kart */
+    .stDataFrame, [data-testid="stDataFrame"], [data-testid="stDataFrameResizable"] {
+        background-color: var(--card-bg) !important;
+        border-radius: 10px !important;
+        border: 1px solid var(--border-light) !important;
     }
 
-    /* Input alanları */
+    /* Input alanlari */
     .stTextInput > div > div > input,
     .stSelectbox > div > div,
     .stMultiSelect > div > div {
-        background-color: #2d3139 !important;
-        color: #d1d2d3 !important;
-        border-color: #444b57 !important;
-        border-radius: 6px !important;
+        background-color: var(--card-bg) !important;
+        color: var(--text-dark) !important;
+        border-color: var(--border-light) !important;
+        border-radius: 8px !important;
     }
 
-    /* Checkbox */
     .stCheckbox > label {
-        color: #d1d2d3 !important;
+        color: var(--text-dark) !important;
     }
 
     /* Expander / Accordion */
     .streamlit-expanderHeader {
-        background-color: #222529 !important;
-        color: #f5a623 !important;
-        border-radius: 6px !important;
+        background-color: var(--card-bg) !important;
+        color: var(--accent-blue) !important;
+        border-radius: 8px !important;
+        border: 1px solid var(--border-light) !important;
     }
 
     /* Tab */
     .stTabs [data-baseweb="tab-list"] {
-        background-color: #222529 !important;
+        background-color: var(--card-bg) !important;
         border-radius: 8px !important;
     }
     .stTabs [data-baseweb="tab"] {
-        color: #9ea3aa !important;
+        color: var(--text-muted) !important;
     }
     .stTabs [aria-selected="true"] {
-        color: #f5a623 !important;
-        border-bottom-color: #f5a623 !important;
+        color: var(--accent-blue) !important;
+        border-bottom-color: var(--accent-blue) !important;
     }
 
-    /* Caption metinleri */
     .stCaption, [data-testid="stCaptionContainer"] {
-        color: #9ea3aa !important;
+        color: var(--text-muted) !important;
     }
 
-    /* Divider */
     hr {
-        border-color: #2d3139 !important;
+        border-color: var(--border-light) !important;
     }
 
-    /* Data editor */
     .stDataEditor {
-        background: #222529 !important;
+        background: var(--card-bg) !important;
+        border-radius: 10px !important;
     }
 
-    /* Metric */
     [data-testid="metric-container"] {
-        background: #222529 !important;
-        border-radius: 8px !important;
+        background: var(--card-bg) !important;
+        border-radius: 10px !important;
         padding: 12px !important;
+        border: 1px solid var(--border-light) !important;
     }
     [data-testid="stMetricValue"] {
-        color: #f5a623 !important;
+        color: var(--accent-blue) !important;
     }
     [data-testid="stMetricLabel"] {
-        color: #9ea3aa !important;
+        color: var(--text-muted) !important;
     }
 
-    /* Info/success/warning kutucukları */
     .stAlert {
-        background-color: #2d3139 !important;
+        background-color: var(--card-bg) !important;
         border-radius: 8px !important;
+        border: 1px solid var(--border-light) !important;
     }
 
-    /* Sidebar arka plan */
+    /* Sidebar - koyu, genis panel */
     [data-testid="stSidebar"] {
-        background-color: #1a1d21 !important;
-        border-right: 1px solid #2d3139 !important;
+        background-color: var(--sidebar-bg) !important;
+        border-right: 1px solid #22252d !important;
+    }
+    [data-testid="stSidebar"] * {
+        color: var(--sidebar-text) !important;
     }
 
-    /* Ana başlık çubuğu - Slack workspace bar gibi */
     .stApp > header {
-        background: #1a1d21 !important;
-        border-bottom: 1px solid #2d3139 !important;
+        background: var(--panel-bg) !important;
+        border-bottom: 1px solid var(--border-light) !important;
     }
 
-    /* Selectbox dropdown */
     [data-baseweb="select"] {
-        background: #2d3139 !important;
+        background: var(--card-bg) !important;
     }
     [data-baseweb="menu"] {
-        background: #2d3139 !important;
-        border: 1px solid #444b57 !important;
+        background: var(--card-bg) !important;
+        border: 1px solid var(--border-light) !important;
     }
     </style>
     """,
     unsafe_allow_html=True,
 )
+
+
 
 
 def _hex_to_rgba(hex_renk, alpha):
@@ -207,19 +219,22 @@ def _hex_to_rgba(hex_renk, alpha):
 
 
 def renkli_kart(etiket, deger, renk, icon=""):
-    """Varsayilan st.metric yerine renkli, ikonlu bir kart gosterir."""
-    arka_plan = _hex_to_rgba(renk, 0.15)
+    """Sellivox tarzi: beyaz kart, hafif golge, sol renkli kenarlik."""
     st.markdown(
         f"""
         <div style="
-            background: {arka_plan};
+            background: #ffffff;
             border-left: 4px solid {renk};
-            border-radius: 8px;
-            padding: 14px 18px;
+            border-radius: 10px;
+            padding: 16px 18px;
             margin-bottom: 10px;
+            box-shadow: 0 1px 3px rgba(16, 24, 40, 0.06);
+            border-top: 1px solid #e8eaf0;
+            border-right: 1px solid #e8eaf0;
+            border-bottom: 1px solid #e8eaf0;
         ">
-            <div style="font-size: 12px; font-weight: 600; color: #9ea3aa; letter-spacing: 0.06em; text-transform: uppercase;">{icon} {etiket}</div>
-            <div style="font-size: 26px; font-weight: 800; color: {renk}; margin-top: 4px;">{deger}</div>
+            <div style="font-size: 26px; font-weight: 800; color: #1f2430; line-height: 1.2;">{icon} {deger}</div>
+            <div style="font-size: 12px; font-weight: 600; color: #8a90a0; letter-spacing: 0.04em; margin-top: 4px;">{etiket}</div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -227,13 +242,13 @@ def renkli_kart(etiket, deger, renk, icon=""):
 
 
 def kar_zarar_stil(val):
-    """Kar/zarar hucresini pozitifse yesil, negatifse kirmizi vurgular."""
+    """Kar/zarar hucresini pozitifse yesil, negatifse kirmizi vurgular (acik tema)."""
     if pd.isna(val):
         return ""
     if val < 0:
-        return "background-color: rgba(220, 38, 38, 0.18); color: #f87171; font-weight: 700;"
+        return "background-color: rgba(220, 38, 38, 0.08); color: #b91c1c; font-weight: 700;"
     if val > 0:
-        return "background-color: rgba(16, 185, 129, 0.15); color: #34d399; font-weight: 700;"
+        return "background-color: rgba(16, 185, 129, 0.10); color: #047857; font-weight: 700;"
     return ""
 
 
@@ -267,28 +282,27 @@ st.markdown(
     <div style="
         display: flex;
         align-items: center;
-        gap: 12px;
-        padding: 10px 0 18px 0;
-        border-bottom: 1px solid #2d3139;
-        margin-bottom: 20px;
+        justify-content: space-between;
+        padding: 6px 0 18px 0;
+        border-bottom: 1px solid #e8eaf0;
+        margin-bottom: 24px;
     ">
-        <div style="
-            width: 36px; height: 36px;
-            background: #f5a623;
-            border-radius: 8px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 20px;
-            flex-shrink: 0;
-        ">📦</div>
         <div>
-            <div style="font-size: 18px; font-weight: 700; color: #ffffff; line-height: 1.2;">
-                Depo Gelir-Gider
-                <span style="color: #f5a623;">Analiz</span>
+            <div style="font-size: 30px; font-weight: 800; color: #1f2430; line-height: 1.2;">
+                📦 Depo Paneli
             </div>
-            <div style="font-size: 12px; color: #9ea3aa; margin-top: 1px;">
+            <div style="font-size: 13px; color: #8a90a0; margin-top: 4px;">
                 Kargo faturalari ile musteri odemelerini otomatik eslestir
             </div>
         </div>
+        <div style="
+            width: 40px; height: 40px;
+            background: #eef4ff;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        ">👤</div>
     </div>
     """,
     unsafe_allow_html=True,
@@ -296,8 +310,146 @@ st.markdown(
 
 st.divider()
 
+# --------------------------------------------------------- sol menu (sidebar) ---
+_hesapla_var = st.session_state.get("hesapla_tiklandi") and "income_df_cache" in st.session_state
+
+BASE_MENU_ITEMS = [
+    ("🏠", "Ana Sayfa"),
+    ("📤", "Kargo Firmasina Gore Dosya Yukle"),
+    ("🗄️", "GitHub Arsivinden Dosya Sec ve Hesapla"),
+]
+REPORT_MENU_ITEMS = [
+    ("🚚", "Kargo Firmalarina Gore"),
+    ("🌍", "Ulkelere Gore"),
+    ("🗺️", "Avrupa Ozeti"),
+    ("👥", "Musterilere Gore"),
+    ("🔗", "Musteri x Ulke"),
+    ("📋", "Detayli Rapor"),
+    ("🔍", "Gider Bulunamayanlar"),
+    ("⚖️", "Eslesmeyen Gider"),
+]
+MENU_ITEMS = BASE_MENU_ITEMS + (REPORT_MENU_ITEMS if _hesapla_var else [])
+
+if "analiz_secimi" not in st.session_state:
+    st.session_state["analiz_secimi"] = None  # None = Ana Sayfa
+
+with st.sidebar:
+    st.markdown(
+        """
+        <style>
+        [data-testid="stSidebar"] {
+            min-width: 248px !important;
+            max-width: 248px !important;
+            background-color: #14161c;
+            border-right: 1px solid #22252d;
+        }
+        [data-testid="stSidebar"] > div:first-child {
+            padding: 0 !important;
+        }
+        div[data-testid="stSidebarContent"] .stButton button {
+            width: 100% !important;
+            justify-content: flex-start !important;
+            padding: 9px 14px !important;
+            margin: 2px 0 !important;
+            border-radius: 8px !important;
+            display: flex;
+            align-items: center;
+            font-size: 14px !important;
+            font-weight: 500 !important;
+            background: transparent !important;
+            border: none !important;
+            color: #9aa0ab !important;
+            box-shadow: none !important;
+            transition: background 0.15s;
+        }
+        div[data-testid="stSidebarContent"] .stButton button:hover {
+            background: rgba(255,255,255,0.06) !important;
+            color: #ffffff !important;
+        }
+        div[data-testid="stSidebarContent"] .stButton button p {
+            font-size: 14px !important;
+            margin: 0 !important;
+            text-align: left !important;
+        }
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 20px 18px 16px 18px;
+            border-bottom: 1px solid #22252d;
+            margin-bottom: 10px;
+        }
+        .sidebar-logo .box {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, #3b82f6, #6366f1);
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px;
+        }
+        .sidebar-logo .name {
+            color: #ffffff !important;
+            font-size: 16px;
+            font-weight: 800;
+        }
+        .sidebar-section {
+            color: #565c68 !important;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            padding: 14px 18px 6px 18px;
+            text-transform: uppercase;
+        }
+        </style>
+        <div class="sidebar-logo">
+            <div class="box">📦</div>
+            <div class="name">ComfyShip</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    _aktif_etiket = st.session_state["analiz_secimi"] or "Ana Sayfa"
+    _tum_etiketler = [label for _, label in MENU_ITEMS]
+    if _aktif_etiket in _tum_etiketler:
+        active_index = _tum_etiketler.index(_aktif_etiket)
+        st.markdown(
+            f"""
+            <style>
+            div[data-testid="stSidebarContent"] .stButton:nth-of-type({active_index + 1}) button {{
+                background: rgba(59, 130, 246, 0.16) !important;
+                color: #ffffff !important;
+                box-shadow: inset 3px 0 0 #3b82f6 !important;
+            }}
+            </style>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    st.markdown('<div class="sidebar-section">Ana Menu</div>', unsafe_allow_html=True)
+    icon, label = BASE_MENU_ITEMS[0]
+    if st.button(f"{icon}  {label}", key=f"nav_{label}", use_container_width=True):
+        st.session_state["analiz_secimi"] = None
+        st.rerun()
+
+    st.markdown('<div class="sidebar-section">Dosya Islemleri</div>', unsafe_allow_html=True)
+    for icon, label in BASE_MENU_ITEMS[1:]:
+        if st.button(f"{icon}  {label}", key=f"nav_{label}", use_container_width=True):
+            st.session_state["analiz_secimi"] = label
+            st.rerun()
+
+    if _hesapla_var:
+        st.markdown('<div class="sidebar-section">Raporlar</div>', unsafe_allow_html=True)
+        for icon, label in REPORT_MENU_ITEMS:
+            if st.button(f"{icon}  {label}", key=f"nav_{label}", use_container_width=True):
+                st.session_state["analiz_secimi"] = label
+                st.rerun()
+
+analiz_secimi = st.session_state.get("analiz_secimi")
+st.divider()
+
 # ---------------------------------------------- kargo firmasina gore yukle ---
-with st.expander("📤 Kargo Firmasina Gore Dosya Yukle", expanded=True):
+if analiz_secimi == "Kargo Firmasina Gore Dosya Yukle":
+    st.subheader("📤 Kargo Firmasina Gore Dosya Yukle")
     st.caption(
         "Bir kargo firmasindan fatura geldikce, tum formu doldurmadan sadece "
         "o dosyayi secip GitHub'a kaydet. Ayni doneme, ayni firmadan tekrar "
@@ -341,7 +493,8 @@ with st.expander("📤 Kargo Firmasina Gore Dosya Yukle", expanded=True):
             st.error(f"Arsivlenirken hata olustu: {e}")
 
 # ------------------------------------------------------- github arsivi ---
-with st.expander("🗄️ GitHub Arsivinden Dosya Sec ve Hesapla", expanded=True):
+elif analiz_secimi == "GitHub Arsivinden Dosya Sec ve Hesapla":
+    st.subheader("🗄️ GitHub Arsivinden Dosya Sec ve Hesapla")
     st.caption(
         "Bilgisayarindan dosya yuklemek yerine, daha once GitHub'a arsivledigin "
         "gelir/gider dosyalarindan istedigini sec ve Hesapla'ya bas."
@@ -353,7 +506,7 @@ with st.expander("🗄️ GitHub Arsivinden Dosya Sec ve Hesapla", expanded=True
         st.warning(str(e))
 
     if not _kayitli_donemler:
-        st.info("Henuz arsivlenmis bir donem yok. Yukaridaki 'Kargo Firmasina Gore Dosya Yukle' bolumunden dosyalarini arsivleyebilirsin.")
+        st.info("Henuz arsivlenmis bir donem yok. 'Kargo Firmasina Gore Dosya Yukle' bolumunden dosyalarini arsivleyebilirsin.")
     else:
         _secilen_arsiv_donemi = st.selectbox("Donem sec", options=_kayitli_donemler, key="arsiv_donem_sec")
 
@@ -435,709 +588,634 @@ with st.expander("🗄️ GitHub Arsivinden Dosya Sec ve Hesapla", expanded=True
                 st.session_state["carrier_overhead_cache"] = carrier_overhead_arsiv
                 st.session_state["warnings_cache"] = warnings_arsiv
                 st.session_state["hesapla_tiklandi"] = True
-                st.success(f"'{_secilen_arsiv_donemi}' donemi secilen dosyalarla hesaplandi, asagida analiz gosteriliyor.")
+                st.session_state["analiz_secimi"] = "Kargo Firmalarina Gore"
+                st.success(f"'{_secilen_arsiv_donemi}' donemi secilen dosyalarla hesaplandi, sonuclara yonlendiriliyorsunuz.")
                 st.rerun()
             except GithubStorageError as e:
                 st.error(str(e))
             except Exception as e:
                 st.error(f"Hesaplanirken hata olustu: {e}")
 
-st.divider()
+# ------------------------------------------------------------- ana sayfa ---
+else:
 
-# Yuklu parametreler varsa widget varsayilan degerlerine uygula
-_params = st.session_state.get("yuklu_parametreler", {})
+    # Yuklu parametreler varsa widget varsayilan degerlerine uygula
+    _params = st.session_state.get("yuklu_parametreler", {})
 
-# ---------------------------------------------------------------- yukleme ---
-col1, col2 = st.columns(2)
+    # ---------------------------------------------------------------- yukleme ---
+    col1, col2 = st.columns(2)
 
-with col1:
-    st.subheader("Gelir")
-    st.caption("WH_CUSTOMER_SHIPMENT_LIST formatinda, musteriden alinan tutarlari iceren dosya.")
-    income_file = st.file_uploader("Gelir Excel dosyasini secin", type=["xlsx"], key="income")
-    only_paid = st.checkbox(
-        "Sadece odenmis gonderileri dahil et (Status = Paid)",
-        value=_params.get("only_paid", True),
-        help="Isaretliyse User Cancelled, New Shipment, Payment Waiting gibi durumlar disarida tutulur.",
-    )
-    exclude_unassigned_carrier = st.checkbox(
-        "Kargo firmasi atanmamis gonderileri haric tut",
-        value=_params.get("exclude_unassigned_carrier", True),
-        help="Isaretliyse Carrier Name (kargo firmasi) bos olan gonderiler analize hic dahil edilmez.",
-    )
+    with col1:
+        st.subheader("Gelir")
+        st.caption("WH_CUSTOMER_SHIPMENT_LIST formatinda, musteriden alinan tutarlari iceren dosya.")
+        income_file = st.file_uploader("Gelir Excel dosyasini secin", type=["xlsx"], key="income")
+        only_paid = st.checkbox(
+            "Sadece odenmis gonderileri dahil et (Status = Paid)",
+            value=_params.get("only_paid", True),
+            help="Isaretliyse User Cancelled, New Shipment, Payment Waiting gibi durumlar disarida tutulur.",
+        )
+        exclude_unassigned_carrier = st.checkbox(
+            "Kargo firmasi atanmamis gonderileri haric tut",
+            value=_params.get("exclude_unassigned_carrier", True),
+            help="Isaretliyse Carrier Name (kargo firmasi) bos olan gonderiler analize hic dahil edilmez.",
+        )
 
-    st.markdown("**Manuel gelir (opsiyonel)**")
-    st.caption(
-        "Hicbir pakete baglanmayan, dogrudan net kara eklenecek gelirler "
-        "(orn. depo kirasi geliri, danismanlik geliri)."
-    )
-    _gelir_default = pd.DataFrame(_params.get("manuel_gelir", [])) if _params else pd.DataFrame({"Aciklama": pd.Series(dtype="str"), "Tutar": pd.Series(dtype="float")})
-    if _gelir_default.empty or list(_gelir_default.columns) != ["Aciklama", "Tutar"]:
-        _gelir_default = pd.DataFrame({"Aciklama": pd.Series(dtype="str"), "Tutar": pd.Series(dtype="float")})
-    manual_income_df = st.data_editor(
-        _gelir_default,
-        num_rows="dynamic",
-        column_config={
-            "Aciklama": st.column_config.TextColumn("Aciklama"),
-            "Tutar": st.column_config.NumberColumn("Tutar ($)", format="$%.2f"),
-        },
-        use_container_width=True,
-        key="manual_income_editor",
-    )
-
-with col2:
-    st.subheader("Gider")
-    st.caption("Kargo firmasindan gelen fatura dosyalari. Birden fazla dosya secebilirsiniz.")
-    cost_files = st.file_uploader(
-        "Gider Excel dosyasini/dosyalarini secin",
-        type=["xlsx"],
-        accept_multiple_files=True,
-        key="cost",
-    )
-
-    carrier_for_file = {}
-    if cost_files:
-        st.write("Her dosya icin kargo firmasini secin:")
-        for f in cost_files:
-            carrier_for_file[f.name] = st.selectbox(
-                f"  {f.name}",
-                options=list(CARRIER_PROFILES.keys()) + [BYELABEL_GROUP_LABEL],
-                key=f"carrier_{f.name}",
-            )
+        st.markdown("**Manuel gelir (opsiyonel)**")
         st.caption(
-            "Su an Asendia, UniUni, UPS ve Asendia'nin ayri Vergi/Gumruk dosyasi "
-            "dogrudan destekleniyor. ByeLabel dosyasini (shipments-...xlsx) sectiginde "
-            "icindeki tum firmalar (ePost Global, DHL, intelcom, APC, USPS, Evri, "
-            "Purolator, FedEx, UPS) otomatik ayri ayri islenir."
+            "Hicbir pakete baglanmayan, dogrudan net kara eklenecek gelirler "
+            "(orn. depo kirasi geliri, danismanlik geliri)."
+        )
+        _gelir_default = pd.DataFrame(_params.get("manuel_gelir", [])) if _params else pd.DataFrame({"Aciklama": pd.Series(dtype="str"), "Tutar": pd.Series(dtype="float")})
+        if _gelir_default.empty or list(_gelir_default.columns) != ["Aciklama", "Tutar"]:
+            _gelir_default = pd.DataFrame({"Aciklama": pd.Series(dtype="str"), "Tutar": pd.Series(dtype="float")})
+        manual_income_df = st.data_editor(
+            _gelir_default,
+            num_rows="dynamic",
+            column_config={
+                "Aciklama": st.column_config.TextColumn("Aciklama"),
+                "Tutar": st.column_config.NumberColumn("Tutar ($)", format="$%.2f"),
+            },
+            use_container_width=True,
+            key="manual_income_editor",
         )
 
-    dahil_et_genel_gider = True  # Pakete baglanamayan giderler her zaman dahil edilir (yarisı otomatik manuel gidere eklenir)
-
-    st.markdown("**Manuel gider (opsiyonel)**")
-    st.caption(
-        "Hicbir pakete baglanmayan, dogrudan net kardan dusulecek giderler "
-        "(orn. depo kirasi, personel maasi, internet faturasi)."
-    )
-    _gider_default = pd.DataFrame(_params.get("manuel_gider", [])) if _params else pd.DataFrame({"Aciklama": pd.Series(dtype="str"), "Tutar": pd.Series(dtype="float")})
-    if _gider_default.empty or list(_gider_default.columns) != ["Aciklama", "Tutar"]:
-        _gider_default = pd.DataFrame({"Aciklama": pd.Series(dtype="str"), "Tutar": pd.Series(dtype="float")})
-
-    # Otomatik satirlari en alta ekle (onceki otomatik satirlari temizle, yenileri ekle)
-    otomatik_satirlar = st.session_state.get("otomatik_genel_gider_satirlari", [])
-    if otomatik_satirlar:
-        otomatik_aciklamalar = {s["Aciklama"] for s in otomatik_satirlar}
-        _gider_default = _gider_default[
-            ~_gider_default["Aciklama"].astype(str).isin(otomatik_aciklamalar)
-        ]
-        _gider_default = pd.concat(
-            [_gider_default, pd.DataFrame(otomatik_satirlar)], ignore_index=True
+    with col2:
+        st.subheader("Gider")
+        st.caption("Kargo firmasindan gelen fatura dosyalari. Birden fazla dosya secebilirsiniz.")
+        cost_files = st.file_uploader(
+            "Gider Excel dosyasini/dosyalarini secin",
+            type=["xlsx"],
+            accept_multiple_files=True,
+            key="cost",
         )
 
-    manual_expenses_df = st.data_editor(
-        _gider_default,
-        num_rows="dynamic",
-        column_config={
-            "Aciklama": st.column_config.TextColumn("Aciklama"),
-            "Tutar": st.column_config.NumberColumn("Tutar ($)", format="$%.2f"),
-        },
-        use_container_width=True,
-        key="manual_expenses_editor",
-    )
-
-    st.markdown("**Paket basina ek gider - firma bazinda (opsiyonel)**")
-    st.caption(
-        "Belirli bir kargo firmasinin HER paketine ayni tutari ekler (orn. "
-        "UniUni icin paket basina $2). Tutar otomatik olarak paket sayisiyla "
-        "carpilir ve her paketin kar/zarar hesabina islenir - tum tablolarda "
-        "(ulke, firma, musteri) otomatik yansir. Gideri eslesmemis paketler "
-        "bu tutari aldiktan sonra 'eslesti' sayilir."
-    )
-    _paket_cols = {"Kargo Firmasi": pd.Series(dtype="str"), "Aciklama": pd.Series(dtype="str"), "Paket Basi Tutar": pd.Series(dtype="float")}
-    _paket_default = pd.DataFrame(_params.get("paket_basi_gider", [])) if _params else pd.DataFrame(_paket_cols)
-    if _paket_default.empty or list(_paket_default.columns) != list(_paket_cols.keys()):
-        _paket_default = pd.DataFrame(_paket_cols)
-    manual_carrier_expenses_df = st.data_editor(
-        _paket_default,
-        num_rows="dynamic",
-        column_config={
-            "Kargo Firmasi": st.column_config.SelectboxColumn("Kargo Firmasi", options=KNOWN_CARRIERS),
-            "Aciklama": st.column_config.TextColumn("Aciklama"),
-            "Paket Basi Tutar": st.column_config.NumberColumn("Paket Basi Tutar ($)", format="$%.2f"),
-        },
-        use_container_width=True,
-        key="manual_carrier_expenses_editor",
-    )
-
-col_hesapla, col_yeniden = st.columns([2, 1])
-with col_hesapla:
-    if st.button("Hesapla", type="primary", disabled=income_file is None):
-        # Dosyalari oku ve session_state'e kaydet
-        try:
-            st.session_state["income_df_cache"] = load_income_file(
-                income_file, only_paid=only_paid, exclude_unassigned_carrier=exclude_unassigned_carrier
+        carrier_for_file = {}
+        if cost_files:
+            st.write("Her dosya icin kargo firmasini secin:")
+            for f in cost_files:
+                carrier_for_file[f.name] = st.selectbox(
+                    f"  {f.name}",
+                    options=list(CARRIER_PROFILES.keys()) + [BYELABEL_GROUP_LABEL],
+                    key=f"carrier_{f.name}",
+                )
+            st.caption(
+                "Su an Asendia, UniUni, UPS ve Asendia'nin ayri Vergi/Gumruk dosyasi "
+                "dogrudan destekleniyor. ByeLabel dosyasini (shipments-...xlsx) sectiginde "
+                "icindeki tum firmalar (ePost Global, DHL, intelcom, APC, USPS, Evri, "
+                "Purolator, FedEx, UPS) otomatik ayri ayri islenir."
             )
-        except ValueError as e:
-            st.error(f"Gelir dosyasi okunamadi: {e}")
-            st.stop()
 
-        cost_dfs = []
-        warnings_list = []
-        carrier_overhead_toplam = 0.0
-        breakdown_dfs = []
-        for f in cost_files or []:
+        dahil_et_genel_gider = True  # Pakete baglanamayan giderler her zaman dahil edilir (yarisı otomatik manuel gidere eklenir)
+
+        st.markdown("**Manuel gider (opsiyonel)**")
+        st.caption(
+            "Hicbir pakete baglanmayan, dogrudan net kardan dusulecek giderler "
+            "(orn. depo kirasi, personel maasi, internet faturasi)."
+        )
+        _gider_default = pd.DataFrame(_params.get("manuel_gider", [])) if _params else pd.DataFrame({"Aciklama": pd.Series(dtype="str"), "Tutar": pd.Series(dtype="float")})
+        if _gider_default.empty or list(_gider_default.columns) != ["Aciklama", "Tutar"]:
+            _gider_default = pd.DataFrame({"Aciklama": pd.Series(dtype="str"), "Tutar": pd.Series(dtype="float")})
+
+        # Otomatik satirlari en alta ekle (onceki otomatik satirlari temizle, yenileri ekle)
+        otomatik_satirlar = st.session_state.get("otomatik_genel_gider_satirlari", [])
+        if otomatik_satirlar:
+            otomatik_aciklamalar = {s["Aciklama"] for s in otomatik_satirlar}
+            _gider_default = _gider_default[
+                ~_gider_default["Aciklama"].astype(str).isin(otomatik_aciklamalar)
+            ]
+            _gider_default = pd.concat(
+                [_gider_default, pd.DataFrame(otomatik_satirlar)], ignore_index=True
+            )
+
+        manual_expenses_df = st.data_editor(
+            _gider_default,
+            num_rows="dynamic",
+            column_config={
+                "Aciklama": st.column_config.TextColumn("Aciklama"),
+                "Tutar": st.column_config.NumberColumn("Tutar ($)", format="$%.2f"),
+            },
+            use_container_width=True,
+            key="manual_expenses_editor",
+        )
+
+        st.markdown("**Paket basina ek gider - firma bazinda (opsiyonel)**")
+        st.caption(
+            "Belirli bir kargo firmasinin HER paketine ayni tutari ekler (orn. "
+            "UniUni icin paket basina $2). Tutar otomatik olarak paket sayisiyla "
+            "carpilir ve her paketin kar/zarar hesabina islenir - tum tablolarda "
+            "(ulke, firma, musteri) otomatik yansir. Gideri eslesmemis paketler "
+            "bu tutari aldiktan sonra 'eslesti' sayilir."
+        )
+        _paket_cols = {"Kargo Firmasi": pd.Series(dtype="str"), "Aciklama": pd.Series(dtype="str"), "Paket Basi Tutar": pd.Series(dtype="float")}
+        _paket_default = pd.DataFrame(_params.get("paket_basi_gider", [])) if _params else pd.DataFrame(_paket_cols)
+        if _paket_default.empty or list(_paket_default.columns) != list(_paket_cols.keys()):
+            _paket_default = pd.DataFrame(_paket_cols)
+        manual_carrier_expenses_df = st.data_editor(
+            _paket_default,
+            num_rows="dynamic",
+            column_config={
+                "Kargo Firmasi": st.column_config.SelectboxColumn("Kargo Firmasi", options=KNOWN_CARRIERS),
+                "Aciklama": st.column_config.TextColumn("Aciklama"),
+                "Paket Basi Tutar": st.column_config.NumberColumn("Paket Basi Tutar ($)", format="$%.2f"),
+            },
+            use_container_width=True,
+            key="manual_carrier_expenses_editor",
+        )
+
+    col_hesapla, col_yeniden = st.columns([2, 1])
+    with col_hesapla:
+        if st.button("Hesapla", type="primary", disabled=income_file is None):
+            # Dosyalari oku ve session_state'e kaydet
             try:
-                secilen = carrier_for_file[f.name]
-                if secilen == BYELABEL_GROUP_LABEL:
-                    group_cost_dfs, group_warnings, group_genel_gider, group_breakdown_dfs = load_byelabel_group(f)
-                    cost_dfs.extend(group_cost_dfs)
-                    warnings_list.extend(group_warnings)
-                    if group_genel_gider:
-                        carrier_overhead_toplam += group_genel_gider
-                    for bd in group_breakdown_dfs:
-                        breakdown_dfs.append(bd)
-                else:
-                    cost_df, warning, genel_gider, breakdown_df = load_cost_file(f, secilen)
-                    cost_dfs.append(cost_df)
-                    if warning:
-                        warnings_list.append(warning)
-                    if genel_gider:
-                        carrier_overhead_toplam += genel_gider
-                    if not breakdown_df.empty:
-                        breakdown_dfs.append(breakdown_df)
+                st.session_state["income_df_cache"] = load_income_file(
+                    income_file, only_paid=only_paid, exclude_unassigned_carrier=exclude_unassigned_carrier
+                )
             except ValueError as e:
-                st.error(f"{f.name} okunamadi: {e}")
+                st.error(f"Gelir dosyasi okunamadi: {e}")
                 st.stop()
 
-        st.session_state["cost_dfs_cache"] = cost_dfs
-        st.session_state["breakdown_dfs_cache"] = breakdown_dfs
-        st.session_state["carrier_overhead_cache"] = carrier_overhead_toplam
-        st.session_state["warnings_cache"] = warnings_list
-        st.session_state["hesapla_tiklandi"] = True
-
-with col_yeniden:
-    yeniden_disabled = "income_df_cache" not in st.session_state
-    if st.button(
-        "Yeniden Hesapla",
-        disabled=yeniden_disabled,
-        help="Dosyalari tekrar yuklemeden, sadece filtre/manuel giris degisikliklerini uygular.",
-    ):
-        st.session_state["hesapla_tiklandi"] = True
-
-# ------------------------------------------------------- github arsivle ---
-with st.expander("🗄️ Bu Dosyalari GitHub'a Arsivle", expanded=False):
-    st.caption(
-        "Yukarida sectigin gelir/gider dosyalarini bir doneme (orn. ay) etiketleyip "
-        "GitHub'a kaydeder. Ayni isimli dosyayi tekrar yuklersen, eski veriyle "
-        "otomatik birlestirilir: ayni takip numarasina sahip satirlar guncellenir, "
-        "yeni satirlar eklenir - hicbir veri kaybolmaz."
-    )
-    _varsayilan_donem = datetime.now(timezone.utc).strftime("%Y-%m")
-    _arsiv_donemi = st.text_input(
-        "Donem etiketi (orn. 2026-07)", value=_varsayilan_donem, key="arsiv_donem_input"
-    )
-    _arsiv_disabled = income_file is None and not cost_files
-    if st.button("📤 GitHub'a Arsivle", key="arsivle_btn", disabled=_arsiv_disabled):
-        try:
-            _sonuc_mesajlari = []
-            if income_file is not None:
-                sonuc = merge_and_save_raw_file(_arsiv_donemi, "gelir", income_file.name, income_file.getvalue())
-                if sonuc["durum"] == "yeni":
-                    _sonuc_mesajlari.append(f"📄 {income_file.name}: yeni dosya olarak kaydedildi ({sonuc['sonuc_satir']} satir).")
-                else:
-                    _sonuc_mesajlari.append(
-                        f"📄 {income_file.name}: mevcut dosyayla birlestirildi "
-                        f"(eski {sonuc['eski_satir']} + yeni {sonuc['yeni_satir']} satir → "
-                        f"toplam {sonuc['sonuc_satir']} satir, tekrarlar elendi"
-                        + (f", anahtar: {sonuc['dedup_anahtari']}" if sonuc["dedup_anahtari"] else "")
-                        + ")."
-                    )
-            _gider_meta = {}
+            cost_dfs = []
+            warnings_list = []
+            carrier_overhead_toplam = 0.0
+            breakdown_dfs = []
             for f in cost_files or []:
-                sonuc = merge_and_save_raw_file(_arsiv_donemi, "gider", f.name, f.getvalue())
-                _gider_meta[f.name] = carrier_for_file.get(f.name, BYELABEL_GROUP_LABEL)
-                if sonuc["durum"] == "yeni":
-                    _sonuc_mesajlari.append(f"📄 {f.name}: yeni dosya olarak kaydedildi ({sonuc['sonuc_satir']} satir).")
-                else:
-                    _sonuc_mesajlari.append(
-                        f"📄 {f.name}: mevcut dosyayla birlestirildi "
-                        f"(eski {sonuc['eski_satir']} + yeni {sonuc['yeni_satir']} satir → "
-                        f"toplam {sonuc['sonuc_satir']} satir, tekrarlar elendi"
-                        + (f", anahtar: {sonuc['dedup_anahtari']}" if sonuc["dedup_anahtari"] else "")
-                        + ")."
-                    )
-            if _gider_meta:
-                save_gider_meta(_arsiv_donemi, _gider_meta)
-            st.success(f"'{_arsiv_donemi}' donemine kaydedildi:")
-            for m in _sonuc_mesajlari:
-                st.caption(m)
-        except GithubStorageError as e:
-            st.error(str(e))
-        except Exception as e:
-            st.error(f"Arsivlenirken hata olustu: {e}")
+                try:
+                    secilen = carrier_for_file[f.name]
+                    if secilen == BYELABEL_GROUP_LABEL:
+                        group_cost_dfs, group_warnings, group_genel_gider, group_breakdown_dfs = load_byelabel_group(f)
+                        cost_dfs.extend(group_cost_dfs)
+                        warnings_list.extend(group_warnings)
+                        if group_genel_gider:
+                            carrier_overhead_toplam += group_genel_gider
+                        for bd in group_breakdown_dfs:
+                            breakdown_dfs.append(bd)
+                    else:
+                        cost_df, warning, genel_gider, breakdown_df = load_cost_file(f, secilen)
+                        cost_dfs.append(cost_df)
+                        if warning:
+                            warnings_list.append(warning)
+                        if genel_gider:
+                            carrier_overhead_toplam += genel_gider
+                        if not breakdown_df.empty:
+                            breakdown_dfs.append(breakdown_df)
+                except ValueError as e:
+                    st.error(f"{f.name} okunamadi: {e}")
+                    st.stop()
 
-# ---------------------------------------------------------------- hesapla ---
-if st.session_state.get("hesapla_tiklandi") and "income_df_cache" in st.session_state:
+            st.session_state["cost_dfs_cache"] = cost_dfs
+            st.session_state["breakdown_dfs_cache"] = breakdown_dfs
+            st.session_state["carrier_overhead_cache"] = carrier_overhead_toplam
+            st.session_state["warnings_cache"] = warnings_list
+            st.session_state["hesapla_tiklandi"] = True
 
-    # Dosyalari her seferinde yeniden yuklemek yerine cache'den al.
-    # Sadece "Hesapla" butonuna basildiginda cache guncellenir.
-    # "Yeniden Hesapla" ise ayni cache'i kullanarak filtre/girdi degisikliklerini uygular.
-    income_df = st.session_state["income_df_cache"]
-    cost_dfs = st.session_state["cost_dfs_cache"]
-    breakdown_dfs = st.session_state["breakdown_dfs_cache"]
-    carrier_overhead_toplam = st.session_state["carrier_overhead_cache"]
+    with col_yeniden:
+        yeniden_disabled = "income_df_cache" not in st.session_state
+        if st.button(
+            "Yeniden Hesapla",
+            disabled=yeniden_disabled,
+            help="Dosyalari tekrar yuklemeden, sadece filtre/manuel giris degisikliklerini uygular.",
+        ):
+            st.session_state["hesapla_tiklandi"] = True
 
-    # Filtreler degismisse gelir dosyasini cache'den yeniden isle
-    # (only_paid / exclude_unassigned_carrier degisebilir - bunlar dosya
-    # okumadan ayri hesaplama adimi oldugu icin burada uygulanir)
-    if income_file is not None:
-        try:
-            income_df = load_income_file(
-                income_file, only_paid=only_paid, exclude_unassigned_carrier=exclude_unassigned_carrier
-            )
-        except Exception:
-            pass  # cache'dekini kullanmaya devam et
-
-    for w in st.session_state.get("warnings_cache", []):
-        st.warning(w)
-
-    # Pakete baglanamayan giderlerin her kalemi ayrı satır olarak,
-    # yarı tutarıyla otomatik manuel gider listesine eklenir.
-    full_breakdown_erken = pd.concat(breakdown_dfs, ignore_index=True) if breakdown_dfs else pd.DataFrame()
-    if not full_breakdown_erken.empty:
-        genel_gider_satirlari = full_breakdown_erken[
-            full_breakdown_erken["Siniflandirma"] == "Genel Gider (pakete baglanamiyor)"
-        ][["Kategori/Sutun", "Tutar"]]
-        otomatik_satirlar = [
-            {
-                "Aciklama": f"{row['Kategori/Sutun']} (yarisi) - otomatik",
-                "Tutar": round(row["Tutar"] / 2, 2),
-            }
-            for _, row in genel_gider_satirlari.iterrows()
-            if row["Tutar"] > 0
-        ]
-    else:
-        otomatik_satirlar = []
-    st.session_state["otomatik_genel_gider_satirlari"] = otomatik_satirlar
-
-    manuel_gider_toplam = manual_expense_total(manual_expenses_df)
-    # carrier_overhead_toplam buraya EKLENMIYOR — onun yarisi zaten
-    # manuel_expenses_df'e otomatik satir olarak eklendi, manual_expense_total
-    # onu zaten sayiyor. Tam tutari ayrica eklemek cift sayima yol acar.
-    toplam_genel_gider = manuel_gider_toplam
-    manuel_gelir_toplam = manual_expense_total(manual_income_df)
-
-    full_breakdown = full_breakdown_erken
-    if not full_breakdown.empty:
-        genel_gider_kategori_detay = full_breakdown[
-            full_breakdown["Siniflandirma"] == "Genel Gider (pakete baglanamiyor)"
-        ][["Kargo Firmasi", "Kategori/Sutun", "Kaynak Sutun", "Tutar"]].rename(columns={"Tutar": "Genel Gider"})
-    else:
-        genel_gider_kategori_detay = pd.DataFrame()
-
-    merged, unmatched_cost = build_report(income_df, cost_dfs)
-    merged = apply_per_package_carrier_fee(merged, manual_carrier_expenses_df)
-    summary = summarize(merged, genel_gider=toplam_genel_gider, manuel_gelir=manuel_gelir_toplam)
-
-    st.divider()
-    st.subheader("📊 Ozet")
-
-    renkli_kart("Toplam Paket Sayisi", f"{summary['toplam_gonderi']:,}", "#6366f1", "📦")
-
-    st.markdown("")
-    col_gelir, col_gider = st.columns(2)
-    with col_gelir:
-        st.markdown("**💰 Gelir**")
-        renkli_kart("Toplam Gelir", f"${summary['toplam_gelir']:,.2f}", "#10b981", "💵")
-
-    with col_gider:
-        st.markdown("**💸 Gider**")
-        renkli_kart("Kargo Gideri", f"${summary['toplam_gider_kargo']:,.2f}", "#f59e0b", "🚚")
-        renkli_kart("Vergi/Gumruk Gideri", f"${summary['toplam_gider_tax']:,.2f}", "#f97316", "🛂")
-        renkli_kart("Toplam Gider", f"${summary['toplam_gider_eslesen']:,.2f}", "#ef4444", "🧾")
-
-    gecerli_paket_basi = manual_carrier_expenses_df.dropna(subset=["Kargo Firmasi", "Paket Basi Tutar"])
-    gecerli_paket_basi = gecerli_paket_basi[gecerli_paket_basi["Kargo Firmasi"].astype(str).str.strip() != ""]
-    has_per_package_fee = not gecerli_paket_basi.empty
-
-    if toplam_genel_gider or manuel_gelir_toplam:
-        col_gelir2, col_gider2 = st.columns(2)
-        with col_gelir2:
-            renkli_kart(
-                "Manuel Gelir",
-                f"${summary['manuel_gelir']:,.2f}",
-                "#14b8a6",
-                "✍️",
-            )
-        with col_gider2:
-            renkli_kart(
-                "Genel Gider",
-                f"${summary['genel_gider']:,.2f}",
-                "#dc2626",
-                "⚠️",
-            )
-
-    gecerli_manuel_gelir = manual_income_df.dropna(subset=["Aciklama", "Tutar"])
-    gecerli_manuel_gelir = gecerli_manuel_gelir[gecerli_manuel_gelir["Aciklama"].astype(str).str.strip() != ""]
-    gecerli_manuel_gider = manual_expenses_df.dropna(subset=["Aciklama", "Tutar"])
-    gecerli_manuel_gider = gecerli_manuel_gider[gecerli_manuel_gider["Aciklama"].astype(str).str.strip() != ""]
-    # Otomatik eklenen satirlari dashboard gosteriminden cikar (sadece kullanicinin yazdiklarini goster)
-    _otomatik_aciklamalar = {s["Aciklama"] for s in st.session_state.get("otomatik_genel_gider_satirlari", [])}
-    gecerli_manuel_gider_gosterim = gecerli_manuel_gider[
-        ~gecerli_manuel_gider["Aciklama"].astype(str).isin(_otomatik_aciklamalar)
-    ]
-
-    if not gecerli_manuel_gelir.empty or not gecerli_manuel_gider_gosterim.empty or has_per_package_fee:
-        col_mg, col_mgid = st.columns(2)
-        with col_mg:
-            if not gecerli_manuel_gelir.empty:
-                st.caption("Manuel gelir kalemleri:")
-                st.dataframe(
-                    gecerli_manuel_gelir.style.format({"Tutar": "${:,.2f}"}),
-                    use_container_width=True,
-                    hide_index=True,
-                )
-        with col_mgid:
-            if not gecerli_manuel_gider_gosterim.empty or otomatik_satirlar:
-                st.caption("Manuel gider kalemleri:")
-                _goster_df = gecerli_manuel_gider_gosterim.copy()
-                if otomatik_satirlar:
-                    _goster_df = pd.concat(
-                        [_goster_df, pd.DataFrame(otomatik_satirlar)], ignore_index=True
-                    )
-                st.dataframe(
-                    _goster_df.style.format({"Tutar": "${:,.2f}"}),
-                    use_container_width=True,
-                    hide_index=True,
-                )
-
-    st.markdown("")
-    _, kar_orta, _ = st.columns([1, 1, 1])
-    with kar_orta:
-        net_kar_renk = "#10b981" if summary["net_kar"] >= 0 else "#dc2626"
-        net_kar_icon = "📈" if summary["net_kar"] >= 0 else "📉"
-        renkli_kart("Net Kar", f"${summary['net_kar']:,.2f}", net_kar_renk, net_kar_icon)
-
-    if not genel_gider_kategori_detay.empty:
-        st.caption("⚠️ Pakete baglanamayan vergi/komisyon - otomatik tespit edilen (Net Kar'a dahil):")
-
-        kaynaklar = genel_gider_kategori_detay[["Kargo Firmasi", "Kaynak Sutun"]].drop_duplicates()
-        for _, kr in kaynaklar.iterrows():
-            st.caption(f"📂 {kr['Kargo Firmasi']} icin kaynak kolon: *{kr['Kaynak Sutun']}*")
-
-        st.dataframe(
-            genel_gider_kategori_detay.drop(columns=["Kaynak Sutun"]).style.format({"Genel Gider": "${:,.2f}"}),
-            use_container_width=True,
-            hide_index=True,
-        )
-        indirme_butonlari(genel_gider_kategori_detay, "genel_gider_detayi", "genel_gider_detay")
-
-    eslesme_orani = summary["eslesen_sayisi"] / summary["toplam_gonderi"] * 100 if summary["toplam_gonderi"] else 0
-    st.caption(f"Eslesme orani: %{eslesme_orani:.1f}")
-
-    st.caption(
-        f"Toplam {summary['toplam_gonderi']} gonderi  |  "
-        f"{summary['eslesen_sayisi']} eslesti  |  "
-        f"{summary['gider_bulunamadi_sayisi']} gider bulunamadi  |  "
-        f"{summary['takip_no_yok_sayisi']} takip no yok"
-    )
-
-    # Slack tarzı ince ikonlu sidebar
-    MENU_ITEMS = [
-        ("🚚", "Kargo Firmalarina Gore"),
-        ("🌍", "Ulkelere Gore"),
-        ("🗺️", "Avrupa Ozeti"),
-        ("👥", "Musterilere Gore"),
-        ("🔗", "Musteri x Ulke"),
-        ("📋", "Detayli Rapor"),
-        ("🔍", "Gider Bulunamayanlar"),
-        ("⚖️", "Eslesmeyen Gider"),
-    ]
-
-    if "analiz_secimi" not in st.session_state:
-        st.session_state["analiz_secimi"] = MENU_ITEMS[0][1]
-
-    with st.sidebar:
-        st.markdown(
-            """
-            <style>
-            [data-testid="stSidebar"] {
-                min-width: 64px !important;
-                max-width: 64px !important;
-                background-color: #1a1d21;
-                border-right: 1px solid #2d3139;
-            }
-            [data-testid="stSidebar"] > div:first-child {
-                padding: 8px 0 0 0;
-            }
-            div[data-testid="stSidebarContent"] .stButton button {
-                width: 44px;
-                height: 44px;
-                border-radius: 10px;
-                padding: 0;
-                margin: 4px auto;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 22px;
-                background: transparent !important;
-                border: none !important;
-                color: #d1d2d3 !important;
-                box-shadow: none !important;
-                transition: background 0.15s;
-            }
-            div[data-testid="stSidebarContent"] .stButton button:hover {
-                background: rgba(255,255,255,0.12) !important;
-                border: none !important;
-            }
-            div[data-testid="stSidebarContent"] .stButton {
-                margin: 0;
-                padding: 0;
-            }
-            div[data-testid="stSidebarContent"] .stButton p {
-                font-size: 22px;
-                margin: 0;
-            }
-            </style>
-            """,
-            unsafe_allow_html=True,
-        )
-
-        active_index = next(
-            (i for i, (_, label) in enumerate(MENU_ITEMS) if label == st.session_state["analiz_secimi"]),
-            0,
-        )
-        st.markdown(
-            f"""
-            <style>
-            div[data-testid="stSidebarContent"] .stButton:nth-of-type({active_index + 1}) button {{
-                background: rgba(245, 166, 35, 0.25) !important;
-                box-shadow: inset 3px 0 0 #f5a623;
-                border-radius: 0 10px 10px 0 !important;
-            }}
-            </style>
-            """,
-            unsafe_allow_html=True,
-        )
-
-        for icon, label in MENU_ITEMS:
-            if st.button(icon, key=f"nav_{label}", help=label):
-                st.session_state["analiz_secimi"] = label
-                st.rerun()
-
-    analiz_secimi = st.session_state.get("analiz_secimi", MENU_ITEMS[0][1])
-    st.divider()
-
-    if analiz_secimi == "Kargo Firmalarina Gore":
-        st.subheader("🚚 Kargo Firmalarina Gore Analiz")
+    # ------------------------------------------------------- github arsivle ---
+    with st.expander("🗄️ Bu Dosyalari GitHub'a Arsivle", expanded=False):
         st.caption(
-            "Kargo firmasi (gelir dosyasindaki Carrier Name) bazinda paket sayisi, "
-            "gelir, gider ve kar/zarar dagilimi."
+            "Yukarida sectigin gelir/gider dosyalarini bir doneme (orn. ay) etiketleyip "
+            "GitHub'a kaydeder. Ayni isimli dosyayi tekrar yuklersen, eski veriyle "
+            "otomatik birlestirilir: ayni takip numarasina sahip satirlar guncellenir, "
+            "yeni satirlar eklenir - hicbir veri kaybolmaz."
         )
-        carrier_table = carrier_breakdown(merged)
-        st.dataframe(
-            carrier_table.style.format(
-                {
-                    "Toplam Gelir (Tum)": "${:,.2f}",
-                    "Eslesen Gelir": "${:,.2f}",
-                    "Kargo Gideri": "${:,.2f}",
-                    "Vergi Gideri": "${:,.2f}",
-                    "Toplam Gider": "${:,.2f}",
-                    "Kar/Zarar": "${:,.2f}",
-                    "Paket Basi Kar/Zarar": "${:,.2f}",
-                }
-            ).map(kar_zarar_stil, subset=["Kar/Zarar", "Paket Basi Kar/Zarar"]),
-            use_container_width=True,
-            hide_index=True,
+        _varsayilan_donem = datetime.now(timezone.utc).strftime("%Y-%m")
+        _arsiv_donemi = st.text_input(
+            "Donem etiketi (orn. 2026-07)", value=_varsayilan_donem, key="arsiv_donem_input"
         )
-        indirme_butonlari(carrier_table, "kargo_firmasi_analizi", "carrier_table")
+        _arsiv_disabled = income_file is None and not cost_files
+        if st.button("📤 GitHub'a Arsivle", key="arsivle_btn", disabled=_arsiv_disabled):
+            try:
+                _sonuc_mesajlari = []
+                if income_file is not None:
+                    sonuc = merge_and_save_raw_file(_arsiv_donemi, "gelir", income_file.name, income_file.getvalue())
+                    if sonuc["durum"] == "yeni":
+                        _sonuc_mesajlari.append(f"📄 {income_file.name}: yeni dosya olarak kaydedildi ({sonuc['sonuc_satir']} satir).")
+                    else:
+                        _sonuc_mesajlari.append(
+                            f"📄 {income_file.name}: mevcut dosyayla birlestirildi "
+                            f"(eski {sonuc['eski_satir']} + yeni {sonuc['yeni_satir']} satir → "
+                            f"toplam {sonuc['sonuc_satir']} satir, tekrarlar elendi"
+                            + (f", anahtar: {sonuc['dedup_anahtari']}" if sonuc["dedup_anahtari"] else "")
+                            + ")."
+                        )
+                _gider_meta = {}
+                for f in cost_files or []:
+                    sonuc = merge_and_save_raw_file(_arsiv_donemi, "gider", f.name, f.getvalue())
+                    _gider_meta[f.name] = carrier_for_file.get(f.name, BYELABEL_GROUP_LABEL)
+                    if sonuc["durum"] == "yeni":
+                        _sonuc_mesajlari.append(f"📄 {f.name}: yeni dosya olarak kaydedildi ({sonuc['sonuc_satir']} satir).")
+                    else:
+                        _sonuc_mesajlari.append(
+                            f"📄 {f.name}: mevcut dosyayla birlestirildi "
+                            f"(eski {sonuc['eski_satir']} + yeni {sonuc['yeni_satir']} satir → "
+                            f"toplam {sonuc['sonuc_satir']} satir, tekrarlar elendi"
+                            + (f", anahtar: {sonuc['dedup_anahtari']}" if sonuc["dedup_anahtari"] else "")
+                            + ")."
+                        )
+                if _gider_meta:
+                    save_gider_meta(_arsiv_donemi, _gider_meta)
+                st.success(f"'{_arsiv_donemi}' donemine kaydedildi:")
+                for m in _sonuc_mesajlari:
+                    st.caption(m)
+            except GithubStorageError as e:
+                st.error(str(e))
+            except Exception as e:
+                st.error(f"Arsivlenirken hata olustu: {e}")
 
+    # ---------------------------------------------------------------- hesapla ---
+    if st.session_state.get("hesapla_tiklandi") and "income_df_cache" in st.session_state:
+
+        # Dosyalari her seferinde yeniden yuklemek yerine cache'den al.
+        # Sadece "Hesapla" butonuna basildiginda cache guncellenir.
+        # "Yeniden Hesapla" ise ayni cache'i kullanarak filtre/girdi degisikliklerini uygular.
+        income_df = st.session_state["income_df_cache"]
+        cost_dfs = st.session_state["cost_dfs_cache"]
+        breakdown_dfs = st.session_state["breakdown_dfs_cache"]
+        carrier_overhead_toplam = st.session_state["carrier_overhead_cache"]
+
+        # Filtreler degismisse gelir dosyasini cache'den yeniden isle
+        # (only_paid / exclude_unassigned_carrier degisebilir - bunlar dosya
+        # okumadan ayri hesaplama adimi oldugu icin burada uygulanir)
+        if income_file is not None:
+            try:
+                income_df = load_income_file(
+                    income_file, only_paid=only_paid, exclude_unassigned_carrier=exclude_unassigned_carrier
+                )
+            except Exception:
+                pass  # cache'dekini kullanmaya devam et
+
+        for w in st.session_state.get("warnings_cache", []):
+            st.warning(w)
+
+        # Pakete baglanamayan giderlerin her kalemi ayrı satır olarak,
+        # yarı tutarıyla otomatik manuel gider listesine eklenir.
+        full_breakdown_erken = pd.concat(breakdown_dfs, ignore_index=True) if breakdown_dfs else pd.DataFrame()
+        if not full_breakdown_erken.empty:
+            genel_gider_satirlari = full_breakdown_erken[
+                full_breakdown_erken["Siniflandirma"] == "Genel Gider (pakete baglanamiyor)"
+            ][["Kategori/Sutun", "Tutar"]]
+            otomatik_satirlar = [
+                {
+                    "Aciklama": f"{row['Kategori/Sutun']} (yarisi) - otomatik",
+                    "Tutar": round(row["Tutar"] / 2, 2),
+                }
+                for _, row in genel_gider_satirlari.iterrows()
+                if row["Tutar"] > 0
+            ]
+        else:
+            otomatik_satirlar = []
+        st.session_state["otomatik_genel_gider_satirlari"] = otomatik_satirlar
+
+        manuel_gider_toplam = manual_expense_total(manual_expenses_df)
+        # carrier_overhead_toplam buraya EKLENMIYOR — onun yarisi zaten
+        # manuel_expenses_df'e otomatik satir olarak eklendi, manual_expense_total
+        # onu zaten sayiyor. Tam tutari ayrica eklemek cift sayima yol acar.
+        toplam_genel_gider = manuel_gider_toplam
+        manuel_gelir_toplam = manual_expense_total(manual_income_df)
+
+        full_breakdown = full_breakdown_erken
         if not full_breakdown.empty:
-            st.caption(
-                "Asagidaki tablo her dosyada hangi kategori/sutunun Kargo, hangisinin "
-                "Vergi, hangisinin (takip numarasi olmadigi icin) Genel Gider sayildigini "
-                "ve ne kadar tutar tasidigini gosterir."
-            )
+            genel_gider_kategori_detay = full_breakdown[
+                full_breakdown["Siniflandirma"] == "Genel Gider (pakete baglanamiyor)"
+            ][["Kargo Firmasi", "Kategori/Sutun", "Kaynak Sutun", "Tutar"]].rename(columns={"Tutar": "Genel Gider"})
+        else:
+            genel_gider_kategori_detay = pd.DataFrame()
+
+        merged, unmatched_cost = build_report(income_df, cost_dfs)
+        merged = apply_per_package_carrier_fee(merged, manual_carrier_expenses_df)
+        summary = summarize(merged, genel_gider=toplam_genel_gider, manuel_gelir=manuel_gelir_toplam)
+
+        st.divider()
+        st.subheader("📊 Ozet")
+
+        renkli_kart("Toplam Paket Sayisi", f"{summary['toplam_gonderi']:,}", "#6366f1", "📦")
+
+        st.markdown("")
+        col_gelir, col_gider = st.columns(2)
+        with col_gelir:
+            st.markdown("**💰 Gelir**")
+            renkli_kart("Toplam Gelir", f"${summary['toplam_gelir']:,.2f}", "#10b981", "💵")
+
+        with col_gider:
+            st.markdown("**💸 Gider**")
+            renkli_kart("Kargo Gideri", f"${summary['toplam_gider_kargo']:,.2f}", "#f59e0b", "🚚")
+            renkli_kart("Vergi/Gumruk Gideri", f"${summary['toplam_gider_tax']:,.2f}", "#f97316", "🛂")
+            renkli_kart("Toplam Gider", f"${summary['toplam_gider_eslesen']:,.2f}", "#ef4444", "🧾")
+
+        gecerli_paket_basi = manual_carrier_expenses_df.dropna(subset=["Kargo Firmasi", "Paket Basi Tutar"])
+        gecerli_paket_basi = gecerli_paket_basi[gecerli_paket_basi["Kargo Firmasi"].astype(str).str.strip() != ""]
+        has_per_package_fee = not gecerli_paket_basi.empty
+
+        if toplam_genel_gider or manuel_gelir_toplam:
+            col_gelir2, col_gider2 = st.columns(2)
+            with col_gelir2:
+                renkli_kart(
+                    "Manuel Gelir",
+                    f"${summary['manuel_gelir']:,.2f}",
+                    "#14b8a6",
+                    "✍️",
+                )
+            with col_gider2:
+                renkli_kart(
+                    "Genel Gider",
+                    f"${summary['genel_gider']:,.2f}",
+                    "#dc2626",
+                    "⚠️",
+                )
+
+        gecerli_manuel_gelir = manual_income_df.dropna(subset=["Aciklama", "Tutar"])
+        gecerli_manuel_gelir = gecerli_manuel_gelir[gecerli_manuel_gelir["Aciklama"].astype(str).str.strip() != ""]
+        gecerli_manuel_gider = manual_expenses_df.dropna(subset=["Aciklama", "Tutar"])
+        gecerli_manuel_gider = gecerli_manuel_gider[gecerli_manuel_gider["Aciklama"].astype(str).str.strip() != ""]
+        # Otomatik eklenen satirlari dashboard gosteriminden cikar (sadece kullanicinin yazdiklarini goster)
+        _otomatik_aciklamalar = {s["Aciklama"] for s in st.session_state.get("otomatik_genel_gider_satirlari", [])}
+        gecerli_manuel_gider_gosterim = gecerli_manuel_gider[
+            ~gecerli_manuel_gider["Aciklama"].astype(str).isin(_otomatik_aciklamalar)
+        ]
+
+        if not gecerli_manuel_gelir.empty or not gecerli_manuel_gider_gosterim.empty or has_per_package_fee:
+            col_mg, col_mgid = st.columns(2)
+            with col_mg:
+                if not gecerli_manuel_gelir.empty:
+                    st.caption("Manuel gelir kalemleri:")
+                    st.dataframe(
+                        gecerli_manuel_gelir.style.format({"Tutar": "${:,.2f}"}),
+                        use_container_width=True,
+                        hide_index=True,
+                    )
+            with col_mgid:
+                if not gecerli_manuel_gider_gosterim.empty or otomatik_satirlar:
+                    st.caption("Manuel gider kalemleri:")
+                    _goster_df = gecerli_manuel_gider_gosterim.copy()
+                    if otomatik_satirlar:
+                        _goster_df = pd.concat(
+                            [_goster_df, pd.DataFrame(otomatik_satirlar)], ignore_index=True
+                        )
+                    st.dataframe(
+                        _goster_df.style.format({"Tutar": "${:,.2f}"}),
+                        use_container_width=True,
+                        hide_index=True,
+                    )
+
+        st.markdown("")
+        _, kar_orta, _ = st.columns([1, 1, 1])
+        with kar_orta:
+            net_kar_renk = "#10b981" if summary["net_kar"] >= 0 else "#dc2626"
+            net_kar_icon = "📈" if summary["net_kar"] >= 0 else "📉"
+            renkli_kart("Net Kar", f"${summary['net_kar']:,.2f}", net_kar_renk, net_kar_icon)
+
+        if not genel_gider_kategori_detay.empty:
+            st.caption("⚠️ Pakete baglanamayan vergi/komisyon - otomatik tespit edilen (Net Kar'a dahil):")
+
+            kaynaklar = genel_gider_kategori_detay[["Kargo Firmasi", "Kaynak Sutun"]].drop_duplicates()
+            for _, kr in kaynaklar.iterrows():
+                st.caption(f"📂 {kr['Kargo Firmasi']} icin kaynak kolon: *{kr['Kaynak Sutun']}*")
+
             st.dataframe(
-                full_breakdown.style.format({"Tutar": "${:,.2f}"}),
+                genel_gider_kategori_detay.drop(columns=["Kaynak Sutun"]).style.format({"Genel Gider": "${:,.2f}"}),
                 use_container_width=True,
                 hide_index=True,
             )
-            indirme_butonlari(full_breakdown, "kargo_vergi_siniflandirma", "full_breakdown")
+            indirme_butonlari(genel_gider_kategori_detay, "genel_gider_detayi", "genel_gider_detay")
 
-    elif analiz_secimi == "Ulkelere Gore":
-        st.subheader("🌍 Ulkeye gore analiz")
+        eslesme_orani = summary["eslesen_sayisi"] / summary["toplam_gonderi"] * 100 if summary["toplam_gonderi"] else 0
+        st.caption(f"Eslesme orani: %{eslesme_orani:.1f}")
+
         st.caption(
-            "Toplam gelir ve gonderi sayisi tum gonderileri kapsar. Kargo/Vergi/Kar "
-            "sutunlari sadece gider dosyasinda eslesen gonderilerden gelir."
+            f"Toplam {summary['toplam_gonderi']} gonderi  |  "
+            f"{summary['eslesen_sayisi']} eslesti  |  "
+            f"{summary['gider_bulunamadi_sayisi']} gider bulunamadi  |  "
+            f"{summary['takip_no_yok_sayisi']} takip no yok"
         )
-        cb = country_breakdown(merged)
-        st.dataframe(
-            cb.style.format(
-                {
-                    "Toplam_Gelir": "${:,.2f}",
-                    "Eslesen_Gelir": "${:,.2f}",
-                    "Kargo_Gideri": "${:,.2f}",
-                    "Vergi_Gideri": "${:,.2f}",
-                    "Toplam_Gider": "${:,.2f}",
-                    "Kar": "${:,.2f}",
-                    "Paket_Basi_Kar": "${:,.2f}",
-                }
-            ).map(kar_zarar_stil, subset=["Kar", "Paket_Basi_Kar"]),
-            use_container_width=True,
-            hide_index=True,
-        )
-        indirme_butonlari(cb, "ulkeye_gore_analiz", "country_table")
 
-    elif analiz_secimi == "Avrupa Ozeti":
-        eu = europe_summary(merged)
-        if eu:
-            st.subheader("🌍 Avrupa Toplam Ozeti")
+        # Rapor sekmelerinden biri secili degilse (orn. hesaplama az once bitti),
+        # varsayilan olarak ilk rapor sekmesini goster.
+        _rapor_etiketleri = [label for _, label in REPORT_MENU_ITEMS]
+        if analiz_secimi not in _rapor_etiketleri:
+            analiz_secimi = REPORT_MENU_ITEMS[0][1]
+            st.session_state["analiz_secimi"] = analiz_secimi
+
+        st.divider()
+
+        if analiz_secimi == "Kargo Firmalarina Gore":
+            st.subheader("🚚 Kargo Firmalarina Gore Analiz")
             st.caption(
-                "UK, Turkiye, Kibris, Israel dahil tum Avrupa ulkelerine ait gonderilerin toplu ozeti. "
-                "Dahil edilen ulkeler: " + " · ".join(eu["ulkeler"])
+                "Kargo firmasi (gelir dosyasindaki Carrier Name) bazinda paket sayisi, "
+                "gelir, gider ve kar/zarar dagilimi."
             )
-            eu_col1, eu_col2, eu_col3 = st.columns(3)
-            with eu_col1:
-                renkli_kart("Gonderi Sayisi (Tum)", f"{eu['gonderi_sayisi']:,}", "#6366f1", "📦")
-                renkli_kart("Eslesen Sayisi", f"{eu['eslesen_sayisi']:,}", "#8b5cf6", "✅")
-            with eu_col2:
-                renkli_kart("Toplam Gelir (Tum)", f"${eu['toplam_gelir']:,.2f}", "#10b981", "💵")
-                renkli_kart("Eslesen Gelir", f"${eu['eslesen_gelir']:,.2f}", "#34d399", "💵")
-            with eu_col3:
-                renkli_kart("Kargo Gideri", f"${eu['kargo_gideri']:,.2f}", "#f59e0b", "🚚")
-                renkli_kart("Vergi/Gumruk", f"${eu['vergi_gideri']:,.2f}", "#f97316", "🛂")
-            eu_col4, eu_col5 = st.columns(2)
-            with eu_col4:
-                renkli_kart("Toplam Gider", f"${eu['toplam_gider']:,.2f}", "#ef4444", "🧾")
-            with eu_col5:
-                eu_renk = "#10b981" if eu["kar_zarar"] >= 0 else "#dc2626"
-                eu_icon = "📈" if eu["kar_zarar"] >= 0 else "📉"
-                renkli_kart("Kar/Zarar", f"${eu['kar_zarar']:,.2f}", eu_renk, eu_icon)
-        else:
-            st.info("Avrupa ulkelerine ait gonderi bulunamadi.")
+            carrier_table = carrier_breakdown(merged)
+            st.dataframe(
+                carrier_table.style.format(
+                    {
+                        "Toplam Gelir (Tum)": "${:,.2f}",
+                        "Eslesen Gelir": "${:,.2f}",
+                        "Kargo Gideri": "${:,.2f}",
+                        "Vergi Gideri": "${:,.2f}",
+                        "Toplam Gider": "${:,.2f}",
+                        "Kar/Zarar": "${:,.2f}",
+                        "Paket Basi Kar/Zarar": "${:,.2f}",
+                    }
+                ).map(kar_zarar_stil, subset=["Kar/Zarar", "Paket Basi Kar/Zarar"]),
+                use_container_width=True,
+                hide_index=True,
+            )
+            indirme_butonlari(carrier_table, "kargo_firmasi_analizi", "carrier_table")
 
-    elif analiz_secimi == "Musterilere Gore":
-        st.subheader("👥 Musteriye gore analiz")
-        st.caption(
-            "Gelir dosyasindaki User No / User Name'e gore musteri bazinda paket "
-            "sayisi, bize odedigi tutar, firmaya odedigimiz tutar, kar/zarar ve "
-            "gonderdigi ulkeler. Eslesen Sayisi/Firmaya Odenen/Kar sutunlari sadece "
-            "ESLESEN gonderilerden gelir."
+            if not full_breakdown.empty:
+                st.caption(
+                    "Asagidaki tablo her dosyada hangi kategori/sutunun Kargo, hangisinin "
+                    "Vergi, hangisinin (takip numarasi olmadigi icin) Genel Gider sayildigini "
+                    "ve ne kadar tutar tasidigini gosterir."
+                )
+                st.dataframe(
+                    full_breakdown.style.format({"Tutar": "${:,.2f}"}),
+                    use_container_width=True,
+                    hide_index=True,
+                )
+                indirme_butonlari(full_breakdown, "kargo_vergi_siniflandirma", "full_breakdown")
+
+        elif analiz_secimi == "Ulkelere Gore":
+            st.subheader("🌍 Ulkeye gore analiz")
+            st.caption(
+                "Toplam gelir ve gonderi sayisi tum gonderileri kapsar. Kargo/Vergi/Kar "
+                "sutunlari sadece gider dosyasinda eslesen gonderilerden gelir."
+            )
+            cb = country_breakdown(merged)
+            st.dataframe(
+                cb.style.format(
+                    {
+                        "Toplam_Gelir": "${:,.2f}",
+                        "Eslesen_Gelir": "${:,.2f}",
+                        "Kargo_Gideri": "${:,.2f}",
+                        "Vergi_Gideri": "${:,.2f}",
+                        "Toplam_Gider": "${:,.2f}",
+                        "Kar": "${:,.2f}",
+                        "Paket_Basi_Kar": "${:,.2f}",
+                    }
+                ).map(kar_zarar_stil, subset=["Kar", "Paket_Basi_Kar"]),
+                use_container_width=True,
+                hide_index=True,
+            )
+            indirme_butonlari(cb, "ulkeye_gore_analiz", "country_table")
+
+        elif analiz_secimi == "Avrupa Ozeti":
+            eu = europe_summary(merged)
+            if eu:
+                st.subheader("🌍 Avrupa Toplam Ozeti")
+                st.caption(
+                    "UK, Turkiye, Kibris, Israel dahil tum Avrupa ulkelerine ait gonderilerin toplu ozeti. "
+                    "Dahil edilen ulkeler: " + " · ".join(eu["ulkeler"])
+                )
+                eu_col1, eu_col2, eu_col3 = st.columns(3)
+                with eu_col1:
+                    renkli_kart("Gonderi Sayisi (Tum)", f"{eu['gonderi_sayisi']:,}", "#6366f1", "📦")
+                    renkli_kart("Eslesen Sayisi", f"{eu['eslesen_sayisi']:,}", "#8b5cf6", "✅")
+                with eu_col2:
+                    renkli_kart("Toplam Gelir (Tum)", f"${eu['toplam_gelir']:,.2f}", "#10b981", "💵")
+                    renkli_kart("Eslesen Gelir", f"${eu['eslesen_gelir']:,.2f}", "#34d399", "💵")
+                with eu_col3:
+                    renkli_kart("Kargo Gideri", f"${eu['kargo_gideri']:,.2f}", "#f59e0b", "🚚")
+                    renkli_kart("Vergi/Gumruk", f"${eu['vergi_gideri']:,.2f}", "#f97316", "🛂")
+                eu_col4, eu_col5 = st.columns(2)
+                with eu_col4:
+                    renkli_kart("Toplam Gider", f"${eu['toplam_gider']:,.2f}", "#ef4444", "🧾")
+                with eu_col5:
+                    eu_renk = "#10b981" if eu["kar_zarar"] >= 0 else "#dc2626"
+                    eu_icon = "📈" if eu["kar_zarar"] >= 0 else "📉"
+                    renkli_kart("Kar/Zarar", f"${eu['kar_zarar']:,.2f}", eu_renk, eu_icon)
+            else:
+                st.info("Avrupa ulkelerine ait gonderi bulunamadi.")
+
+        elif analiz_secimi == "Musterilere Gore":
+            st.subheader("👥 Musteriye gore analiz")
+            st.caption(
+                "Gelir dosyasindaki User No / User Name'e gore musteri bazinda paket "
+                "sayisi, bize odedigi tutar, firmaya odedigimiz tutar, kar/zarar ve "
+                "gonderdigi ulkeler. Eslesen Sayisi/Firmaya Odenen/Kar sutunlari sadece "
+                "ESLESEN gonderilerden gelir."
+            )
+            cust_table = customer_breakdown(merged)
+            st.dataframe(
+                cust_table.style.format(
+                    {
+                        "Bize Odenen (Gelir)": "${:,.2f}",
+                        "Firmaya Odenen (Gider)": "${:,.2f}",
+                        "Kar/Zarar": "${:,.2f}",
+                        "Paket Basi Kar/Zarar": "${:,.2f}",
+                    }
+                ).map(kar_zarar_stil, subset=["Kar/Zarar", "Paket Basi Kar/Zarar"]),
+                use_container_width=True,
+                hide_index=True,
+            )
+            indirme_butonlari(cust_table, "musteriye_gore_analiz", "cust_table")
+
+        elif analiz_secimi == "Musteri x Ulke":
+            st.subheader("👥 Musteri x Ulke Analizi")
+            st.caption(
+                "Her musterinin HER ULKEDE ayri ayri kar mi zarar mi ettirdigini gosterir "
+                "(en zararli kombinasyonlar basta). Genel toplamda kar gibi gorunen bir "
+                "musteri, bazi ulkelerde zarar ettiriyor olabilir."
+            )
+            cust_country_table = customer_country_breakdown(merged)
+            st.dataframe(
+                cust_country_table.style.format(
+                    {
+                        "Gelir": "${:,.2f}",
+                        "Gider": "${:,.2f}",
+                        "Kar/Zarar": "${:,.2f}",
+                    }
+                ).map(kar_zarar_stil, subset=["Kar/Zarar"]),
+                use_container_width=True,
+                hide_index=True,
+            )
+            indirme_butonlari(cust_country_table, "musteri_x_ulke_analizi", "cust_country_table")
+
+        elif analiz_secimi == "Detayli Rapor":
+            st.subheader("📋 Detayli Rapor")
+            detayli_rapor_df = merged.sort_values("Added Date")[
+                [
+                    "Shipment No", "Track Number", "Carrier Name", "Invoice Amount",
+                    "Gider_Kargo", "Gider_Tax", "Gider", "Gider_Kalemleri", "Kar",
+                ]
+            ].rename(columns={
+                "Gider_Kargo": "Kargo Gideri", "Gider_Tax": "Vergi/Gumruk",
+                "Gider": "Toplam Gider", "Gider_Kalemleri": "Gider Kalemleri",
+            })
+            st.dataframe(
+                detayli_rapor_df.style.format(
+                    {"Invoice Amount": "${:,.2f}", "Kargo Gideri": "${:,.2f}",
+                     "Vergi/Gumruk": "${:,.2f}", "Toplam Gider": "${:,.2f}", "Kar": "${:,.2f}"}
+                ).map(kar_zarar_stil, subset=["Kar"]),
+                use_container_width=True,
+                hide_index=True,
+            )
+            indirme_butonlari(detayli_rapor_df, "detayli_rapor", "tab1")
+
+        elif analiz_secimi == "Gider Bulunamayanlar":
+            st.subheader("🔍 Gider Bulunamayanlar")
+            not_found = merged[merged["Durum"] == "Gider bulunamadi"]
+            st.caption(
+                "Bu gonderiler icin takip numarasi var ama yuklenen gider dosyalarinda "
+                "karsiligi bulunamadi. Henuz faturalanmamis olabilir, veya ait oldugu "
+                "kargo firmasinin dosyasi yuklenmemis olabilir."
+            )
+            not_found_display = not_found[["Shipment No", "Track Number", "Carrier Name", "Status", "Invoice Amount"]]
+            st.dataframe(not_found_display, use_container_width=True, hide_index=True)
+            indirme_butonlari(not_found_display, "gider_bulunamayanlar", "tab2")
+
+        elif analiz_secimi == "Eslesmeyen Gider":
+            st.subheader("⚖️ Eslesmeyen Gider")
+            st.caption(
+                "Bu takip numaralari kargo firmasinin fatura listesinde var ama gelir "
+                "dosyasinda eslesen bir gonderi bulunamadi. Farkli ay/musteri donemine "
+                "ait olabilir, kontrol etmekte fayda var."
+            )
+            st.dataframe(unmatched_cost, use_container_width=True, hide_index=True)
+            indirme_butonlari(unmatched_cost, "eslesmeyen_gider", "tab3")
+
+
+
+        st.divider()
+
+        # Excel export icin tum analizleri hesapla (sidebar seciminden bagimsiz)
+        _carrier_table_export = carrier_breakdown(merged)
+        _cb_export = country_breakdown(merged)
+        _cust_table_export = customer_breakdown(merged)
+        _cust_country_table_export = customer_country_breakdown(merged)
+
+        buffer = io.BytesIO()
+        with pd.ExcelWriter(buffer, engine="xlsxwriter") as writer:
+            merged.drop(columns=["Takip_Var_Mi", "TrackingKey"]).to_excel(writer, sheet_name="Detayli Rapor", index=False)
+            merged[merged["Durum"] == "Gider bulunamadi"].drop(columns=["Takip_Var_Mi", "TrackingKey"], errors="ignore").to_excel(
+                writer, sheet_name="Gider Bulunamayan", index=False
+            )
+            unmatched_cost.to_excel(writer, sheet_name="Eslesmeyen Gider", index=False)
+            if not full_breakdown.empty:
+                full_breakdown.to_excel(writer, sheet_name="Kargo-Vergi Detayi", index=False)
+            _cb_export.to_excel(writer, sheet_name="Ulke Bazinda", index=False)
+            _carrier_table_export.to_excel(writer, sheet_name="Kargo Firmasi Bazinda", index=False)
+            _cust_table_export.to_excel(writer, sheet_name="Musteri Bazinda", index=False)
+            _cust_country_table_export.to_excel(writer, sheet_name="Musteri x Ulke", index=False)
+            if manuel_gider_toplam:
+                manual_expenses_df.to_excel(writer, sheet_name="Manuel Giderler", index=False)
+            if has_per_package_fee:
+                manual_carrier_expenses_df.to_excel(writer, sheet_name="Paket Basi Ek Gider", index=False)
+            if manuel_gelir_toplam:
+                manual_income_df.to_excel(writer, sheet_name="Manuel Gelirler", index=False)
+
+        st.download_button(
+            "Raporu Excel olarak indir",
+            data=buffer.getvalue(),
+            file_name="gelir_gider_raporu.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
-        cust_table = customer_breakdown(merged)
-        st.dataframe(
-            cust_table.style.format(
-                {
-                    "Bize Odenen (Gelir)": "${:,.2f}",
-                    "Firmaya Odenen (Gider)": "${:,.2f}",
-                    "Kar/Zarar": "${:,.2f}",
-                    "Paket Basi Kar/Zarar": "${:,.2f}",
-                }
-            ).map(kar_zarar_stil, subset=["Kar/Zarar", "Paket Basi Kar/Zarar"]),
-            use_container_width=True,
-            hide_index=True,
-        )
-        indirme_butonlari(cust_table, "musteriye_gore_analiz", "cust_table")
 
-    elif analiz_secimi == "Musteri x Ulke":
-        st.subheader("👥 Musteri x Ulke Analizi")
-        st.caption(
-            "Her musterinin HER ULKEDE ayri ayri kar mi zarar mi ettirdigini gosterir "
-            "(en zararli kombinasyonlar basta). Genel toplamda kar gibi gorunen bir "
-            "musteri, bazi ulkelerde zarar ettiriyor olabilir."
-        )
-        cust_country_table = customer_country_breakdown(merged)
-        st.dataframe(
-            cust_country_table.style.format(
-                {
-                    "Gelir": "${:,.2f}",
-                    "Gider": "${:,.2f}",
-                    "Kar/Zarar": "${:,.2f}",
-                }
-            ).map(kar_zarar_stil, subset=["Kar/Zarar"]),
-            use_container_width=True,
-            hide_index=True,
-        )
-        indirme_butonlari(cust_country_table, "musteri_x_ulke_analizi", "cust_country_table")
-
-    elif analiz_secimi == "Detayli Rapor":
-        st.subheader("📋 Detayli Rapor")
-        detayli_rapor_df = merged.sort_values("Added Date")[
-            [
-                "Shipment No", "Track Number", "Carrier Name", "Invoice Amount",
-                "Gider_Kargo", "Gider_Tax", "Gider", "Gider_Kalemleri", "Kar",
-            ]
-        ].rename(columns={
-            "Gider_Kargo": "Kargo Gideri", "Gider_Tax": "Vergi/Gumruk",
-            "Gider": "Toplam Gider", "Gider_Kalemleri": "Gider Kalemleri",
-        })
-        st.dataframe(
-            detayli_rapor_df.style.format(
-                {"Invoice Amount": "${:,.2f}", "Kargo Gideri": "${:,.2f}",
-                 "Vergi/Gumruk": "${:,.2f}", "Toplam Gider": "${:,.2f}", "Kar": "${:,.2f}"}
-            ).map(kar_zarar_stil, subset=["Kar"]),
-            use_container_width=True,
-            hide_index=True,
-        )
-        indirme_butonlari(detayli_rapor_df, "detayli_rapor", "tab1")
-
-    elif analiz_secimi == "Gider Bulunamayanlar":
-        st.subheader("🔍 Gider Bulunamayanlar")
-        not_found = merged[merged["Durum"] == "Gider bulunamadi"]
-        st.caption(
-            "Bu gonderiler icin takip numarasi var ama yuklenen gider dosyalarinda "
-            "karsiligi bulunamadi. Henuz faturalanmamis olabilir, veya ait oldugu "
-            "kargo firmasinin dosyasi yuklenmemis olabilir."
-        )
-        not_found_display = not_found[["Shipment No", "Track Number", "Carrier Name", "Status", "Invoice Amount"]]
-        st.dataframe(not_found_display, use_container_width=True, hide_index=True)
-        indirme_butonlari(not_found_display, "gider_bulunamayanlar", "tab2")
-
-    elif analiz_secimi == "Eslesmeyen Gider":
-        st.subheader("⚖️ Eslesmeyen Gider")
-        st.caption(
-            "Bu takip numaralari kargo firmasinin fatura listesinde var ama gelir "
-            "dosyasinda eslesen bir gonderi bulunamadi. Farkli ay/musteri donemine "
-            "ait olabilir, kontrol etmekte fayda var."
-        )
-        st.dataframe(unmatched_cost, use_container_width=True, hide_index=True)
-        indirme_butonlari(unmatched_cost, "eslesmeyen_gider", "tab3")
-
-
-
-    st.divider()
-
-    # Excel export icin tum analizleri hesapla (sidebar seciminden bagimsiz)
-    _carrier_table_export = carrier_breakdown(merged)
-    _cb_export = country_breakdown(merged)
-    _cust_table_export = customer_breakdown(merged)
-    _cust_country_table_export = customer_country_breakdown(merged)
-
-    buffer = io.BytesIO()
-    with pd.ExcelWriter(buffer, engine="xlsxwriter") as writer:
-        merged.drop(columns=["Takip_Var_Mi", "TrackingKey"]).to_excel(writer, sheet_name="Detayli Rapor", index=False)
-        merged[merged["Durum"] == "Gider bulunamadi"].drop(columns=["Takip_Var_Mi", "TrackingKey"], errors="ignore").to_excel(
-            writer, sheet_name="Gider Bulunamayan", index=False
-        )
-        unmatched_cost.to_excel(writer, sheet_name="Eslesmeyen Gider", index=False)
-        if not full_breakdown.empty:
-            full_breakdown.to_excel(writer, sheet_name="Kargo-Vergi Detayi", index=False)
-        _cb_export.to_excel(writer, sheet_name="Ulke Bazinda", index=False)
-        _carrier_table_export.to_excel(writer, sheet_name="Kargo Firmasi Bazinda", index=False)
-        _cust_table_export.to_excel(writer, sheet_name="Musteri Bazinda", index=False)
-        _cust_country_table_export.to_excel(writer, sheet_name="Musteri x Ulke", index=False)
-        if manuel_gider_toplam:
-            manual_expenses_df.to_excel(writer, sheet_name="Manuel Giderler", index=False)
-        if has_per_package_fee:
-            manual_carrier_expenses_df.to_excel(writer, sheet_name="Paket Basi Ek Gider", index=False)
-        if manuel_gelir_toplam:
-            manual_income_df.to_excel(writer, sheet_name="Manuel Gelirler", index=False)
-
-    st.download_button(
-        "Raporu Excel olarak indir",
-        data=buffer.getvalue(),
-        file_name="gelir_gider_raporu.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    )
-
-elif "income_df_cache" not in st.session_state:
-    st.info("Baslamak icin once gelir dosyasini yukleyin ve 'Hesapla' butonuna basin.")
+    elif "income_df_cache" not in st.session_state:
+        st.info("Baslamak icin once gelir dosyasini yukleyin ve 'Hesapla' butonuna basin.")
