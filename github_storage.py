@@ -9,9 +9,11 @@ Yerel calistirmada ise .streamlit/secrets.toml dosyasina eklenir (bu dosya
 """
 
 import base64
+import io
 import json
 
 import numpy as np
+import pandas as pd
 import requests
 import streamlit as st
 
@@ -19,6 +21,7 @@ GITHUB_OWNER = "YasinSinan"
 GITHUB_REPO = "invoice"
 GITHUB_BRANCH = "main"
 REPORTS_DIR = "reports"
+RAW_DATA_DIR = "data"
 API_BASE = f"https://api.github.com/repos/{GITHUB_OWNER}/{GITHUB_REPO}"
 
 
@@ -136,3 +139,186 @@ def delete_report(period):
     resp = requests.delete(url, headers=_headers(), json=body, timeout=15)
     resp.raise_for_status()
     return resp.json()
+
+
+# ----------------------------------------------------------------------
+# Ham gelir/gider dosyalarinin arsivlenmesi
+#
+# Yapisi:  data/{period}/gelir/{dosya_adi}
+#          data/{period}/gider/{dosya_adi}
+#          data/{period}/gider/_meta.json  -> {"dosya_adi.xlsx": "UniUni", ...}
+# Boylece bir donemin (orn. "2026-07") tum fatura dosyalari saklanir ve
+# istenen zaman tekrar indirilip analiz calistirilabilir.
+# ----------------------------------------------------------------------
+
+def list_periods():
+    """data/ altindaki kayitli donemleri (klasor adlarini), en yeni en basta
+    olacak sekilde listeler. Hic dosya arsivlenmemisse bos liste doner."""
+    url = f"{API_BASE}/contents/{RAW_DATA_DIR}"
+    resp = requests.get(url, headers=_headers(), timeout=15)
+    if resp.status_code == 404:
+        return []
+    resp.raise_for_status()
+    items = resp.json()
+    periods = sorted((it["name"] for it in items if it["type"] == "dir"), reverse=True)
+    return periods
+
+
+def list_raw_files(period, category):
+    """Bir donemin gelir/gider klasorundeki dosya adlarini listeler
+    (_meta.json haric)."""
+    url = f"{API_BASE}/contents/{RAW_DATA_DIR}/{period}/{category}"
+    resp = requests.get(url, headers=_headers(), timeout=15)
+    if resp.status_code == 404:
+        return []
+    resp.raise_for_status()
+    items = resp.json()
+    return sorted(it["name"] for it in items if it["type"] == "file" and it["name"] != "_meta.json")
+
+
+def save_raw_file(period, category, filename, file_bytes):
+    """Bir gelir/gider dosyasini data/{period}/{category}/{filename} olarak
+    kaydeder. Dosya zaten varsa uzerine yazar."""
+    url = f"{API_BASE}/contents/{RAW_DATA_DIR}/{period}/{category}/{filename}"
+
+    sha = None
+    existing = requests.get(url, headers=_headers(), timeout=15)
+    if existing.status_code == 200:
+        sha = existing.json()["sha"]
+    elif existing.status_code not in (404,):
+        existing.raise_for_status()
+
+    content_b64 = base64.b64encode(file_bytes).decode("utf-8")
+    body = {
+        "message": f"Dosya arsivlendi: {period}/{category}/{filename}",
+        "content": content_b64,
+        "branch": GITHUB_BRANCH,
+    }
+    if sha:
+        body["sha"] = sha
+
+    resp = requests.put(url, headers=_headers(), json=body, timeout=30)
+    resp.raise_for_status()
+    return resp.json()
+
+
+def load_raw_file(period, category, filename):
+    """data/{period}/{category}/{filename} dosyasinin icerigini bytes olarak dondurur."""
+    url = f"{API_BASE}/contents/{RAW_DATA_DIR}/{period}/{category}/{filename}"
+    resp = requests.get(url, headers=_headers(), timeout=15)
+    resp.raise_for_status()
+    data = resp.json()
+    return base64.b64decode(data["content"])
+
+
+def save_gider_meta(period, carrier_for_file):
+    """Gider dosyalarinin hangi kargo firmasina ait oldugunu
+    data/{period}/gider/_meta.json icine kaydeder. carrier_for_file:
+    {"dosya_adi.xlsx": "UniUni", ...}"""
+    url = f"{API_BASE}/contents/{RAW_DATA_DIR}/{period}/gider/_meta.json"
+
+    sha = None
+    existing = requests.get(url, headers=_headers(), timeout=15)
+    if existing.status_code == 200:
+        sha = existing.json()["sha"]
+    elif existing.status_code not in (404,):
+        existing.raise_for_status()
+
+    content_str = json.dumps(carrier_for_file, ensure_ascii=False, indent=2)
+    content_b64 = base64.b64encode(content_str.encode("utf-8")).decode("utf-8")
+    body = {
+        "message": f"Gider firma bilgisi kaydedildi: {period}",
+        "content": content_b64,
+        "branch": GITHUB_BRANCH,
+    }
+    if sha:
+        body["sha"] = sha
+
+    resp = requests.put(url, headers=_headers(), json=body, timeout=15)
+    resp.raise_for_status()
+    return resp.json()
+
+
+def load_gider_meta(period):
+    """data/{period}/gider/_meta.json icerigini dict olarak dondurur.
+    Yoksa bos dict doner."""
+    url = f"{API_BASE}/contents/{RAW_DATA_DIR}/{period}/gider/_meta.json"
+    resp = requests.get(url, headers=_headers(), timeout=15)
+    if resp.status_code == 404:
+        return {}
+    resp.raise_for_status()
+    data = resp.json()
+    content = base64.b64decode(data["content"]).decode("utf-8")
+    return json.loads(content)
+
+
+# Bir dosyada bu kolonlardan hangisi varsa, satirlarin "kimligi" (tekillestirme
+# anahtari) olarak o kullanilir - ayni kimlige sahip iki satirdan en son
+# yuklenen gecerli olur. Kolon isimleri processing.py'deki CARRIER_PROFILES
+# ile gelir dosyasi kolonlarindan derlenmistir.
+_DEDUP_KEY_CANDIDATES = [
+    "Shipment No",
+    "Track Number",
+    "CustomerTrackingNumberOriginal",
+    "Customer Tracking Number Original",
+    "Parcel Tracking No.",
+    "Tracking Number",
+    "Express or Ground Tracking ID",
+    "Master Tracking Number",
+]
+
+
+def _guess_dedup_key(df):
+    for col in _DEDUP_KEY_CANDIDATES:
+        if col in df.columns:
+            return col
+    return None
+
+
+def merge_and_save_raw_file(period, category, filename, new_bytes):
+    """Ayni isimli dosya data/{period}/{category}/{filename} altinda zaten
+    varsa, eskisiyle yeni yuklenen dosyayi birlestirir: ayni takip numarasina
+    (veya Shipment No'ya) sahip satirlarda en son yuklenen veri gecerli olur,
+    farkli/yeni satirlar ise eklenir - hicbir veri kaybolmaz. Dosya ilk kez
+    yukleniyorsa oldugu gibi kaydedilir.
+
+    Returns: dict(durum="yeni"|"birlestirildi", eski_satir, yeni_satir, sonuc_satir, dedup_anahtari)
+    """
+    url = f"{API_BASE}/contents/{RAW_DATA_DIR}/{period}/{category}/{filename}"
+    existing = requests.get(url, headers=_headers(), timeout=15)
+
+    new_df = pd.read_excel(io.BytesIO(new_bytes))
+
+    if existing.status_code == 404:
+        save_raw_file(period, category, filename, new_bytes)
+        return {
+            "durum": "yeni",
+            "eski_satir": 0,
+            "yeni_satir": len(new_df),
+            "sonuc_satir": len(new_df),
+            "dedup_anahtari": None,
+        }
+    existing.raise_for_status()
+
+    old_content = base64.b64decode(existing.json()["content"])
+    old_df = pd.read_excel(io.BytesIO(old_content))
+
+    combined = pd.concat([old_df, new_df], ignore_index=True)
+    dedup_key = _guess_dedup_key(combined)
+    if dedup_key:
+        combined = combined.drop_duplicates(subset=[dedup_key], keep="last")
+    else:
+        combined = combined.drop_duplicates(keep="last")
+    combined = combined.reset_index(drop=True)
+
+    out_buffer = io.BytesIO()
+    combined.to_excel(out_buffer, index=False)
+    save_raw_file(period, category, filename, out_buffer.getvalue())
+
+    return {
+        "durum": "birlestirildi",
+        "eski_satir": len(old_df),
+        "yeni_satir": len(new_df),
+        "sonuc_satir": len(combined),
+        "dedup_anahtari": dedup_key,
+    }

@@ -28,7 +28,20 @@ from processing import (
     manual_expense_total,
     summarize,
 )
-from github_storage import GithubStorageError, delete_report, list_saved_reports, load_report, save_report
+from github_storage import (
+    GithubStorageError,
+    delete_report,
+    list_periods,
+    list_raw_files,
+    list_saved_reports,
+    load_gider_meta,
+    load_raw_file,
+    load_report,
+    merge_and_save_raw_file,
+    save_gider_meta,
+    save_raw_file,
+    save_report,
+)
 
 st.set_page_config(page_title="Gelir-Gider Karsilastirma", layout="wide")
 
@@ -408,8 +421,86 @@ with st.expander("Gecmis analizler (aylik kayitlar)", expanded=False):
 
 st.divider()
 
-# Yuklu parametreler varsa widget varsayilan degerlerine uygula
-_params = st.session_state.get("yuklu_parametreler", {})
+# ------------------------------------------------------- github arsivi ---
+with st.expander("🗄️ GitHub Arsivinden Donem Yukle", expanded=False):
+    st.caption(
+        "Daha once 'GitHub'a Arsivle' ile kaydettigin gelir/gider dosyalarini "
+        "tekrar yuklemeden, kayitli bir donemi secip direkt analiz calistir."
+    )
+    try:
+        _kayitli_donemler = list_periods()
+    except GithubStorageError as e:
+        _kayitli_donemler = []
+        st.warning(str(e))
+
+    if not _kayitli_donemler:
+        st.info("Henuz arsivlenmis bir donem yok. Asagidaki yukleme alanindan dosyalarini arsivleyebilirsin.")
+    else:
+        _secilen_arsiv_donemi = st.selectbox("Donem sec", options=_kayitli_donemler, key="arsiv_donem_sec")
+        if st.button("📥 Bu Donemi Yukle ve Analiz Et", key="arsiv_yukle_btn"):
+            try:
+                gelir_dosyalari = list_raw_files(_secilen_arsiv_donemi, "gelir")
+                gider_dosyalari = list_raw_files(_secilen_arsiv_donemi, "gider")
+                if not gelir_dosyalari:
+                    st.error("Bu donem icin arsivlenmis bir gelir dosyasi bulunamadi.")
+                    st.stop()
+
+                gider_carrier_map = load_gider_meta(_secilen_arsiv_donemi)
+
+                gelir_dfs_arsiv = []
+                for gelir_dosya in gelir_dosyalari:
+                    gelir_bytes = load_raw_file(_secilen_arsiv_donemi, "gelir", gelir_dosya)
+                    gelir_dfs_arsiv.append(
+                        load_income_file(
+                            io.BytesIO(gelir_bytes),
+                            only_paid=True,
+                            exclude_unassigned_carrier=True,
+                        )
+                    )
+                income_df_arsiv = pd.concat(gelir_dfs_arsiv, ignore_index=True)
+
+                cost_dfs_arsiv = []
+                warnings_arsiv = []
+                carrier_overhead_arsiv = 0.0
+                breakdown_dfs_arsiv = []
+                for gider_dosya in gider_dosyalari:
+                    gider_bytes = load_raw_file(_secilen_arsiv_donemi, "gider", gider_dosya)
+                    secilen_carrier = gider_carrier_map.get(gider_dosya, BYELABEL_GROUP_LABEL)
+                    if secilen_carrier == BYELABEL_GROUP_LABEL:
+                        g_cost_dfs, g_warnings, g_genel_gider, g_breakdown_dfs = load_byelabel_group(
+                            io.BytesIO(gider_bytes)
+                        )
+                        cost_dfs_arsiv.extend(g_cost_dfs)
+                        warnings_arsiv.extend(g_warnings)
+                        carrier_overhead_arsiv += g_genel_gider
+                        breakdown_dfs_arsiv.extend(g_breakdown_dfs)
+                    else:
+                        cost_df, warning, genel_gider, breakdown_df = load_cost_file(
+                            io.BytesIO(gider_bytes), secilen_carrier
+                        )
+                        cost_dfs_arsiv.append(cost_df)
+                        if warning:
+                            warnings_arsiv.append(warning)
+                        carrier_overhead_arsiv += genel_gider
+                        if not breakdown_df.empty:
+                            breakdown_dfs_arsiv.append(breakdown_df)
+
+                st.session_state["income_df_cache"] = income_df_arsiv
+                st.session_state["cost_dfs_cache"] = cost_dfs_arsiv
+                st.session_state["breakdown_dfs_cache"] = breakdown_dfs_arsiv
+                st.session_state["carrier_overhead_cache"] = carrier_overhead_arsiv
+                st.session_state["warnings_cache"] = warnings_arsiv
+                st.session_state["hesapla_tiklandi"] = True
+                st.success(f"'{_secilen_arsiv_donemi}' donemi yuklendi, asagida analiz gosteriliyor.")
+                st.rerun()
+            except GithubStorageError as e:
+                st.error(str(e))
+            except Exception as e:
+                st.error(f"Donem yuklenirken hata olustu: {e}")
+
+st.divider()
+
+
 
 # ---------------------------------------------------------------- yukleme ---
 col1, col2 = st.columns(2)
@@ -585,6 +676,58 @@ with col_yeniden:
         help="Dosyalari tekrar yuklemeden, sadece filtre/manuel giris degisikliklerini uygular.",
     ):
         st.session_state["hesapla_tiklandi"] = True
+
+# ------------------------------------------------------- github arsivle ---
+with st.expander("🗄️ Bu Dosyalari GitHub'a Arsivle", expanded=False):
+    st.caption(
+        "Yukarida sectigin gelir/gider dosyalarini bir doneme (orn. ay) etiketleyip "
+        "GitHub'a kaydeder. Ayni isimli dosyayi tekrar yuklersen, eski veriyle "
+        "otomatik birlestirilir: ayni takip numarasina sahip satirlar guncellenir, "
+        "yeni satirlar eklenir - hicbir veri kaybolmaz."
+    )
+    _varsayilan_donem = datetime.now(timezone.utc).strftime("%Y-%m")
+    _arsiv_donemi = st.text_input(
+        "Donem etiketi (orn. 2026-07)", value=_varsayilan_donem, key="arsiv_donem_input"
+    )
+    _arsiv_disabled = income_file is None and not cost_files
+    if st.button("📤 GitHub'a Arsivle", key="arsivle_btn", disabled=_arsiv_disabled):
+        try:
+            _sonuc_mesajlari = []
+            if income_file is not None:
+                sonuc = merge_and_save_raw_file(_arsiv_donemi, "gelir", income_file.name, income_file.getvalue())
+                if sonuc["durum"] == "yeni":
+                    _sonuc_mesajlari.append(f"📄 {income_file.name}: yeni dosya olarak kaydedildi ({sonuc['sonuc_satir']} satir).")
+                else:
+                    _sonuc_mesajlari.append(
+                        f"📄 {income_file.name}: mevcut dosyayla birlestirildi "
+                        f"(eski {sonuc['eski_satir']} + yeni {sonuc['yeni_satir']} satir → "
+                        f"toplam {sonuc['sonuc_satir']} satir, tekrarlar elendi"
+                        + (f", anahtar: {sonuc['dedup_anahtari']}" if sonuc["dedup_anahtari"] else "")
+                        + ")."
+                    )
+            _gider_meta = {}
+            for f in cost_files or []:
+                sonuc = merge_and_save_raw_file(_arsiv_donemi, "gider", f.name, f.getvalue())
+                _gider_meta[f.name] = carrier_for_file.get(f.name, BYELABEL_GROUP_LABEL)
+                if sonuc["durum"] == "yeni":
+                    _sonuc_mesajlari.append(f"📄 {f.name}: yeni dosya olarak kaydedildi ({sonuc['sonuc_satir']} satir).")
+                else:
+                    _sonuc_mesajlari.append(
+                        f"📄 {f.name}: mevcut dosyayla birlestirildi "
+                        f"(eski {sonuc['eski_satir']} + yeni {sonuc['yeni_satir']} satir → "
+                        f"toplam {sonuc['sonuc_satir']} satir, tekrarlar elendi"
+                        + (f", anahtar: {sonuc['dedup_anahtari']}" if sonuc["dedup_anahtari"] else "")
+                        + ")."
+                    )
+            if _gider_meta:
+                save_gider_meta(_arsiv_donemi, _gider_meta)
+            st.success(f"'{_arsiv_donemi}' donemine kaydedildi:")
+            for m in _sonuc_mesajlari:
+                st.caption(m)
+        except GithubStorageError as e:
+            st.error(str(e))
+        except Exception as e:
+            st.error(f"Arsivlenirken hata olustu: {e}")
 
 # ---------------------------------------------------------------- hesapla ---
 if st.session_state.get("hesapla_tiklandi") and "income_df_cache" in st.session_state:
