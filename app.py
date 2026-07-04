@@ -30,17 +30,12 @@ from processing import (
 )
 from github_storage import (
     GithubStorageError,
-    delete_report,
     list_periods,
     list_raw_files,
-    list_saved_reports,
     load_gider_meta,
     load_raw_file,
-    load_report,
     merge_and_save_raw_file,
     save_gider_meta,
-    save_raw_file,
-    save_report,
 )
 
 st.set_page_config(page_title="Gelir-Gider Karsilastirma", layout="wide")
@@ -298,126 +293,6 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
-
-# ------------------------------------------------------------ gecmis analiz ---
-with st.expander("Gecmis analizler (aylik kayitlar)", expanded=False):
-    try:
-        saved_periods = list_saved_reports()
-    except GithubStorageError as e:
-        saved_periods = None
-        st.info(
-            "Gecmis analizleri kaydetme/goruntuleme ozelligi henuz kurulmadi. "
-            f"({e})"
-        )
-
-    if saved_periods is not None:
-        if not saved_periods:
-            st.caption("Henuz kayitli bir analiz yok. Asagida hesaplama yaptiktan sonra kaydedebilirsin.")
-        else:
-            secilen_donem = st.selectbox("Bir donem secin", options=saved_periods, key="gecmis_donem_secimi")
-
-            col_goruntule, col_yukle, col_sil = st.columns([1, 1, 1])
-            with col_goruntule:
-                if st.button("Goruntule", key="gecmis_goruntule_buton"):
-                    st.session_state["gecmis_goruntulenecek_donem"] = secilen_donem
-            with col_yukle:
-                if st.button("⬇️ Parametreleri yukle", key="gecmis_yukle_buton"):
-                    try:
-                        rapor = load_report(secilen_donem)
-                        params = rapor.get("parametreler")
-                        if not params:
-                            st.warning("Bu kayıtta parametre bilgisi yok (eski format).")
-                        else:
-                            st.session_state["yuklu_parametreler"] = params
-                            st.session_state["yuklu_donem"] = secilen_donem
-                            st.success(
-                                f"'{secilen_donem}' parametreleri yuklendi. "
-                                "Asagida dosyalarini yukleyip 'Hesapla'ya bas."
-                            )
-                    except Exception as e:
-                        st.error(f"Parametreler yuklenemedi: {e}")
-            with col_sil:
-                if st.button("Sil (geri alinamaz)", key="gecmis_sil_buton"):
-                    try:
-                        delete_report(secilen_donem)
-                        st.success(f"'{secilen_donem}' donemi silindi.")
-                        if st.session_state.get("gecmis_goruntulenecek_donem") == secilen_donem:
-                            st.session_state.pop("gecmis_goruntulenecek_donem", None)
-                        st.rerun()
-                    except Exception as e:
-                        st.error(f"Silinemedi: {e}")
-
-            if st.session_state.get("yuklu_donem"):
-                st.info(f"📥 '{st.session_state['yuklu_donem']}' donemine ait parametreler yuklu — asagida dosyalarini yukleyip 'Hesapla'ya bas.")
-
-            goruntulenecek_donem = st.session_state.get("gecmis_goruntulenecek_donem")
-            if goruntulenecek_donem and goruntulenecek_donem in saved_periods:
-                try:
-                    rapor = load_report(goruntulenecek_donem)
-                    st.caption(f"Kayit tarihi: {rapor.get('saved_at', '-')}")
-
-                    s = rapor["summary"]
-                    renkli_kart("Toplam Paket Sayisi", f"{s['toplam_gonderi']:,}", "#6366f1", "📦")
-
-                    st.markdown("")
-                    g_gelir, g_gider = st.columns(2)
-                    with g_gelir:
-                        st.markdown("**💰 Gelir**")
-                        renkli_kart("Toplam Gelir", f"${s['toplam_gelir']:,.2f}", "#10b981", "💵")
-                        if s.get("manuel_gelir"):
-                            renkli_kart("Manuel Gelir", f"${s['manuel_gelir']:,.2f}", "#14b8a6", "✍️")
-                    with g_gider:
-                        st.markdown("**💸 Gider**")
-                        renkli_kart("Kargo Gideri", f"${s['toplam_gider_kargo']:,.2f}", "#f59e0b", "🚚")
-                        renkli_kart("Vergi/Gumruk Gideri", f"${s['toplam_gider_tax']:,.2f}", "#f97316", "🛂")
-                        renkli_kart("Toplam Gider", f"${s['toplam_gider_eslesen']:,.2f}", "#ef4444", "🧾")
-                        if s.get("genel_gider"):
-                            renkli_kart("Genel Gider", f"${s['genel_gider']:,.2f}", "#dc2626", "⚠️")
-
-                    st.markdown("")
-                    _, g_kar_orta, _ = st.columns([1, 1, 1])
-                    with g_kar_orta:
-                        g_net_kar_renk = "#10b981" if s["net_kar"] >= 0 else "#dc2626"
-                        g_net_kar_icon = "📈" if s["net_kar"] >= 0 else "📉"
-                        renkli_kart("Net Kar", f"${s['net_kar']:,.2f}", g_net_kar_renk, g_net_kar_icon)
-
-                    st.markdown("**🚚 Kargo firmalarina gore analiz**")
-                    gecmis_carrier_df = pd.DataFrame(rapor["carrier_table"])
-                    gecmis_carrier_kar_kolonlari = [c for c in ["Kar/Zarar", "Paket Basi Kar/Zarar"] if c in gecmis_carrier_df.columns]
-                    st.dataframe(
-                        gecmis_carrier_df.style.map(kar_zarar_stil, subset=gecmis_carrier_kar_kolonlari)
-                        if gecmis_carrier_kar_kolonlari
-                        else gecmis_carrier_df,
-                        use_container_width=True,
-                        hide_index=True,
-                    )
-                    indirme_butonlari(gecmis_carrier_df, f"{goruntulenecek_donem}_kargo_firmasi", "gecmis_carrier")
-
-                    st.markdown("**🌍 Ulkeye gore analiz**")
-                    gecmis_country_df = pd.DataFrame(rapor["country_table"])
-                    gecmis_country_kar_kolonlari = [c for c in ["Kar", "Paket_Basi_Kar"] if c in gecmis_country_df.columns]
-                    st.dataframe(
-                        gecmis_country_df.style.map(kar_zarar_stil, subset=gecmis_country_kar_kolonlari)
-                        if gecmis_country_kar_kolonlari
-                        else gecmis_country_df,
-                        use_container_width=True,
-                        hide_index=True,
-                    )
-                    indirme_butonlari(gecmis_country_df, f"{goruntulenecek_donem}_ulke", "gecmis_country")
-
-                    st.markdown("**👥 Musteriye gore analiz**")
-                    gecmis_customer_df = pd.DataFrame(rapor["customer_table"])
-                    gecmis_customer_kar_kolonlari = [c for c in ["Kar/Zarar", "Paket Basi Kar/Zarar"] if c in gecmis_customer_df.columns]
-                    st.dataframe(
-                        gecmis_customer_df.style.map(kar_zarar_stil, subset=gecmis_customer_kar_kolonlari)
-                        if gecmis_customer_kar_kolonlari
-                        else gecmis_customer_df,
-                        use_container_width=True,
-                        hide_index=True,
-                    )
-                    indirme_butonlari(gecmis_customer_df, f"{goruntulenecek_donem}_musteri", "gecmis_customer")
-                except Exception as e:
-                    st.error(f"Rapor yuklenemedi: {e}")
 
 st.divider()
 
@@ -1263,39 +1138,6 @@ if st.session_state.get("hesapla_tiklandi") and "income_df_cache" in st.session_
         file_name="gelir_gider_raporu.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
-
-    st.divider()
-    st.subheader("Bu analizi kaydet (gecmis analizler icin)")
-    st.caption(
-        "Bu hesaplamayi bir donem etiketiyle (orn. 2026-06) GitHub reposuna "
-        "kaydeder. Daha sonra sayfanin en ustundeki 'Gecmis analizler' "
-        "bolumunden tekrar goruntuleyebilir, parametreleri geri yukleyebilirsin."
-    )
-    varsayilan_donem = datetime.now().strftime("%Y-%m")
-    donem_etiketi = st.text_input("Donem etiketi", value=varsayilan_donem, key="kayit_donem_etiketi")
-    if st.button("GitHub'a kaydet", key="kayit_buton"):
-        try:
-            payload = {
-                "saved_at": datetime.now(timezone.utc).isoformat(),
-                "summary": summary,
-                "carrier_table": carrier_table.to_dict("records"),
-                "country_table": cb.to_dict("records"),
-                "customer_table": cust_table.to_dict("records"),
-                "customer_country_table": cust_country_table.to_dict("records"),
-                "parametreler": {
-                    "only_paid": only_paid,
-                    "exclude_unassigned_carrier": exclude_unassigned_carrier,
-                    "manuel_gelir": manual_income_df.to_dict("records"),
-                    "manuel_gider": manual_expenses_df.to_dict("records"),
-                    "paket_basi_gider": manual_carrier_expenses_df.to_dict("records"),
-                },
-            }
-            save_report(donem_etiketi, payload)
-            st.success(f"'{donem_etiketi}' donemi kaydedildi. Parametreler de saklandı.")
-        except GithubStorageError as e:
-            st.error(str(e))
-        except Exception as e:
-            st.error(f"Kaydetme sirasinda bir hata olustu: {e}")
 
 elif "income_df_cache" not in st.session_state:
     st.info("Baslamak icin once gelir dosyasini yukleyin ve 'Hesapla' butonuna basin.")
