@@ -78,10 +78,6 @@ st.markdown(
         background: var(--panel-bg) !important;
         height: 2.75rem !important;
         min-height: 2.75rem !important;
-        z-index: 999999 !important;
-        position: fixed !important;
-        top: 0 !important;
-        width: 100% !important;
     }
     [data-testid="stToolbar"] {
         visibility: hidden !important;
@@ -445,10 +441,12 @@ with st.sidebar:
         """
         <style>
         [data-testid="stSidebar"] {
-            min-width: 248px !important;
-            max-width: 248px !important;
             background-color: #14161c;
             border-right: 1px solid #22252d;
+        }
+        [data-testid="stSidebar"][aria-expanded="true"] {
+            min-width: 248px !important;
+            max-width: 248px !important;
         }
         [data-testid="stSidebar"] > div:first-child {
             padding: 0 !important;
