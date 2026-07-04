@@ -164,6 +164,52 @@ st.markdown(
         border-radius: 10px !important;
     }
 
+    /* Dosya yukleme kutusu - lacivert zemin, acik renk yazi */
+    [data-testid="stFileUploaderDropzone"] {
+        background-color: #16213e !important;
+        border: 1px dashed #2e3f66 !important;
+        border-radius: 10px !important;
+    }
+    [data-testid="stFileUploaderDropzone"] * {
+        color: #e5e9f2 !important;
+    }
+    [data-testid="stFileUploaderDropzone"] svg {
+        fill: #e5e9f2 !important;
+    }
+    [data-testid="stFileUploaderDropzone"] small {
+        color: #a9b2c6 !important;
+    }
+    [data-testid="stFileUploaderDropzone"] button {
+        background-color: #223258 !important;
+        color: #ffffff !important;
+        border: 1px solid #3b4c7a !important;
+        border-radius: 6px !important;
+    }
+    [data-testid="stFileUploaderFile"] {
+        background-color: #16213e !important;
+        color: #e5e9f2 !important;
+        border-radius: 8px !important;
+    }
+    [data-testid="stFileUploaderFile"] * {
+        color: #e5e9f2 !important;
+    }
+
+    /* Manuel giris tablolari (data_editor) - lacivert zemin, acik renk yazi */
+    [data-testid="stDataEditorGrid"],
+    [data-testid="stDataFrameResizable"] canvas {
+        background-color: #16213e !important;
+    }
+    .stDataEditor [data-testid="stElementToolbar"] {
+        background-color: #16213e !important;
+    }
+    .stDataEditor {
+        background-color: #16213e !important;
+        border: 1px solid #2e3f66 !important;
+    }
+    .stDataEditor * {
+        color: #e5e9f2 !important;
+    }
+
     [data-testid="metric-container"] {
         background: var(--card-bg) !important;
         border-radius: 10px !important;
