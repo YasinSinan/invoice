@@ -778,11 +778,11 @@ else:
 
         st.markdown("**Paket basina ek gider - firma bazinda (opsiyonel)**")
         st.caption(
-            "Belirli bir kargo firmasinin HER paketine ayni tutari ekler (orn. "
-            "US-CA Arasi nakliye ucreti UniUni icin paket basina $2). Tutar otomatik olarak paket sayisiyla "
-            "carpilir ve her paketin kar/zarar hesabina islenir - tum tablolarda "
-            "(ulke, firma, musteri) otomatik yansir. Gideri eslesmemis paketler "
-            "bu tutari aldiktan sonra 'eslesti' sayilir."
+            "Belirli bir kargo firmasinin, gideri ZATEN eslesmis olan HER paketine "
+            "ayni tutari ekler (orn. UniUni icin paket basina $2). Tutar otomatik "
+            "olarak eslesen paket sayisiyla carpilir ve her paketin kar/zarar "
+            "hesabina islenir - tum tablolarda (ulke, firma, musteri) otomatik "
+            "yansir. Gideri eslesmemis paketlere bu tutar uygulanmaz."
         )
         _paket_cols = {"Kargo Firmasi": pd.Series(dtype="str"), "Aciklama": pd.Series(dtype="str"), "Paket Basi Tutar": pd.Series(dtype="float")}
         _paket_default = pd.DataFrame(_params.get("paket_basi_gider", [])) if _params else pd.DataFrame(_paket_cols)
