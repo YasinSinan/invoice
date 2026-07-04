@@ -50,7 +50,7 @@ st.markdown(
         --card-bg: #ffffff;
         --text-dark: #1f2430;
         --text-muted: #8a90a0;
-        --border-light: #e8eaf0;
+        --border-light: #c7cbd6;
         --accent-blue: #3b82f6;
         --sidebar-bg: #14161c;
         --sidebar-bg-2: #1b1e26;
@@ -63,15 +63,45 @@ st.markdown(
         color: var(--text-dark) !important;
     }
 
-    .main .block-container {
+    .main .block-container,
+    [data-testid="stMainBlockContainer"] {
         background-color: var(--panel-bg) !important;
-        padding-top: 1.5rem !important;
+        padding-top: 0.6rem !important;
         max-width: 1400px !important;
+    }
+
+    /* Streamlit'in ust bosluk birakan gizli header/toolbar alani */
+    [data-testid="stHeader"] {
+        height: 0 !important;
+        min-height: 0 !important;
+    }
+    [data-testid="stToolbar"] {
+        display: none !important;
+    }
+    [data-testid="stDecoration"] {
+        display: none !important;
+    }
+
+    /* Elemanlar arasi dikey bosluklari sikistir */
+    [data-testid="stVerticalBlock"] {
+        gap: 0.55rem !important;
+    }
+    div[data-testid="stVerticalBlockBorderWrapper"] {
+        gap: 0.55rem !important;
+    }
+
+    /* Ayirici (divider) daha ince bosluklu */
+    hr {
+        margin: 0.5rem 0 !important;
+        border-color: var(--border-light) !important;
+        border-width: 1px !important;
     }
 
     h1, h2, h3, h4 {
         color: var(--text-dark) !important;
         font-weight: 700 !important;
+        margin-top: 0.2rem !important;
+        margin-bottom: 0.4rem !important;
     }
 
     p, span, label, .stMarkdown {
@@ -113,7 +143,7 @@ st.markdown(
     .stDataFrame, [data-testid="stDataFrame"], [data-testid="stDataFrameResizable"] {
         background-color: var(--card-bg) !important;
         border-radius: 10px !important;
-        border: 1px solid var(--border-light) !important;
+        border: 1.5px solid var(--border-light) !important;
     }
 
     /* Input alanlari */
@@ -122,7 +152,7 @@ st.markdown(
     .stMultiSelect > div > div {
         background-color: var(--card-bg) !important;
         color: var(--text-dark) !important;
-        border-color: var(--border-light) !important;
+        border: 1.5px solid var(--border-light) !important;
         border-radius: 8px !important;
     }
 
@@ -135,7 +165,7 @@ st.markdown(
         background-color: var(--card-bg) !important;
         color: var(--accent-blue) !important;
         border-radius: 8px !important;
-        border: 1px solid var(--border-light) !important;
+        border: 1.5px solid var(--border-light) !important;
     }
 
     /* Tab */
@@ -153,10 +183,6 @@ st.markdown(
 
     .stCaption, [data-testid="stCaptionContainer"] {
         color: var(--text-muted) !important;
-    }
-
-    hr {
-        border-color: var(--border-light) !important;
     }
 
     .stDataEditor {
@@ -214,7 +240,7 @@ st.markdown(
         background: var(--card-bg) !important;
         border-radius: 10px !important;
         padding: 12px !important;
-        border: 1px solid var(--border-light) !important;
+        border: 1.5px solid var(--border-light) !important;
     }
     [data-testid="stMetricValue"] {
         color: var(--accent-blue) !important;
@@ -226,7 +252,7 @@ st.markdown(
     .stAlert {
         background-color: var(--card-bg) !important;
         border-radius: 8px !important;
-        border: 1px solid var(--border-light) !important;
+        border: 1.5px solid var(--border-light) !important;
     }
 
     /* Sidebar - koyu, genis panel */
@@ -270,16 +296,16 @@ def renkli_kart(etiket, deger, renk, icon=""):
         f"""
         <div style="
             background: #ffffff;
-            border-left: 4px solid {renk};
+            border-left: 5px solid {renk};
             border-radius: 10px;
-            padding: 16px 18px;
-            margin-bottom: 10px;
-            box-shadow: 0 1px 3px rgba(16, 24, 40, 0.06);
-            border-top: 1px solid #e8eaf0;
-            border-right: 1px solid #e8eaf0;
-            border-bottom: 1px solid #e8eaf0;
+            padding: 14px 18px;
+            margin-bottom: 6px;
+            box-shadow: 0 1px 4px rgba(16, 24, 40, 0.10);
+            border-top: 1.5px solid #c7cbd6;
+            border-right: 1.5px solid #c7cbd6;
+            border-bottom: 1.5px solid #c7cbd6;
         ">
-            <div style="font-size: 26px; font-weight: 800; color: #1f2430; line-height: 1.2;">{icon} {deger}</div>
+            <div style="font-size: 25px; font-weight: 800; color: #1f2430; line-height: 1.2;">{icon} {deger}</div>
             <div style="font-size: 12px; font-weight: 600; color: #8a90a0; letter-spacing: 0.04em; margin-top: 4px;">{etiket}</div>
         </div>
         """,
@@ -329,15 +355,15 @@ st.markdown(
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 6px 0 18px 0;
-        border-bottom: 1px solid #e8eaf0;
-        margin-bottom: 24px;
+        padding: 4px 0 12px 0;
+        border-bottom: 1.5px solid #c7cbd6;
+        margin-bottom: 10px;
     ">
         <div>
-            <div style="font-size: 30px; font-weight: 800; color: #1f2430; line-height: 1.2;">
+            <div style="font-size: 26px; font-weight: 800; color: #1f2430; line-height: 1.2;">
                 📦 Depo Paneli
             </div>
-            <div style="font-size: 13px; color: #8a90a0; margin-top: 4px;">
+            <div style="font-size: 13px; color: #8a90a0; margin-top: 2px;">
                 Kargo faturalari ile musteri odemelerini otomatik eslestir
             </div>
         </div>
@@ -348,6 +374,7 @@ st.markdown(
             display: flex; align-items: center; justify-content: center;
             font-size: 18px;
             flex-shrink: 0;
+            border: 1.5px solid #c7cbd6;
         ">👤</div>
     </div>
     """,
