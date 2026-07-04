@@ -70,13 +70,17 @@ st.markdown(
         max-width: 1400px !important;
     }
 
-    /* Streamlit'in ust bosluk birakan gizli header/toolbar alani */
+    /* Streamlit'in ust bosluk birakan gizli header/toolbar alani.
+       Not: yukseklik 0 yapilmiyor, cunku sidebar acma/kapama oku bu alanin
+       icinde - sadece dekoratif kisimlar (renkli ust cizgi, deploy/menu
+       araç çubugu) gizleniyor, ok butonu gorunur kaliyor. */
     [data-testid="stHeader"] {
-        height: 0 !important;
-        min-height: 0 !important;
+        background: var(--panel-bg) !important;
+        height: 2.75rem !important;
+        min-height: 2.75rem !important;
     }
     [data-testid="stToolbar"] {
-        display: none !important;
+        visibility: hidden !important;
     }
     [data-testid="stDecoration"] {
         display: none !important;
@@ -264,6 +268,31 @@ st.markdown(
     }
     [data-testid="stSidebar"] * {
         color: var(--sidebar-text) !important;
+    }
+
+    /* Sidebar'i kapatma oku (sidebar acikken, sidebar icinde) - acik renk */
+    [data-testid="stSidebarCollapseButton"],
+    [data-testid="stSidebarCollapseButton"] button,
+    [data-testid="stSidebarCollapseButton"] svg {
+        visibility: visible !important;
+        opacity: 1 !important;
+        color: #ffffff !important;
+        fill: #ffffff !important;
+        stroke: #ffffff !important;
+    }
+
+    /* Sidebar'i acma oku (sidebar kapaliyken, ana alanin sol ustunde) - koyu renk */
+    [data-testid="collapsedControl"] {
+        background: var(--card-bg) !important;
+        border: 1.5px solid var(--border-light) !important;
+        border-radius: 6px !important;
+    }
+    [data-testid="collapsedControl"] button,
+    [data-testid="collapsedControl"] svg {
+        color: var(--text-dark) !important;
+        fill: var(--text-dark) !important;
+        stroke: var(--text-dark) !important;
+        opacity: 1 !important;
     }
 
     .stApp > header {
