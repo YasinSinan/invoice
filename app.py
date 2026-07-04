@@ -614,10 +614,11 @@ elif analiz_secimi == "GitHub Arsivinden Dosya Sec ve Hesapla":
         _secili_gider_dosyalari = [_gider_etiketli[e] for e in _secili_gider_etiketleri]
 
         if st.button(
-            "Hesapla",
+            "📥 Dosyalari Yukle",
             type="primary",
             key="arsiv_hesapla_btn",
             disabled=not _secili_gelir_dosyalari,
+            help="Dosyalari yukler ve Ana Sayfa'ya yonlendirir - orada manuel gelir/gider ekleyip Yeniden Hesapla'ya basabilirsin.",
         ):
             try:
                 gider_carrier_map = _gider_carrier_map_ekran
@@ -660,14 +661,23 @@ elif analiz_secimi == "GitHub Arsivinden Dosya Sec ve Hesapla":
                         if not breakdown_df.empty:
                             breakdown_dfs_arsiv.append(breakdown_df)
 
+                # Not: burada hesapla_tiklandi=True SET EDILMIYOR - kullanici
+                # once Ana Sayfa'da manuel gelir/gider eklemeli, sonra kendi
+                # "Yeniden Hesapla"ya basarak hesaplamayi tetiklemeli. Onceki
+                # bir hesaplamadan kalma bayrak varsa temizlenir, aksi halde
+                # otomatik olarak rapor sekmesine yonlendirilir.
+                st.session_state["hesapla_tiklandi"] = False
                 st.session_state["income_df_cache"] = income_df_arsiv
                 st.session_state["cost_dfs_cache"] = cost_dfs_arsiv
                 st.session_state["breakdown_dfs_cache"] = breakdown_dfs_arsiv
                 st.session_state["carrier_overhead_cache"] = carrier_overhead_arsiv
                 st.session_state["warnings_cache"] = warnings_arsiv
-                st.session_state["hesapla_tiklandi"] = True
-                st.session_state["analiz_secimi"] = "Kargo Firmalarina Gore"
-                st.success(f"'{_secilen_arsiv_donemi}' donemi secilen dosyalarla hesaplandi, sonuclara yonlendiriliyorsunuz.")
+                st.session_state["analiz_secimi"] = None
+                st.success(
+                    f"'{_secilen_arsiv_donemi}' donemi dosyalari yuklendi. Ana Sayfa'ya "
+                    "yonlendiriliyorsunuz - istersen manuel gelir/gider ekleyip "
+                    "'Yeniden Hesapla'ya bas."
+                )
                 st.rerun()
             except GithubStorageError as e:
                 st.error(str(e))
@@ -779,7 +789,9 @@ else:
         st.markdown("**Paket basina ek gider - firma bazinda (opsiyonel)**")
         st.caption(
             "Belirli bir kargo firmasinin, gideri ZATEN eslesmis olan HER paketine "
-            "ayni tutari ekler (orn. UniUni US-CA arasi nakliye icin paket basina $2). Tum tablolarda (ulke, firma, musteri) otomatik "
+            "ayni tutari ekler (orn. UniUni icin paket basina $2). Tutar otomatik "
+            "olarak eslesen paket sayisiyla carpilir ve her paketin kar/zarar "
+            "hesabina islenir - tum tablolarda (ulke, firma, musteri) otomatik "
             "yansir. Gideri eslesmemis paketlere bu tutar uygulanmaz."
         )
         _paket_cols = {"Kargo Firmasi": pd.Series(dtype="str"), "Aciklama": pd.Series(dtype="str"), "Paket Basi Tutar": pd.Series(dtype="float")}
