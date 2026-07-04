@@ -421,11 +421,55 @@ with st.expander("Gecmis analizler (aylik kayitlar)", expanded=False):
 
 st.divider()
 
-# ------------------------------------------------------- github arsivi ---
-with st.expander("🗄️ GitHub Arsivinden Donem Yukle", expanded=False):
+# ---------------------------------------------- kargo firmasina gore yukle ---
+with st.expander("📤 Kargo Firmasina Gore Dosya Yukle", expanded=True):
     st.caption(
-        "Daha once 'GitHub'a Arsivle' ile kaydettigin gelir/gider dosyalarini "
-        "tekrar yuklemeden, kayitli bir donemi secip direkt analiz calistir."
+        "Bir kargo firmasindan fatura geldikce, tum formu doldurmadan sadece "
+        "o dosyayi secip GitHub'a kaydet. Ayni doneme, ayni firmadan tekrar "
+        "dosya yuklersen otomatik birlestirilir (tekrarlar elenir, yeni "
+        "satirlar eklenir)."
+    )
+    _tekli_donem = st.text_input(
+        "Donem etiketi (orn. 2026-07)",
+        value=datetime.now(timezone.utc).strftime("%Y-%m"),
+        key="tekli_arsiv_donem",
+    )
+    _tekli_secenekler = ["Gelir (WH_CUSTOMER_SHIPMENT_LIST)"] + list(CARRIER_PROFILES.keys()) + [BYELABEL_GROUP_LABEL]
+    _tekli_secim = st.selectbox("Kargo firmasi / dosya turu", options=_tekli_secenekler, key="tekli_arsiv_secim")
+    _tekli_dosya = st.file_uploader(
+        "Dosyayi sec", type=["xlsx"], key="tekli_arsiv_dosya"
+    )
+    if st.button("📤 Bu Dosyayi Arsivle", key="tekli_arsivle_btn", disabled=_tekli_dosya is None):
+        try:
+            _kategori = "gelir" if _tekli_secim.startswith("Gelir") else "gider"
+            sonuc = merge_and_save_raw_file(
+                _tekli_donem, _kategori, _tekli_dosya.name, _tekli_dosya.getvalue()
+            )
+            if _kategori == "gider":
+                _mevcut_meta = load_gider_meta(_tekli_donem)
+                _mevcut_meta[_tekli_dosya.name] = _tekli_secim
+                save_gider_meta(_tekli_donem, _mevcut_meta)
+
+            if sonuc["durum"] == "yeni":
+                st.success(f"'{_tekli_dosya.name}' yeni dosya olarak '{_tekli_donem}' donemine kaydedildi ({sonuc['sonuc_satir']} satir).")
+            else:
+                st.success(
+                    f"'{_tekli_dosya.name}' mevcut dosyayla birlestirildi "
+                    f"(eski {sonuc['eski_satir']} + yeni {sonuc['yeni_satir']} satir → "
+                    f"toplam {sonuc['sonuc_satir']} satir, tekrarlar elendi"
+                    + (f", anahtar: {sonuc['dedup_anahtari']}" if sonuc["dedup_anahtari"] else "")
+                    + ")."
+                )
+        except GithubStorageError as e:
+            st.error(str(e))
+        except Exception as e:
+            st.error(f"Arsivlenirken hata olustu: {e}")
+
+# ------------------------------------------------------- github arsivi ---
+with st.expander("🗄️ GitHub Arsivinden Dosya Sec ve Hesapla", expanded=True):
+    st.caption(
+        "Bilgisayarindan dosya yuklemek yerine, daha once GitHub'a arsivledigin "
+        "gelir/gider dosyalarindan istedigini sec ve Hesapla'ya bas."
     )
     try:
         _kayitli_donemler = list_periods()
@@ -434,21 +478,46 @@ with st.expander("🗄️ GitHub Arsivinden Donem Yukle", expanded=False):
         st.warning(str(e))
 
     if not _kayitli_donemler:
-        st.info("Henuz arsivlenmis bir donem yok. Asagidaki yukleme alanindan dosyalarini arsivleyebilirsin.")
+        st.info("Henuz arsivlenmis bir donem yok. Yukaridaki 'Kargo Firmasina Gore Dosya Yukle' bolumunden dosyalarini arsivleyebilirsin.")
     else:
         _secilen_arsiv_donemi = st.selectbox("Donem sec", options=_kayitli_donemler, key="arsiv_donem_sec")
-        if st.button("📥 Bu Donemi Yukle ve Analiz Et", key="arsiv_yukle_btn"):
-            try:
-                gelir_dosyalari = list_raw_files(_secilen_arsiv_donemi, "gelir")
-                gider_dosyalari = list_raw_files(_secilen_arsiv_donemi, "gider")
-                if not gelir_dosyalari:
-                    st.error("Bu donem icin arsivlenmis bir gelir dosyasi bulunamadi.")
-                    st.stop()
 
-                gider_carrier_map = load_gider_meta(_secilen_arsiv_donemi)
+        try:
+            _gelir_secenekleri = list_raw_files(_secilen_arsiv_donemi, "gelir")
+            _gider_secenekleri = list_raw_files(_secilen_arsiv_donemi, "gider")
+            _gider_carrier_map_ekran = load_gider_meta(_secilen_arsiv_donemi)
+        except GithubStorageError as e:
+            _gelir_secenekleri, _gider_secenekleri, _gider_carrier_map_ekran = [], [], {}
+            st.warning(str(e))
+
+        _secili_gelir_dosyalari = st.multiselect(
+            "Gelir dosyasi/dosyalari",
+            options=_gelir_secenekleri,
+            default=_gelir_secenekleri,
+            key="arsiv_gelir_secim",
+        )
+        _gider_etiketli = {
+            f"{ad}  →  {_gider_carrier_map_ekran.get(ad, 'bilinmiyor')}": ad for ad in _gider_secenekleri
+        }
+        _secili_gider_etiketleri = st.multiselect(
+            "Gider (fatura) dosyasi/dosyalari",
+            options=list(_gider_etiketli.keys()),
+            default=list(_gider_etiketli.keys()),
+            key="arsiv_gider_secim",
+        )
+        _secili_gider_dosyalari = [_gider_etiketli[e] for e in _secili_gider_etiketleri]
+
+        if st.button(
+            "Hesapla",
+            type="primary",
+            key="arsiv_hesapla_btn",
+            disabled=not _secili_gelir_dosyalari,
+        ):
+            try:
+                gider_carrier_map = _gider_carrier_map_ekran
 
                 gelir_dfs_arsiv = []
-                for gelir_dosya in gelir_dosyalari:
+                for gelir_dosya in _secili_gelir_dosyalari:
                     gelir_bytes = load_raw_file(_secilen_arsiv_donemi, "gelir", gelir_dosya)
                     gelir_dfs_arsiv.append(
                         load_income_file(
@@ -463,7 +532,7 @@ with st.expander("🗄️ GitHub Arsivinden Donem Yukle", expanded=False):
                 warnings_arsiv = []
                 carrier_overhead_arsiv = 0.0
                 breakdown_dfs_arsiv = []
-                for gider_dosya in gider_dosyalari:
+                for gider_dosya in _secili_gider_dosyalari:
                     gider_bytes = load_raw_file(_secilen_arsiv_donemi, "gider", gider_dosya)
                     secilen_carrier = gider_carrier_map.get(gider_dosya, BYELABEL_GROUP_LABEL)
                     if secilen_carrier == BYELABEL_GROUP_LABEL:
@@ -491,12 +560,12 @@ with st.expander("🗄️ GitHub Arsivinden Donem Yukle", expanded=False):
                 st.session_state["carrier_overhead_cache"] = carrier_overhead_arsiv
                 st.session_state["warnings_cache"] = warnings_arsiv
                 st.session_state["hesapla_tiklandi"] = True
-                st.success(f"'{_secilen_arsiv_donemi}' donemi yuklendi, asagida analiz gosteriliyor.")
+                st.success(f"'{_secilen_arsiv_donemi}' donemi secilen dosyalarla hesaplandi, asagida analiz gosteriliyor.")
                 st.rerun()
             except GithubStorageError as e:
                 st.error(str(e))
             except Exception as e:
-                st.error(f"Donem yuklenirken hata olustu: {e}")
+                st.error(f"Hesaplanirken hata olustu: {e}")
 
 st.divider()
 
@@ -1230,4 +1299,3 @@ if st.session_state.get("hesapla_tiklandi") and "income_df_cache" in st.session_
 
 elif "income_df_cache" not in st.session_state:
     st.info("Baslamak icin once gelir dosyasini yukleyin ve 'Hesapla' butonuna basin.")
-
