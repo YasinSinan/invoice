@@ -49,6 +49,16 @@ def _headers():
     }
 
 
+def _raw_headers():
+    """GitHub, Contents API'de 1MB'dan buyuk dosyalarda base64 icerigi
+    dondurmuyor. Bu header ile dosya icerigi dogrudan ham (raw) bytes
+    olarak alinir, boyut sinirlamasi olmaz."""
+    return {
+        "Authorization": f"Bearer {_get_token()}",
+        "Accept": "application/vnd.github.raw",
+    }
+
+
 def list_saved_reports():
     """reports/ klasorundeki kayitli donemleri (dosya adi - .json haric) listeler.
     En yeni donem en basta olacak sekilde sirali dondurur. Klasor yoksa veya
@@ -203,12 +213,13 @@ def save_raw_file(period, category, filename, file_bytes):
 
 
 def load_raw_file(period, category, filename):
-    """data/{period}/{category}/{filename} dosyasinin icerigini bytes olarak dondurur."""
+    """data/{period}/{category}/{filename} dosyasinin icerigini bytes olarak dondurur.
+    Ham (raw) Accept header'i kullanilir - boylece 1MB'dan buyuk dosyalarda da
+    (GitHub Contents API'nin base64 icerik sinirlamasina takilmadan) calisir."""
     url = f"{API_BASE}/contents/{RAW_DATA_DIR}/{period}/{category}/{filename}"
-    resp = requests.get(url, headers=_headers(), timeout=15)
+    resp = requests.get(url, headers=_raw_headers(), timeout=30)
     resp.raise_for_status()
-    data = resp.json()
-    return base64.b64decode(data["content"])
+    return resp.content
 
 
 def save_gider_meta(period, carrier_for_file):
@@ -300,7 +311,7 @@ def merge_and_save_raw_file(period, category, filename, new_bytes):
         }
     existing.raise_for_status()
 
-    old_content = base64.b64decode(existing.json()["content"])
+    old_content = load_raw_file(period, category, filename)
     old_df = pd.read_excel(io.BytesIO(old_content))
 
     combined = pd.concat([old_df, new_df], ignore_index=True)
