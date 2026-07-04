@@ -567,26 +567,131 @@ if st.session_state.get("hesapla_tiklandi") and "income_df_cache" in st.session_
         f"{summary['takip_no_yok_sayisi']} takip no yok"
     )
 
+    # Slack tarzı ince ikonlu sidebar
+    MENU_ITEMS = [
+        ("🚚", "Kargo Firmalarina Gore"),
+        ("🌍", "Ulkelere Gore"),
+        ("🗺️", "Avrupa Ozeti"),
+        ("👥", "Musterilere Gore"),
+        ("🔗", "Musteri x Ulke"),
+        ("📋", "Detayli Rapor"),
+        ("🔍", "Gider Bulunamayanlar"),
+        ("⚖️", "Eslesmeyen Gider"),
+    ]
+
+    if "analiz_secimi" not in st.session_state:
+        st.session_state["analiz_secimi"] = MENU_ITEMS[0][1]
+
     with st.sidebar:
-        st.markdown("### 📊 Analiz Secimi")
-        analiz_secimi = st.radio(
-            "",
-            options=[
-                "🚚 Kargo Firmalarina Gore",
-                "🌍 Ulkelere Gore",
-                "🌍 Avrupa Ozeti",
-                "👥 Musterilere Gore",
-                "👥 Musteri x Ulke",
-                "📋 Detayli Rapor",
-                "🔍 Gider Bulunamayanlar",
-                "⚖️ Eslesmeyen Gider",
-            ],
-            key="analiz_secimi",
+        st.markdown(
+            """
+            <style>
+            [data-testid="stSidebar"] {
+                min-width: 64px !important;
+                max-width: 64px !important;
+                background-color: #1a1d21;
+            }
+            [data-testid="stSidebar"] > div:first-child {
+                padding: 8px 0 0 0;
+            }
+            .slack-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 44px;
+                height: 44px;
+                border-radius: 10px;
+                margin: 4px auto;
+                font-size: 22px;
+                cursor: pointer;
+                position: relative;
+                transition: background 0.15s;
+                background: transparent;
+                border: none;
+                text-decoration: none;
+            }
+            .slack-btn:hover {
+                background: rgba(255,255,255,0.12);
+            }
+            .slack-btn.active {
+                background: rgba(255,255,255,0.20);
+            }
+            .slack-btn .tooltip {
+                visibility: hidden;
+                opacity: 0;
+                background: #1a1d21;
+                color: #fff;
+                font-size: 13px;
+                font-weight: 500;
+                white-space: nowrap;
+                border-radius: 6px;
+                padding: 5px 10px;
+                position: absolute;
+                left: 54px;
+                top: 50%;
+                transform: translateY(-50%);
+                z-index: 9999;
+                pointer-events: none;
+                border: 1px solid rgba(255,255,255,0.15);
+                transition: opacity 0.15s;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            }
+            .slack-btn:hover .tooltip {
+                visibility: visible;
+                opacity: 1;
+            }
+            div[data-testid="stSidebarContent"] .stButton button {
+                width: 44px;
+                height: 44px;
+                border-radius: 10px;
+                padding: 0;
+                margin: 4px auto;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 22px;
+                background: transparent;
+                border: none;
+                color: white;
+                transition: background 0.15s;
+            }
+            div[data-testid="stSidebarContent"] .stButton button:hover {
+                background: rgba(255,255,255,0.12) !important;
+                border: none !important;
+            }
+            div[data-testid="stSidebarContent"] .stButton {
+                margin: 0;
+                padding: 0;
+            }
+            div[data-testid="stSidebarContent"] .stButton p {
+                font-size: 22px;
+                margin: 0;
+            }
+            </style>
+            """,
+            unsafe_allow_html=True,
         )
 
+        for icon, label in MENU_ITEMS:
+            is_active = st.session_state["analiz_secimi"] == label
+            btn_style = "background:rgba(255,255,255,0.20);border-radius:10px;" if is_active else ""
+            st.markdown(
+                f"""
+                <div class="slack-btn {'active' if is_active else ''}" title="{label}">
+                    {icon}
+                    <span class="tooltip">{label}</span>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+            if st.button(icon, key=f"nav_{label}", help=label):
+                st.session_state["analiz_secimi"] = label
+                st.rerun()
+
+    analiz_secimi = st.session_state.get("analiz_secimi", MENU_ITEMS[0][1])
     st.divider()
 
-    if analiz_secimi == "🚚 Kargo Firmalarina Gore":
+    if analiz_secimi == "Kargo Firmalarina Gore":
         st.subheader("🚚 Kargo Firmalarina Gore Analiz")
         st.caption(
             "Kargo firmasi (gelir dosyasindaki Carrier Name) bazinda paket sayisi, "
@@ -623,7 +728,7 @@ if st.session_state.get("hesapla_tiklandi") and "income_df_cache" in st.session_
             )
             indirme_butonlari(full_breakdown, "kargo_vergi_siniflandirma", "full_breakdown")
 
-    elif analiz_secimi == "🌍 Ulkelere Gore":
+    elif analiz_secimi == "Ulkelere Gore":
         st.subheader("🌍 Ulkeye gore analiz")
         st.caption(
             "Toplam gelir ve gonderi sayisi tum gonderileri kapsar. Kargo/Vergi/Kar "
@@ -647,7 +752,7 @@ if st.session_state.get("hesapla_tiklandi") and "income_df_cache" in st.session_
         )
         indirme_butonlari(cb, "ulkeye_gore_analiz", "country_table")
 
-    elif analiz_secimi == "🌍 Avrupa Ozeti":
+    elif analiz_secimi == "Avrupa Ozeti":
         eu = europe_summary(merged)
         if eu:
             st.subheader("🌍 Avrupa Toplam Ozeti")
@@ -675,7 +780,7 @@ if st.session_state.get("hesapla_tiklandi") and "income_df_cache" in st.session_
         else:
             st.info("Avrupa ulkelerine ait gonderi bulunamadi.")
 
-    elif analiz_secimi == "👥 Musterilere Gore":
+    elif analiz_secimi == "Musterilere Gore":
         st.subheader("👥 Musteriye gore analiz")
         st.caption(
             "Gelir dosyasindaki User No / User Name'e gore musteri bazinda paket "
@@ -698,7 +803,7 @@ if st.session_state.get("hesapla_tiklandi") and "income_df_cache" in st.session_
         )
         indirme_butonlari(cust_table, "musteriye_gore_analiz", "cust_table")
 
-    elif analiz_secimi == "👥 Musteri x Ulke":
+    elif analiz_secimi == "Musteri x Ulke":
         st.subheader("👥 Musteri x Ulke Analizi")
         st.caption(
             "Her musterinin HER ULKEDE ayri ayri kar mi zarar mi ettirdigini gosterir "
@@ -719,7 +824,7 @@ if st.session_state.get("hesapla_tiklandi") and "income_df_cache" in st.session_
         )
         indirme_butonlari(cust_country_table, "musteri_x_ulke_analizi", "cust_country_table")
 
-    elif analiz_secimi == "📋 Detayli Rapor":
+    elif analiz_secimi == "Detayli Rapor":
         st.subheader("📋 Detayli Rapor")
         detayli_rapor_df = merged.sort_values("Added Date")[
             [
@@ -740,7 +845,7 @@ if st.session_state.get("hesapla_tiklandi") and "income_df_cache" in st.session_
         )
         indirme_butonlari(detayli_rapor_df, "detayli_rapor", "tab1")
 
-    elif analiz_secimi == "🔍 Gider Bulunamayanlar":
+    elif analiz_secimi == "Gider Bulunamayanlar":
         st.subheader("🔍 Gider Bulunamayanlar")
         not_found = merged[merged["Durum"] == "Gider bulunamadi"]
         st.caption(
@@ -752,7 +857,7 @@ if st.session_state.get("hesapla_tiklandi") and "income_df_cache" in st.session_
         st.dataframe(not_found_display, use_container_width=True, hide_index=True)
         indirme_butonlari(not_found_display, "gider_bulunamayanlar", "tab2")
 
-    elif analiz_secimi == "⚖️ Eslesmeyen Gider":
+    elif analiz_secimi == "Eslesmeyen Gider":
         st.subheader("⚖️ Eslesmeyen Gider")
         st.caption(
             "Bu takip numaralari kargo firmasinin fatura listesinde var ama gelir "
