@@ -265,38 +265,27 @@ st.markdown(
         border: 1.5px solid var(--border-light) !important;
     }
 
-    /* Sidebar - koyu, genis panel */
+    /* Sidebar - koyu, genis panel. Her zaman acik ve sabit genislikte kalir,
+       kapatilamaz - boylece kapatma okunun gorunmemesi gibi sorunlar bir
+       daha yasanmaz. */
     [data-testid="stSidebar"] {
         background-color: var(--sidebar-bg) !important;
         border-right: 1px solid #22252d !important;
+        min-width: 248px !important;
+        max-width: 248px !important;
+        width: 248px !important;
+        transform: none !important;
+        visibility: visible !important;
+        margin-left: 0 !important;
     }
     [data-testid="stSidebar"] * {
         color: var(--sidebar-text) !important;
     }
 
-    /* Sidebar'i kapatma oku (sidebar acikken, sidebar icinde) - acik renk */
+    /* Sidebar'i kapatma/acma oklari tamamen gizlendi - sidebar artik hep acik */
     [data-testid="stSidebarCollapseButton"],
-    [data-testid="stSidebarCollapseButton"] button,
-    [data-testid="stSidebarCollapseButton"] svg {
-        visibility: visible !important;
-        opacity: 1 !important;
-        color: #ffffff !important;
-        fill: #ffffff !important;
-        stroke: #ffffff !important;
-    }
-
-    /* Sidebar'i acma oku (sidebar kapaliyken, ana alanin sol ustunde) - koyu renk */
     [data-testid="collapsedControl"] {
-        background: var(--card-bg) !important;
-        border: 1.5px solid var(--border-light) !important;
-        border-radius: 6px !important;
-    }
-    [data-testid="collapsedControl"] button,
-    [data-testid="collapsedControl"] svg {
-        color: var(--text-dark) !important;
-        fill: var(--text-dark) !important;
-        stroke: var(--text-dark) !important;
-        opacity: 1 !important;
+        display: none !important;
     }
 
     .stApp > header {
