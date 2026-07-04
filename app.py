@@ -66,7 +66,7 @@ st.markdown(
     .main .block-container,
     [data-testid="stMainBlockContainer"] {
         background-color: var(--panel-bg) !important;
-        padding-top: 0.6rem !important;
+        padding-top: 3.4rem !important;
         max-width: 1400px !important;
     }
 
@@ -78,6 +78,10 @@ st.markdown(
         background: var(--panel-bg) !important;
         height: 2.75rem !important;
         min-height: 2.75rem !important;
+        z-index: 999999 !important;
+        position: fixed !important;
+        top: 0 !important;
+        width: 100% !important;
     }
     [data-testid="stToolbar"] {
         visibility: hidden !important;
