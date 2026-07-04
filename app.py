@@ -441,12 +441,10 @@ with st.sidebar:
         """
         <style>
         [data-testid="stSidebar"] {
-            background-color: #14161c;
-            border-right: 1px solid #22252d;
-        }
-        [data-testid="stSidebar"][aria-expanded="true"] {
             min-width: 248px !important;
             max-width: 248px !important;
+            background-color: #14161c;
+            border-right: 1px solid #22252d;
         }
         [data-testid="stSidebar"] > div:first-child {
             padding: 0 !important;
