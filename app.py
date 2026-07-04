@@ -780,54 +780,6 @@ if st.session_state.get("hesapla_tiklandi") and "income_df_cache" in st.session_
             [data-testid="stSidebar"] > div:first-child {
                 padding: 8px 0 0 0;
             }
-            .slack-btn {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                width: 44px;
-                height: 44px;
-                border-radius: 10px;
-                margin: 4px auto;
-                font-size: 22px;
-                cursor: pointer;
-                position: relative;
-                transition: background 0.15s;
-                background: transparent;
-                border: none;
-                text-decoration: none;
-            }
-            .slack-btn:hover {
-                background: rgba(245, 166, 35, 0.15);
-            }
-            .slack-btn.active {
-                background: rgba(245, 166, 35, 0.25);
-                box-shadow: inset 3px 0 0 #f5a623;
-                border-radius: 0 10px 10px 0;
-            }
-            .slack-btn .tooltip {
-                visibility: hidden;
-                opacity: 0;
-                background: #2d3139;
-                color: #f5a623;
-                font-size: 13px;
-                font-weight: 600;
-                white-space: nowrap;
-                border-radius: 6px;
-                padding: 5px 12px;
-                position: absolute;
-                left: 54px;
-                top: 50%;
-                transform: translateY(-50%);
-                z-index: 9999;
-                pointer-events: none;
-                border: 1px solid #f5a623;
-                transition: opacity 0.15s;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-            }
-            .slack-btn:hover .tooltip {
-                visibility: visible;
-                opacity: 1;
-            }
             div[data-testid="stSidebarContent"] .stButton button {
                 width: 44px;
                 height: 44px;
@@ -861,18 +813,24 @@ if st.session_state.get("hesapla_tiklandi") and "income_df_cache" in st.session_
             unsafe_allow_html=True,
         )
 
+        active_index = next(
+            (i for i, (_, label) in enumerate(MENU_ITEMS) if label == st.session_state["analiz_secimi"]),
+            0,
+        )
+        st.markdown(
+            f"""
+            <style>
+            div[data-testid="stSidebarContent"] .stButton:nth-of-type({active_index + 1}) button {{
+                background: rgba(245, 166, 35, 0.25) !important;
+                box-shadow: inset 3px 0 0 #f5a623;
+                border-radius: 0 10px 10px 0 !important;
+            }}
+            </style>
+            """,
+            unsafe_allow_html=True,
+        )
+
         for icon, label in MENU_ITEMS:
-            is_active = st.session_state["analiz_secimi"] == label
-            btn_style = "background:rgba(255,255,255,0.20);border-radius:10px;" if is_active else ""
-            st.markdown(
-                f"""
-                <div class="slack-btn {'active' if is_active else ''}" title="{label}">
-                    {icon}
-                    <span class="tooltip">{label}</span>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
             if st.button(icon, key=f"nav_{label}", help=label):
                 st.session_state["analiz_secimi"] = label
                 st.rerun()
