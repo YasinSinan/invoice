@@ -38,7 +38,11 @@ from github_storage import (
     save_gider_meta,
 )
 
-st.set_page_config(page_title="Gelir-Gider Karsilastirma", layout="wide")
+st.set_page_config(
+    page_title="Gelir-Gider Karsilastirma",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
 
 # "Sellivox" tarzi acik panel temasi: koyu genis sidebar + beyaz ana alan +
 # renkli sol-kenarlikli KPI kartlari.
@@ -530,20 +534,20 @@ with st.sidebar:
 
     st.markdown('<div class="sidebar-section">Ana Menu</div>', unsafe_allow_html=True)
     icon, label = BASE_MENU_ITEMS[0]
-    if st.button(f"{icon}  {label}", key=f"nav_{label}", use_container_width=True):
+    if st.button(f"{icon}  {label}", key=f"nav_{label}", width="stretch"):
         st.session_state["analiz_secimi"] = None
         st.rerun()
 
     st.markdown('<div class="sidebar-section">Dosya Islemleri</div>', unsafe_allow_html=True)
     for icon, label in BASE_MENU_ITEMS[1:]:
-        if st.button(f"{icon}  {label}", key=f"nav_{label}", use_container_width=True):
+        if st.button(f"{icon}  {label}", key=f"nav_{label}", width="stretch"):
             st.session_state["analiz_secimi"] = label
             st.rerun()
 
     if _hesapla_var:
         st.markdown('<div class="sidebar-section">Raporlar</div>', unsafe_allow_html=True)
         for icon, label in REPORT_MENU_ITEMS:
-            if st.button(f"{icon}  {label}", key=f"nav_{label}", use_container_width=True):
+            if st.button(f"{icon}  {label}", key=f"nav_{label}", width="stretch"):
                 st.session_state["analiz_secimi"] = label
                 st.rerun()
 
@@ -752,7 +756,7 @@ else:
                 "Aciklama": st.column_config.TextColumn("Aciklama"),
                 "Tutar": st.column_config.NumberColumn("Tutar ($)", format="$%.2f"),
             },
-            use_container_width=True,
+            width="stretch",
             key="manual_income_editor",
         )
 
@@ -811,7 +815,7 @@ else:
                 "Aciklama": st.column_config.TextColumn("Aciklama"),
                 "Tutar": st.column_config.NumberColumn("Tutar ($)", format="$%.2f"),
             },
-            use_container_width=True,
+            width="stretch",
             key="manual_expenses_editor",
         )
 
@@ -835,7 +839,7 @@ else:
                 "Aciklama": st.column_config.TextColumn("Aciklama"),
                 "Paket Basi Tutar": st.column_config.NumberColumn("Paket Basi Tutar ($)", format="$%.2f"),
             },
-            use_container_width=True,
+            width="stretch",
             key="manual_carrier_expenses_editor",
         )
 
@@ -1063,7 +1067,7 @@ else:
                     st.caption("Manuel gelir kalemleri:")
                     st.dataframe(
                         gecerli_manuel_gelir.style.format({"Tutar": "${:,.2f}"}),
-                        use_container_width=True,
+                        width="stretch",
                         hide_index=True,
                     )
             with col_mgid:
@@ -1076,7 +1080,7 @@ else:
                         )
                     st.dataframe(
                         _goster_df.style.format({"Tutar": "${:,.2f}"}),
-                        use_container_width=True,
+                        width="stretch",
                         hide_index=True,
                     )
 
@@ -1096,7 +1100,7 @@ else:
 
             st.dataframe(
                 genel_gider_kategori_detay.drop(columns=["Kaynak Sutun"]).style.format({"Genel Gider": "${:,.2f}"}),
-                use_container_width=True,
+                width="stretch",
                 hide_index=True,
             )
             indirme_butonlari(genel_gider_kategori_detay, "genel_gider_detayi", "genel_gider_detay")
@@ -1139,7 +1143,7 @@ else:
                         "Paket Basi Kar/Zarar": "${:,.2f}",
                     }
                 ).map(kar_zarar_stil, subset=["Kar/Zarar", "Paket Basi Kar/Zarar"]),
-                use_container_width=True,
+                width="stretch",
                 hide_index=True,
             )
             indirme_butonlari(carrier_table, "kargo_firmasi_analizi", "carrier_table")
@@ -1152,7 +1156,7 @@ else:
                 )
                 st.dataframe(
                     full_breakdown.style.format({"Tutar": "${:,.2f}"}),
-                    use_container_width=True,
+                    width="stretch",
                     hide_index=True,
                 )
                 indirme_butonlari(full_breakdown, "kargo_vergi_siniflandirma", "full_breakdown")
@@ -1176,7 +1180,7 @@ else:
                         "Paket_Basi_Kar": "${:,.2f}",
                     }
                 ).map(kar_zarar_stil, subset=["Kar", "Paket_Basi_Kar"]),
-                use_container_width=True,
+                width="stretch",
                 hide_index=True,
             )
             indirme_butonlari(cb, "ulkeye_gore_analiz", "country_table")
@@ -1227,7 +1231,7 @@ else:
                         "Paket Basi Kar/Zarar": "${:,.2f}",
                     }
                 ).map(kar_zarar_stil, subset=["Kar/Zarar", "Paket Basi Kar/Zarar"]),
-                use_container_width=True,
+                width="stretch",
                 hide_index=True,
             )
             indirme_butonlari(cust_table, "musteriye_gore_analiz", "cust_table")
@@ -1248,7 +1252,7 @@ else:
                         "Kar/Zarar": "${:,.2f}",
                     }
                 ).map(kar_zarar_stil, subset=["Kar/Zarar"]),
-                use_container_width=True,
+                width="stretch",
                 hide_index=True,
             )
             indirme_butonlari(cust_country_table, "musteri_x_ulke_analizi", "cust_country_table")
@@ -1269,7 +1273,7 @@ else:
                     {"Invoice Amount": "${:,.2f}", "Kargo Gideri": "${:,.2f}",
                      "Vergi/Gumruk": "${:,.2f}", "Toplam Gider": "${:,.2f}", "Kar": "${:,.2f}"}
                 ).map(kar_zarar_stil, subset=["Kar"]),
-                use_container_width=True,
+                width="stretch",
                 hide_index=True,
             )
             indirme_butonlari(detayli_rapor_df, "detayli_rapor", "tab1")
@@ -1283,7 +1287,7 @@ else:
                 "kargo firmasinin dosyasi yuklenmemis olabilir."
             )
             not_found_display = not_found[["Shipment No", "Track Number", "Carrier Name", "Status", "Invoice Amount"]]
-            st.dataframe(not_found_display, use_container_width=True, hide_index=True)
+            st.dataframe(not_found_display, width="stretch", hide_index=True)
             indirme_butonlari(not_found_display, "gider_bulunamayanlar", "tab2")
 
         elif analiz_secimi == "Eslesmeyen Gider":
@@ -1293,7 +1297,7 @@ else:
                 "dosyasinda eslesen bir gonderi bulunamadi. Farkli ay/musteri donemine "
                 "ait olabilir, kontrol etmekte fayda var."
             )
-            st.dataframe(unmatched_cost, use_container_width=True, hide_index=True)
+            st.dataframe(unmatched_cost, width="stretch", hide_index=True)
             indirme_butonlari(unmatched_cost, "eslesmeyen_gider", "tab3")
 
 
