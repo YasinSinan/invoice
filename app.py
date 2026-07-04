@@ -500,7 +500,8 @@ with st.expander("🗄️ GitHub Arsivinden Donem Yukle", expanded=False):
 
 st.divider()
 
-
+# Yuklu parametreler varsa widget varsayilan degerlerine uygula
+_params = st.session_state.get("yuklu_parametreler", {})
 
 # ---------------------------------------------------------------- yukleme ---
 col1, col2 = st.columns(2)
@@ -1229,3 +1230,4 @@ if st.session_state.get("hesapla_tiklandi") and "income_df_cache" in st.session_
 
 elif "income_df_cache" not in st.session_state:
     st.info("Baslamak icin once gelir dosyasini yukleyin ve 'Hesapla' butonuna basin.")
+
