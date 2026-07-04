@@ -531,15 +531,20 @@ if analiz_secimi == "Kargo Firmasina Gore Dosya Yukle":
     )
     _tekli_donem = st.text_input(
         "Donem etiketi (orn. 2026-07)",
-        value=datetime.now(timezone.utc).strftime("%Y-%m"),
+        value="",
         key="tekli_arsiv_donem",
+        placeholder="orn. 2026-07",
     )
     _tekli_secenekler = ["Gelir (WH_CUSTOMER_SHIPMENT_LIST)"] + list(CARRIER_PROFILES.keys()) + [BYELABEL_GROUP_LABEL]
     _tekli_secim = st.selectbox("Kargo firmasi / dosya turu", options=_tekli_secenekler, key="tekli_arsiv_secim")
     _tekli_dosya = st.file_uploader(
         "Dosyayi sec", type=["xlsx"], key="tekli_arsiv_dosya"
     )
-    if st.button("📤 Bu Dosyayi Arsivle", key="tekli_arsivle_btn", disabled=_tekli_dosya is None):
+    if st.button(
+        "📤 Bu Dosyayi Arsivle",
+        key="tekli_arsivle_btn",
+        disabled=_tekli_dosya is None or not _tekli_donem.strip(),
+    ):
         try:
             _kategori = "gelir" if _tekli_secim.startswith("Gelir") else "gider"
             sonuc = merge_and_save_raw_file(
@@ -858,11 +863,10 @@ else:
             "otomatik birlestirilir: ayni takip numarasina sahip satirlar guncellenir, "
             "yeni satirlar eklenir - hicbir veri kaybolmaz."
         )
-        _varsayilan_donem = datetime.now(timezone.utc).strftime("%Y-%m")
         _arsiv_donemi = st.text_input(
-            "Donem etiketi (orn. 2026-07)", value=_varsayilan_donem, key="arsiv_donem_input"
+            "Donem etiketi (orn. 2026-07)", value="", key="arsiv_donem_input", placeholder="orn. 2026-07"
         )
-        _arsiv_disabled = income_file is None and not cost_files
+        _arsiv_disabled = (income_file is None and not cost_files) or not _arsiv_donemi.strip()
         if st.button("📤 GitHub'a Arsivle", key="arsivle_btn", disabled=_arsiv_disabled):
             try:
                 _sonuc_mesajlari = []
