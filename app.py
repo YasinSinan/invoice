@@ -49,12 +49,12 @@ st.markdown(
         --panel-bg: #f4f5f8;
         --card-bg: #ffffff;
         --text-dark: #1f2430;
-        --text-muted: #8a90a0;
+        --text-muted: #5f6779;
         --border-light: #c7cbd6;
         --accent-blue: #3b82f6;
         --sidebar-bg: #14161c;
         --sidebar-bg-2: #1b1e26;
-        --sidebar-text: #9aa0ab;
+        --sidebar-text: #c3c9d4;
     }
 
     /* Ana arka plan - acik gri */
@@ -90,11 +90,13 @@ st.markdown(
         gap: 0.55rem !important;
     }
 
-    /* Ayirici (divider) daha ince bosluklu */
+    /* Ayirici (divider) - tek, ince, duz cizgi (tarayici varsayilan "oluklu" gorunumu kaldirildi) */
     hr {
-        margin: 0.5rem 0 !important;
-        border-color: var(--border-light) !important;
-        border-width: 1px !important;
+        margin: 0.4rem 0 !important;
+        border: none !important;
+        border-top: 1px solid var(--border-light) !important;
+        background: none !important;
+        height: 0 !important;
     }
 
     h1, h2, h3, h4 {
@@ -306,7 +308,7 @@ def renkli_kart(etiket, deger, renk, icon=""):
             border-bottom: 1.5px solid #c7cbd6;
         ">
             <div style="font-size: 25px; font-weight: 800; color: #1f2430; line-height: 1.2;">{icon} {deger}</div>
-            <div style="font-size: 12px; font-weight: 600; color: #8a90a0; letter-spacing: 0.04em; margin-top: 4px;">{etiket}</div>
+            <div style="font-size: 12px; font-weight: 600; color: #5f6779; letter-spacing: 0.04em; margin-top: 4px;">{etiket}</div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -355,15 +357,14 @@ st.markdown(
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 4px 0 12px 0;
-        border-bottom: 1.5px solid #c7cbd6;
-        margin-bottom: 10px;
+        padding: 4px 0 4px 0;
+        margin-bottom: 4px;
     ">
         <div>
             <div style="font-size: 26px; font-weight: 800; color: #1f2430; line-height: 1.2;">
                 📦 Depo Paneli
             </div>
-            <div style="font-size: 13px; color: #8a90a0; margin-top: 2px;">
+            <div style="font-size: 13px; color: #5f6779; margin-top: 2px;">
                 Kargo faturalari ile musteri odemelerini otomatik eslestir
             </div>
         </div>
@@ -431,7 +432,7 @@ with st.sidebar:
             font-weight: 500 !important;
             background: transparent !important;
             border: none !important;
-            color: #9aa0ab !important;
+            color: #c3c9d4 !important;
             box-shadow: none !important;
             transition: background 0.15s;
         }
@@ -465,7 +466,7 @@ with st.sidebar:
             font-weight: 800;
         }
         .sidebar-section {
-            color: #565c68 !important;
+            color: #8891a1 !important;
             font-size: 11px;
             font-weight: 700;
             letter-spacing: 0.06em;
@@ -518,7 +519,6 @@ with st.sidebar:
                 st.rerun()
 
 analiz_secimi = st.session_state.get("analiz_secimi")
-st.divider()
 
 # ---------------------------------------------- kargo firmasina gore yukle ---
 if analiz_secimi == "Kargo Firmasina Gore Dosya Yukle":
