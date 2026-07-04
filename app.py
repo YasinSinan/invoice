@@ -32,6 +32,165 @@ from github_storage import GithubStorageError, delete_report, list_saved_reports
 
 st.set_page_config(page_title="Gelir-Gider Karsilastirma", layout="wide")
 
+# Slack tarzı siyah-sarı global tema
+st.markdown(
+    """
+    <style>
+    /* Ana arka plan - koyu */
+    .stApp {
+        background-color: #1a1d21 !important;
+        color: #d1d2d3 !important;
+    }
+
+    /* İçerik alanı */
+    .main .block-container {
+        background-color: #1a1d21 !important;
+        padding-top: 1rem !important;
+    }
+
+    /* Başlıklar - sarı vurgu */
+    h1, h2, h3, h4 {
+        color: #ffffff !important;
+    }
+
+    /* Metrikler ve yazılar */
+    p, span, label, .stMarkdown {
+        color: #d1d2d3 !important;
+    }
+
+    /* Sayfa başlığı */
+    .stApp header {
+        background-color: #1a1d21 !important;
+    }
+
+    /* Butonlar - sarı */
+    .stButton > button {
+        background-color: #f5a623 !important;
+        color: #1a1d21 !important;
+        border: none !important;
+        border-radius: 6px !important;
+        font-weight: 700 !important;
+    }
+    .stButton > button:hover {
+        background-color: #e09610 !important;
+        color: #1a1d21 !important;
+    }
+
+    /* Download butonları - daha ince */
+    [data-testid="stDownloadButton"] > button {
+        background-color: #2d3139 !important;
+        color: #f5a623 !important;
+        border: 1px solid #f5a623 !important;
+        border-radius: 6px !important;
+        font-weight: 600 !important;
+    }
+    [data-testid="stDownloadButton"] > button:hover {
+        background-color: #f5a623 !important;
+        color: #1a1d21 !important;
+    }
+
+    /* Tablolar */
+    .stDataFrame, [data-testid="stDataFrame"] {
+        background-color: #222529 !important;
+    }
+    [data-testid="stDataFrameResizable"] {
+        background: #222529 !important;
+    }
+
+    /* Input alanları */
+    .stTextInput > div > div > input,
+    .stSelectbox > div > div,
+    .stMultiSelect > div > div {
+        background-color: #2d3139 !important;
+        color: #d1d2d3 !important;
+        border-color: #444b57 !important;
+        border-radius: 6px !important;
+    }
+
+    /* Checkbox */
+    .stCheckbox > label {
+        color: #d1d2d3 !important;
+    }
+
+    /* Expander / Accordion */
+    .streamlit-expanderHeader {
+        background-color: #222529 !important;
+        color: #f5a623 !important;
+        border-radius: 6px !important;
+    }
+
+    /* Tab */
+    .stTabs [data-baseweb="tab-list"] {
+        background-color: #222529 !important;
+        border-radius: 8px !important;
+    }
+    .stTabs [data-baseweb="tab"] {
+        color: #9ea3aa !important;
+    }
+    .stTabs [aria-selected="true"] {
+        color: #f5a623 !important;
+        border-bottom-color: #f5a623 !important;
+    }
+
+    /* Caption metinleri */
+    .stCaption, [data-testid="stCaptionContainer"] {
+        color: #9ea3aa !important;
+    }
+
+    /* Divider */
+    hr {
+        border-color: #2d3139 !important;
+    }
+
+    /* Data editor */
+    .stDataEditor {
+        background: #222529 !important;
+    }
+
+    /* Metric */
+    [data-testid="metric-container"] {
+        background: #222529 !important;
+        border-radius: 8px !important;
+        padding: 12px !important;
+    }
+    [data-testid="stMetricValue"] {
+        color: #f5a623 !important;
+    }
+    [data-testid="stMetricLabel"] {
+        color: #9ea3aa !important;
+    }
+
+    /* Info/success/warning kutucukları */
+    .stAlert {
+        background-color: #2d3139 !important;
+        border-radius: 8px !important;
+    }
+
+    /* Sidebar arka plan */
+    [data-testid="stSidebar"] {
+        background-color: #1a1d21 !important;
+        border-right: 1px solid #2d3139 !important;
+    }
+
+    /* Ana başlık çubuğu - Slack workspace bar gibi */
+    .stApp > header {
+        background: #1a1d21 !important;
+        border-bottom: 1px solid #2d3139 !important;
+    }
+
+    /* Selectbox dropdown */
+    [data-baseweb="select"] {
+        background: #2d3139 !important;
+    }
+    [data-baseweb="menu"] {
+        background: #2d3139 !important;
+        border: 1px solid #444b57 !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 
 def _hex_to_rgba(hex_renk, alpha):
     hex_renk = hex_renk.lstrip("#")
@@ -41,18 +200,18 @@ def _hex_to_rgba(hex_renk, alpha):
 
 def renkli_kart(etiket, deger, renk, icon=""):
     """Varsayilan st.metric yerine renkli, ikonlu bir kart gosterir."""
-    arka_plan = _hex_to_rgba(renk, 0.12)
+    arka_plan = _hex_to_rgba(renk, 0.15)
     st.markdown(
         f"""
         <div style="
             background: {arka_plan};
-            border-left: 5px solid {renk};
-            border-radius: 10px;
-            padding: 16px 20px;
+            border-left: 4px solid {renk};
+            border-radius: 8px;
+            padding: 14px 18px;
             margin-bottom: 10px;
         ">
-            <div style="font-size: 13px; font-weight: 600; opacity: 0.75; letter-spacing: 0.02em;">{icon} {etiket}</div>
-            <div style="font-size: 28px; font-weight: 800; color: {renk}; margin-top: 2px;">{deger}</div>
+            <div style="font-size: 12px; font-weight: 600; color: #9ea3aa; letter-spacing: 0.06em; text-transform: uppercase;">{icon} {etiket}</div>
+            <div style="font-size: 26px; font-weight: 800; color: {renk}; margin-top: 4px;">{deger}</div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -64,9 +223,9 @@ def kar_zarar_stil(val):
     if pd.isna(val):
         return ""
     if val < 0:
-        return "background-color: rgba(239, 68, 68, 0.16); color: #dc2626; font-weight: 700;"
+        return "background-color: rgba(220, 38, 38, 0.18); color: #f87171; font-weight: 700;"
     if val > 0:
-        return "background-color: rgba(16, 185, 129, 0.16); color: #059669; font-weight: 700;"
+        return "background-color: rgba(16, 185, 129, 0.15); color: #34d399; font-weight: 700;"
     return ""
 
 
@@ -95,10 +254,36 @@ def indirme_butonlari(df, dosya_adi, key_prefix):
         )
 
 
-st.title("Depo Gelir-Gider Karsilastirma Araci")
-st.caption(
-    "Musteri faturasi (gelir) ve kargo firmasi faturasi (gider) dosyalarini "
-    "yukleyin, paket/takip numarasina gore otomatik eslestirip kar-zarar raporu alin."
+st.markdown(
+    """
+    <div style="
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 0 18px 0;
+        border-bottom: 1px solid #2d3139;
+        margin-bottom: 20px;
+    ">
+        <div style="
+            width: 36px; height: 36px;
+            background: #f5a623;
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        ">📦</div>
+        <div>
+            <div style="font-size: 18px; font-weight: 700; color: #ffffff; line-height: 1.2;">
+                Depo Gelir-Gider
+                <span style="color: #f5a623;">Analiz</span>
+            </div>
+            <div style="font-size: 12px; color: #9ea3aa; margin-top: 1px;">
+                Kargo faturalari ile musteri odemelerini otomatik eslestir
+            </div>
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True,
 )
 
 # ------------------------------------------------------------ gecmis analiz ---
@@ -590,6 +775,7 @@ if st.session_state.get("hesapla_tiklandi") and "income_df_cache" in st.session_
                 min-width: 64px !important;
                 max-width: 64px !important;
                 background-color: #1a1d21;
+                border-right: 1px solid #2d3139;
             }
             [data-testid="stSidebar"] > div:first-child {
                 padding: 8px 0 0 0;
@@ -611,30 +797,32 @@ if st.session_state.get("hesapla_tiklandi") and "income_df_cache" in st.session_
                 text-decoration: none;
             }
             .slack-btn:hover {
-                background: rgba(255,255,255,0.12);
+                background: rgba(245, 166, 35, 0.15);
             }
             .slack-btn.active {
-                background: rgba(255,255,255,0.20);
+                background: rgba(245, 166, 35, 0.25);
+                box-shadow: inset 3px 0 0 #f5a623;
+                border-radius: 0 10px 10px 0;
             }
             .slack-btn .tooltip {
                 visibility: hidden;
                 opacity: 0;
-                background: #1a1d21;
-                color: #fff;
+                background: #2d3139;
+                color: #f5a623;
                 font-size: 13px;
-                font-weight: 500;
+                font-weight: 600;
                 white-space: nowrap;
                 border-radius: 6px;
-                padding: 5px 10px;
+                padding: 5px 12px;
                 position: absolute;
                 left: 54px;
                 top: 50%;
                 transform: translateY(-50%);
                 z-index: 9999;
                 pointer-events: none;
-                border: 1px solid rgba(255,255,255,0.15);
+                border: 1px solid #f5a623;
                 transition: opacity 0.15s;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.5);
             }
             .slack-btn:hover .tooltip {
                 visibility: visible;
@@ -650,9 +838,10 @@ if st.session_state.get("hesapla_tiklandi") and "income_df_cache" in st.session_
                 align-items: center;
                 justify-content: center;
                 font-size: 22px;
-                background: transparent;
-                border: none;
-                color: white;
+                background: transparent !important;
+                border: none !important;
+                color: #d1d2d3 !important;
+                box-shadow: none !important;
                 transition: background 0.15s;
             }
             div[data-testid="stSidebarContent"] .stButton button:hover {
