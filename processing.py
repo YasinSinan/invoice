@@ -763,15 +763,16 @@ def carrier_breakdown(merged):
 
 
 def apply_per_package_carrier_fee(merged, fee_df):
-    """Belirli bir kargo firmasinin HER takip edilebilir paketine (Takip_Var_Mi
-    = True) sabit bir paket-basi ek gider ekler (orn. UniUni icin paket basina
-    $2). Boylece eklenen tutar otomatik olarak paket sayisi ile carpilip her
-    paketin Gider/Kar degerine islenir - toplam kar, ulke/firma/musteri
-    kirilimlari dahil her yerde otomatik gorunur (hepsi merged'den hesaplanir).
+    """Belirli bir kargo firmasinin HER takip edilebilir VE ZATEN GIDERI
+    ESLESMIS paketine (Takip_Var_Mi = True, Durum = "Eslesti") sabit bir
+    paket-basi ek gider ekler (orn. UniUni icin paket basina $2). Boylece
+    eklenen tutar otomatik olarak paket sayisi ile carpilip her paketin
+    Gider/Kar degerine islenir - toplam kar, ulke/firma/musteri kirilimlari
+    dahil her yerde otomatik gorunur (hepsi merged'den hesaplanir).
 
-    Onceden gideri eslesmemis (Durum="Gider bulunamadi") paketler, bu ek
-    gideri aldiktan sonra "Eslesti" sayilir - artik gercek bir gider degerleri
-    var. Takip numarasi olmayan ("Takip no yok") paketlere uygulanmaz.
+    Gideri eslesmemis (Durum="Gider bulunamadi") paketlere bu ek gider
+    UYGULANMAZ - sadece zaten gideri eslesmis paketlerin gider tutarina
+    eklenir, "eslesme" durumunu degistirmez.
 
     merged'in guncellenmis bir KOPYASINI dondurur (orijinali degistirmez).
     """
@@ -789,7 +790,11 @@ def apply_per_package_carrier_fee(merged, fee_df):
         firma = _normalize_carrier_name(str(row["Kargo Firmasi"]).strip())
         tutar = float(row["Paket Basi Tutar"])
 
-        mask = (merged["Carrier Name"] == firma) & (merged["Takip_Var_Mi"])
+        mask = (
+            (merged["Carrier Name"] == firma)
+            & (merged["Takip_Var_Mi"])
+            & (merged["Durum"] == "Eslesti")
+        )
         if not mask.any():
             continue
 
@@ -797,7 +802,6 @@ def apply_per_package_carrier_fee(merged, fee_df):
         merged.loc[mask, "Gider_Tax"] = merged.loc[mask, "Gider_Tax"].fillna(0.0)
         merged.loc[mask, "Gider"] = merged.loc[mask, "Gider_Kargo"] + merged.loc[mask, "Gider_Tax"]
         merged.loc[mask, "Kar"] = merged.loc[mask, "Invoice Amount"] - merged.loc[mask, "Gider"]
-        merged.loc[mask & (merged["Durum"] != "Eslesti"), "Durum"] = "Eslesti"
 
         not_etiketi = f"Paket basi ek ucret: ${tutar:.2f}"
         mevcut = merged.loc[mask, "Gider_Kalemleri"].fillna("")
