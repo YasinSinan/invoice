@@ -779,7 +779,7 @@ else:
         st.markdown("**Paket basina ek gider - firma bazinda (opsiyonel)**")
         st.caption(
             "Belirli bir kargo firmasinin HER paketine ayni tutari ekler (orn. "
-            "UniUni icin paket basina $2). Tutar otomatik olarak paket sayisiyla "
+            "US-CA Arasi nakliye ucreti UniUni icin paket basina $2). Tutar otomatik olarak paket sayisiyla "
             "carpilir ve her paketin kar/zarar hesabina islenir - tum tablolarda "
             "(ulke, firma, musteri) otomatik yansir. Gideri eslesmemis paketler "
             "bu tutari aldiktan sonra 'eslesti' sayilir."
