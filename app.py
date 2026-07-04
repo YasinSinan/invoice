@@ -842,7 +842,7 @@ if st.session_state.get("hesapla_tiklandi") and "income_df_cache" in st.session_
 
     # Slack tarzı ince ikonlu sidebar
     MENU_ITEMS = [
-        ("🚚", "Kargo Firmalarina "),
+        ("🚚", "Kargo Firmalarina Gore"),
         ("🌍", "Ulkelere Gore"),
         ("🗺️", "Avrupa Ozeti"),
         ("👥", "Musterilere Gore"),
