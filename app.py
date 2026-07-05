@@ -434,6 +434,44 @@ def _dosya_listesinden_cikar(liste_key, ad):
     ]
 
 
+def _her_seyi_sifirla():
+    """Ana Sayfa'ya donerken yuklu dosyalari, hesaplanmis sonuclari, manuel
+    giris tablolarini ve arsiv sayfalarindaki secimleri tamamen temizler -
+    kullanici tertemiz bir sayfayla baslar. Giris (authentication) bilgilerine
+    dokunulmaz."""
+    _silinecek_anahtarlar = [
+        "gelir_dosyalari",
+        "gider_dosyalari",
+        "income_df_cache",
+        "cost_dfs_cache",
+        "breakdown_dfs_cache",
+        "carrier_overhead_cache",
+        "warnings_cache",
+        "hesapla_tiklandi",
+        "otomatik_genel_gider_satirlari",
+        "yuklu_parametreler",
+        "yuklu_donem",
+        "manual_income_editor",
+        "manual_expenses_editor",
+        "manual_carrier_expenses_editor",
+        "arsiv_donem_sec",
+        "arsiv_gelir_secim",
+        "arsiv_gider_secim",
+        "tekli_arsiv_donem",
+        "tekli_arsiv_secim",
+        "arsiv_donem_input",
+    ]
+    for anahtar in _silinecek_anahtarlar:
+        st.session_state.pop(anahtar, None)
+
+    # Dosya yukleyici widget'larini da gorsel olarak sifirlamak icin
+    # anahtarlarini bir sonraki surume geçiriyoruz (Streamlit dosya
+    # yukleyicileri kod ile dogrudan bosaltilamaz, sadece key degisince
+    # sifirlanir).
+    st.session_state["gelir_uploader_versiyon"] = st.session_state.get("gelir_uploader_versiyon", 0) + 1
+    st.session_state["gider_uploader_versiyon"] = st.session_state.get("gider_uploader_versiyon", 0) + 1
+
+
 def renkli_kart(etiket, deger, renk, icon=""):
     """Sellivox tarzi: beyaz kart, hafif golge, sol renkli kenarlik."""
     st.markdown(
@@ -644,6 +682,7 @@ with st.sidebar:
     st.markdown('<div class="sidebar-section">Ana Menu</div>', unsafe_allow_html=True)
     icon, label = BASE_MENU_ITEMS[0]
     if st.button(f"{icon}  {label}", key=f"nav_{label}", width="stretch"):
+        _her_seyi_sifirla()
         st.session_state["analiz_secimi"] = None
         st.rerun()
 
