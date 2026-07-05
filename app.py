@@ -70,7 +70,7 @@ st.markdown(
     .main .block-container,
     [data-testid="stMainBlockContainer"] {
         background-color: var(--panel-bg) !important;
-        padding-top: 3.4rem !important;
+        padding-top: 3.0rem !important;
         max-width: 1400px !important;
     }
 
@@ -557,34 +557,66 @@ def indirme_butonlari(df, dosya_adi, key_prefix):
 
 st.markdown(
     """
-    <div style="
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 4px 0 4px 0;
-        margin-bottom: 4px;
-    ">
-        <div>
-            <div style="font-size: 26px; font-weight: 800; color: #1f2430; line-height: 1.2;">
+    <style>
+    [data-testid="stHorizontalBlock"]:has(#hesap-alani) {
+        align-items: center !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+_col_baslik, _col_hesap = st.columns([3, 1])
+with _col_baslik:
+    st.markdown(
+        """
+        <div style="padding: 2px 0;">
+            <div style="font-size: 24px; font-weight: 800; color: #1f2430; line-height: 1.2;">
                 📦 Depo Paneli
             </div>
             <div style="font-size: 13px; color: #5f6779; margin-top: 2px;">
                 Kargo faturalari ile musteri odemelerini otomatik eslestir
             </div>
         </div>
+        """,
+        unsafe_allow_html=True,
+    )
+with _col_hesap:
+    st.markdown('<span id="hesap-alani"></span>', unsafe_allow_html=True)
+    st.markdown(
+        f"""
+        <style>
+        [data-testid="stButton"]:has(button[kind="secondary"]) button {{
+            float: right;
+        }}
+        </style>
         <div style="
-            width: 40px; height: 40px;
-            background: #eef4ff;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 18px;
-            flex-shrink: 0;
-            border: 1.5px solid #c7cbd6;
-        ">👤</div>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-bottom: 6px;
+        ">
+            <div style="
+                width: 34px; height: 34px;
+                background: #eef4ff;
+                border-radius: 50%;
+                display: flex; align-items: center; justify-content: center;
+                font-size: 15px;
+                flex-shrink: 0;
+                border: 1.5px solid #c7cbd6;
+            ">👤</div>
+            <div style="text-align: left; line-height: 1.2;">
+                <div style="font-size: 13px; font-weight: 700; color: #1f2430;">{st.session_state.get('name', '')}</div>
+                <div style="font-size: 11px; color: #8a90a0;">Giris yapildi</div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    _col_bos, _col_cikis = st.columns([1, 1.3])
+    with _col_cikis:
+        authenticator.logout("🚪 Cikis Yap", "main", key="cikis_butonu")
 
 st.divider()
 
@@ -732,10 +764,6 @@ with st.sidebar:
         if st.button(f"{icon}  {label}", key=f"nav_{label}", width="stretch"):
             st.session_state["analiz_secimi"] = label
             st.rerun()
-
-    st.markdown('<div class="sidebar-section">Hesap</div>', unsafe_allow_html=True)
-    st.caption(f"👤 {st.session_state.get('name', '')}")
-    authenticator.logout("🚪 Cikis Yap", "sidebar", key="cikis_butonu")
 
 analiz_secimi = st.session_state.get("analiz_secimi")
 
