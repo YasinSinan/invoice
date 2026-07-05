@@ -44,51 +44,6 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
 )
-
-# ------------------------------------------------------------- giris (auth) ---
-def _kimlik_dogrulayici_olustur():
-    """Streamlit Cloud Secrets'taki [auth] bolumunden kullanici bilgilerini
-    okuyup bir Authenticate nesnesi olusturur. Secrets kurulmamissa acik ve
-    anlasilir bir hata gosterir."""
-    try:
-        auth_cfg = st.secrets["auth"]
-        kullanicilar_raw = dict(auth_cfg["credentials"]["usernames"])
-    except Exception:
-        st.error(
-            "🔒 Giris sistemi henuz kurulmamis. Streamlit Cloud'da uygulama "
-            "ayarlarindan **Secrets** bolumune `[auth]` yapilandirmasini "
-            "eklemen gerekiyor. Claude'a 'secrets nasil eklenir' diye sorabilirsin."
-        )
-        st.stop()
-
-    credentials = {"usernames": {}}
-    for kullanici_adi, bilgi in kullanicilar_raw.items():
-        credentials["usernames"][kullanici_adi] = {
-            "email": bilgi.get("email", ""),
-            "first_name": bilgi.get("first_name", kullanici_adi),
-            "last_name": bilgi.get("last_name", ""),
-            "password": bilgi["password"],
-        }
-
-    return stauth.Authenticate(
-        credentials,
-        auth_cfg.get("cookie_name", "comfyship_auth"),
-        auth_cfg.get("cookie_key", "comfyship_varsayilan_anahtar_degistir"),
-        auth_cfg.get("cookie_expiry_days", 30),
-    )
-
-
-authenticator = _kimlik_dogrulayici_olustur()
-authenticator.login(location="main")
-
-_auth_durumu = st.session_state.get("authentication_status")
-if _auth_durumu is False:
-    st.error("Kullanici adi veya sifre hatali.")
-    st.stop()
-elif _auth_durumu is None:
-    st.info("Devam etmek icin kullanici adi ve sifrenle giris yap.")
-    st.stop()
-
 # "Sellivox" tarzi acik panel temasi: koyu genis sidebar + beyaz ana alan +
 # renkli sol-kenarlikli KPI kartlari.
 st.markdown(
@@ -349,6 +304,109 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
+
+# ------------------------------------------------------------- giris (auth) ---
+def _kimlik_dogrulayici_olustur():
+    """Streamlit Cloud Secrets'taki [auth] bolumunden kullanici bilgilerini
+    okuyup bir Authenticate nesnesi olusturur. Secrets kurulmamissa acik ve
+    anlasilir bir hata gosterir."""
+    try:
+        auth_cfg = st.secrets["auth"]
+        kullanicilar_raw = dict(auth_cfg["credentials"]["usernames"])
+    except Exception:
+        st.error(
+            "🔒 Giris sistemi henuz kurulmamis. Streamlit Cloud'da uygulama "
+            "ayarlarindan **Secrets** bolumune `[auth]` yapilandirmasini "
+            "eklemen gerekiyor. Claude'a 'secrets nasil eklenir' diye sorabilirsin."
+        )
+        st.stop()
+
+    credentials = {"usernames": {}}
+    for kullanici_adi, bilgi in kullanicilar_raw.items():
+        credentials["usernames"][kullanici_adi] = {
+            "email": bilgi.get("email", ""),
+            "first_name": bilgi.get("first_name", kullanici_adi),
+            "last_name": bilgi.get("last_name", ""),
+            "password": bilgi["password"],
+        }
+
+    return stauth.Authenticate(
+        credentials,
+        auth_cfg.get("cookie_name", "comfyship_auth"),
+        auth_cfg.get("cookie_key", "comfyship_varsayilan_anahtar_degistir"),
+        auth_cfg.get("cookie_expiry_days", 30),
+    )
+
+
+authenticator = _kimlik_dogrulayici_olustur()
+
+# Onceki oturumdan kalma "beni hatirla" cerezi varsa otomatik giris yap
+if not st.session_state.get("authentication_status"):
+    _token = authenticator.cookie_controller.get_cookie()
+    if _token:
+        authenticator.authentication_controller.login(token=_token)
+
+if not st.session_state.get("authentication_status"):
+    st.markdown(
+        """
+        <style>
+        [data-testid="stForm"] {
+            background: #ffffff !important;
+            border: 1.5px solid #c7cbd6 !important;
+            border-radius: 16px !important;
+            padding: 32px 28px !important;
+            box-shadow: 0 4px 16px rgba(16, 24, 40, 0.10) !important;
+        }
+        [data-testid="stForm"] label p {
+            color: #1f2430 !important;
+            font-weight: 600 !important;
+            font-size: 14px !important;
+        }
+        [data-testid="stForm"] input {
+            color: #1f2430 !important;
+            background: #f8f9fb !important;
+            border: 1.5px solid #c7cbd6 !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    _bos_sol, _form_orta, _bos_sag = st.columns([1, 1.1, 1])
+    with _form_orta:
+        st.markdown(
+            """
+            <div style="text-align:center; margin-bottom: 18px; margin-top: 6vh;">
+                <div style="font-size: 40px;">📦</div>
+                <div style="font-size: 22px; font-weight: 800; color: #1f2430;">Depo Paneli</div>
+                <div style="font-size: 13px; color: #5f6779; margin-top: 2px;">Devam etmek icin giris yap</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        _sifre_goster = st.checkbox("👁️ Sifreyi goster", key="sifre_goster_toggle")
+
+        with st.form("giris_formu", clear_on_submit=False, border=False):
+            _email = st.text_input("Email", autocomplete="off", key="giris_email")
+            _sifre = st.text_input(
+                "Sifre",
+                type="default" if _sifre_goster else "password",
+                autocomplete="off",
+                key="giris_sifre",
+            )
+            _gonderildi = st.form_submit_button("Giris Yap", type="primary", width="stretch")
+
+        if _gonderildi:
+            _basarili = authenticator.authentication_controller.login(_email, _sifre)
+            if _basarili:
+                authenticator.cookie_controller.set_cookie()
+                st.rerun()
+            else:
+                st.error("Email veya sifre hatali.")
+
+    st.stop()
+
 
 
 
