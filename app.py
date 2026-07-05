@@ -70,7 +70,7 @@ st.markdown(
     .main .block-container,
     [data-testid="stMainBlockContainer"] {
         background-color: var(--panel-bg) !important;
-        padding-top: 0.5rem !important;
+        padding-top: 0 !important;
         max-width: 1400px !important;
     }
 
@@ -574,32 +574,26 @@ with _col_baslik:
 with _col_info:
     st.markdown(
         f"""
-        <div style="
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 10px;
-            height: 100%;
-        ">
+        <div style="display: flex; align-items: center; justify-content: flex-end; gap: 8px;">
             <div style="
-                width: 34px; height: 34px;
+                width: 28px; height: 28px;
                 background: #eef4ff;
                 border-radius: 50%;
                 display: flex; align-items: center; justify-content: center;
-                font-size: 15px;
+                font-size: 13px;
                 flex-shrink: 0;
                 border: 1.5px solid #c7cbd6;
             ">👤</div>
-            <div style="text-align: left; line-height: 1.2;">
-                <div style="font-size: 13px; font-weight: 700; color: #1f2430;">{st.session_state.get('name', '')}</div>
-                <div style="font-size: 11px; color: #8a90a0;">Giris yapildi</div>
-            </div>
+            <div style="font-size: 13px; font-weight: 700; color: #1f2430;">{st.session_state.get('name', '')}</div>
+        </div>
+        <div style="text-align: right; font-size: 11px; color: #8a90a0; margin-top: 4px;">
+            Giris yapildi
         </div>
         """,
         unsafe_allow_html=True,
     )
 with _col_btn:
-    st.markdown('<div style="margin-top: 2px;"></div>', unsafe_allow_html=True)
+    st.markdown('<div style="height: 34px;"></div>', unsafe_allow_html=True)
     authenticator.logout("🚪 Cikis Yap", "main", key="cikis_butonu")
 
 st.divider()
