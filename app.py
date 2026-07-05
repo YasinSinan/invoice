@@ -1228,6 +1228,26 @@ else:
                 width="stretch",
                 hide_index=True,
             )
+
+            _genel_gider_toplam = genel_gider_kategori_detay["Genel Gider"].sum()
+            st.markdown(
+                f"""
+                <div style="display: flex; justify-content: flex-end; margin-top: -6px;">
+                    <div style="
+                        background: #ffffff;
+                        border: 1.5px solid #c7cbd6;
+                        border-radius: 8px;
+                        padding: 8px 16px;
+                        font-size: 14px;
+                    ">
+                        <span style="color: #5f6779; font-weight: 600;">Toplam:</span>
+                        <span style="color: #1f2430; font-weight: 800; margin-left: 6px;">${_genel_gider_toplam:,.2f}</span>
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
             indirme_butonlari(genel_gider_kategori_detay, "genel_gider_detayi", "genel_gider_detay")
 
         eslesme_orani = summary["eslesen_sayisi"] / summary["toplam_gonderi"] * 100 if summary["toplam_gonderi"] else 0
