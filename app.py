@@ -586,8 +586,9 @@ with _col_hesap:
     st.markdown(
         f"""
         <style>
-        [data-testid="stButton"]:has(button[kind="secondary"]) button {{
-            float: right;
+        [data-testid="stVerticalBlock"]:has(#hesap-alani) [data-testid="stButton"] {{
+            display: flex;
+            justify-content: flex-end;
         }}
         </style>
         <div style="
@@ -614,9 +615,7 @@ with _col_hesap:
         """,
         unsafe_allow_html=True,
     )
-    _col_bos, _col_cikis = st.columns([1, 1.3])
-    with _col_cikis:
-        authenticator.logout("🚪 Cikis Yap", "main", key="cikis_butonu")
+    authenticator.logout("🚪 Cikis Yap", "main", key="cikis_butonu")
 
 st.divider()
 
@@ -655,6 +654,9 @@ with st.sidebar:
         }
         [data-testid="stSidebar"] > div:first-child {
             padding: 0 !important;
+        }
+        [data-testid="stSidebarContent"] {
+            padding-top: 0.25rem !important;
         }
         [data-testid="stSidebarContent"] [data-testid="stVerticalBlock"] {
             align-items: flex-start !important;
@@ -696,7 +698,7 @@ with st.sidebar:
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 20px 18px 16px 18px;
+            padding: 8px 18px 14px 18px;
             border-bottom: 1px solid #22252d;
             margin-bottom: 10px;
         }
