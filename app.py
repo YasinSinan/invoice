@@ -473,7 +473,6 @@ def _her_seyi_sifirla():
         "carrier_overhead_cache",
         "warnings_cache",
         "hesapla_tiklandi",
-        "otomatik_genel_gider_satirlari",
         "yuklu_parametreler",
         "yuklu_donem",
         "manual_income_editor",
@@ -980,7 +979,7 @@ else:
                 "Purolator, FedEx, UPS) otomatik ayri ayri islenir."
             )
 
-        dahil_et_genel_gider = True  # Pakete baglanamayan giderler her zaman dahil edilir (yarisı otomatik manuel gidere eklenir)
+        dahil_et_genel_gider = True  # Pakete baglanamayan giderler bilgi amacli gosterilir, otomatik eklenmez
 
         st.markdown("**Manuel gider (opsiyonel)**")
         st.caption(
@@ -990,17 +989,6 @@ else:
         _gider_default = pd.DataFrame(_params.get("manuel_gider", [])) if _params else pd.DataFrame({"Aciklama": pd.Series(dtype="str"), "Tutar": pd.Series(dtype="float")})
         if _gider_default.empty or list(_gider_default.columns) != ["Aciklama", "Tutar"]:
             _gider_default = pd.DataFrame({"Aciklama": pd.Series(dtype="str"), "Tutar": pd.Series(dtype="float")})
-
-        # Otomatik satirlari en alta ekle (onceki otomatik satirlari temizle, yenileri ekle)
-        otomatik_satirlar = st.session_state.get("otomatik_genel_gider_satirlari", [])
-        if otomatik_satirlar:
-            otomatik_aciklamalar = {s["Aciklama"] for s in otomatik_satirlar}
-            _gider_default = _gider_default[
-                ~_gider_default["Aciklama"].astype(str).isin(otomatik_aciklamalar)
-            ]
-            _gider_default = pd.concat(
-                [_gider_default, pd.DataFrame(otomatik_satirlar)], ignore_index=True
-            )
 
         manual_expenses_df = st.data_editor(
             _gider_default,
@@ -1132,29 +1120,12 @@ else:
         for w in st.session_state.get("warnings_cache", []):
             st.warning(w)
 
-        # Pakete baglanamayan giderlerin her kalemi ayrı satır olarak,
-        # yarı tutarıyla otomatik manuel gider listesine eklenir.
+        # Pakete baglanamayan giderler (Brokerage/Government Charges vb.)
+        # artik otomatik olarak manuel gider listesine eklenmiyor. Kullanici
+        # isterse bunlari kendisi manuel gider tablosuna elle girebilir.
         full_breakdown_erken = pd.concat(breakdown_dfs, ignore_index=True) if breakdown_dfs else pd.DataFrame()
-        if not full_breakdown_erken.empty:
-            genel_gider_satirlari = full_breakdown_erken[
-                full_breakdown_erken["Siniflandirma"] == "Genel Gider (pakete baglanamiyor)"
-            ][["Kategori/Sutun", "Tutar"]]
-            otomatik_satirlar = [
-                {
-                    "Aciklama": f"{row['Kategori/Sutun']} (yarisi) - otomatik",
-                    "Tutar": round(row["Tutar"] / 2, 2),
-                }
-                for _, row in genel_gider_satirlari.iterrows()
-                if row["Tutar"] > 0
-            ]
-        else:
-            otomatik_satirlar = []
-        st.session_state["otomatik_genel_gider_satirlari"] = otomatik_satirlar
 
         manuel_gider_toplam = manual_expense_total(manual_expenses_df)
-        # carrier_overhead_toplam buraya EKLENMIYOR — onun yarisi zaten
-        # manuel_expenses_df'e otomatik satir olarak eklendi, manual_expense_total
-        # onu zaten sayiyor. Tam tutari ayrica eklemek cift sayima yol acar.
         toplam_genel_gider = manuel_gider_toplam
         manuel_gelir_toplam = manual_expense_total(manual_income_df)
 
@@ -1212,11 +1183,7 @@ else:
         gecerli_manuel_gelir = gecerli_manuel_gelir[gecerli_manuel_gelir["Aciklama"].astype(str).str.strip() != ""]
         gecerli_manuel_gider = manual_expenses_df.dropna(subset=["Aciklama", "Tutar"])
         gecerli_manuel_gider = gecerli_manuel_gider[gecerli_manuel_gider["Aciklama"].astype(str).str.strip() != ""]
-        # Otomatik eklenen satirlari dashboard gosteriminden cikar (sadece kullanicinin yazdiklarini goster)
-        _otomatik_aciklamalar = {s["Aciklama"] for s in st.session_state.get("otomatik_genel_gider_satirlari", [])}
-        gecerli_manuel_gider_gosterim = gecerli_manuel_gider[
-            ~gecerli_manuel_gider["Aciklama"].astype(str).isin(_otomatik_aciklamalar)
-        ]
+        gecerli_manuel_gider_gosterim = gecerli_manuel_gider
 
         if not gecerli_manuel_gelir.empty or not gecerli_manuel_gider_gosterim.empty or has_per_package_fee:
             col_mg, col_mgid = st.columns(2)
