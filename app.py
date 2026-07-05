@@ -10,6 +10,7 @@ from datetime import datetime, timezone
 
 import pandas as pd
 import streamlit as st
+import streamlit_authenticator as stauth
 
 from processing import (
     BYELABEL_GROUP_LABEL,
@@ -43,6 +44,50 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
 )
+
+# ------------------------------------------------------------- giris (auth) ---
+def _kimlik_dogrulayici_olustur():
+    """Streamlit Cloud Secrets'taki [auth] bolumunden kullanici bilgilerini
+    okuyup bir Authenticate nesnesi olusturur. Secrets kurulmamissa acik ve
+    anlasilir bir hata gosterir."""
+    try:
+        auth_cfg = st.secrets["auth"]
+        kullanicilar_raw = dict(auth_cfg["credentials"]["usernames"])
+    except Exception:
+        st.error(
+            "🔒 Giris sistemi henuz kurulmamis. Streamlit Cloud'da uygulama "
+            "ayarlarindan **Secrets** bolumune `[auth]` yapilandirmasini "
+            "eklemen gerekiyor. Claude'a 'secrets nasil eklenir' diye sorabilirsin."
+        )
+        st.stop()
+
+    credentials = {"usernames": {}}
+    for kullanici_adi, bilgi in kullanicilar_raw.items():
+        credentials["usernames"][kullanici_adi] = {
+            "email": bilgi.get("email", ""),
+            "first_name": bilgi.get("first_name", kullanici_adi),
+            "last_name": bilgi.get("last_name", ""),
+            "password": bilgi["password"],
+        }
+
+    return stauth.Authenticate(
+        credentials,
+        auth_cfg.get("cookie_name", "comfyship_auth"),
+        auth_cfg.get("cookie_key", "comfyship_varsayilan_anahtar_degistir"),
+        auth_cfg.get("cookie_expiry_days", 30),
+    )
+
+
+authenticator = _kimlik_dogrulayici_olustur()
+authenticator.login(location="main")
+
+_auth_durumu = st.session_state.get("authentication_status")
+if _auth_durumu is False:
+    st.error("Kullanici adi veya sifre hatali.")
+    st.stop()
+elif _auth_durumu is None:
+    st.info("Devam etmek icin kullanici adi ve sifrenle giris yap.")
+    st.stop()
 
 # "Sellivox" tarzi acik panel temasi: koyu genis sidebar + beyaz ana alan +
 # renkli sol-kenarlikli KPI kartlari.
@@ -556,6 +601,10 @@ with st.sidebar:
             if st.button(f"{icon}  {label}", key=f"nav_{label}", width="stretch"):
                 st.session_state["analiz_secimi"] = label
                 st.rerun()
+
+    st.markdown('<div class="sidebar-section">Hesap</div>', unsafe_allow_html=True)
+    st.caption(f"👤 {st.session_state.get('name', '')}")
+    authenticator.logout("🚪 Cikis Yap", "sidebar", key="cikis_butonu")
 
 analiz_secimi = st.session_state.get("analiz_secimi")
 
