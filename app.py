@@ -624,6 +624,12 @@ with st.sidebar:
         [data-testid="stSidebar"] > div:first-child {
             padding: 0 !important;
         }
+        [data-testid="stSidebarContent"] [data-testid="stVerticalBlock"] {
+            align-items: flex-start !important;
+        }
+        div[data-testid="stSidebarContent"] .stButton {
+            width: 100% !important;
+        }
         div[data-testid="stSidebarContent"] .stButton button {
             width: 100% !important;
             justify-content: flex-start !important;
@@ -639,6 +645,11 @@ with st.sidebar:
             color: #c3c9d4 !important;
             box-shadow: none !important;
             transition: background 0.15s;
+            text-align: left !important;
+        }
+        div[data-testid="stSidebarContent"] .stButton button div {
+            justify-content: flex-start !important;
+            width: 100% !important;
         }
         div[data-testid="stSidebarContent"] .stButton button:hover {
             background: rgba(255,255,255,0.06) !important;
