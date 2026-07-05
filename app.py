@@ -692,14 +692,15 @@ if analiz_secimi == "Kargo Firmasina Gore Dosya Yukle":
         disabled=_tekli_dosya is None or not _tekli_donem.strip(),
     ):
         try:
-            _kategori = "gelir" if _tekli_secim.startswith("Gelir") else "gider"
-            sonuc = merge_and_save_raw_file(
-                _tekli_donem, _kategori, _tekli_dosya.name, _tekli_dosya.getvalue()
-            )
-            if _kategori == "gider":
-                _mevcut_meta = load_gider_meta(_tekli_donem)
-                _mevcut_meta[_tekli_dosya.name] = _tekli_secim
-                save_gider_meta(_tekli_donem, _mevcut_meta)
+            with st.spinner("📤 GitHub'a kaydediliyor..."):
+                _kategori = "gelir" if _tekli_secim.startswith("Gelir") else "gider"
+                sonuc = merge_and_save_raw_file(
+                    _tekli_donem, _kategori, _tekli_dosya.name, _tekli_dosya.getvalue()
+                )
+                if _kategori == "gider":
+                    _mevcut_meta = load_gider_meta(_tekli_donem)
+                    _mevcut_meta[_tekli_dosya.name] = _tekli_secim
+                    save_gider_meta(_tekli_donem, _mevcut_meta)
 
             if sonuc["durum"] == "yeni":
                 st.success(f"'{_tekli_dosya.name}' yeni dosya olarak '{_tekli_donem}' donemine kaydedildi ({sonuc['sonuc_satir']} satir).")
@@ -724,7 +725,8 @@ elif analiz_secimi == "GitHub Arsivinden Dosya Sec ve Hesapla":
         "gelir/gider dosyalarindan istedigini sec ve Hesapla'ya bas."
     )
     try:
-        _kayitli_donemler = list_periods()
+        with st.spinner("🔄 GitHub'daki donemler yukleniyor..."):
+            _kayitli_donemler = list_periods()
     except GithubStorageError as e:
         _kayitli_donemler = []
         st.warning(str(e))
@@ -735,9 +737,10 @@ elif analiz_secimi == "GitHub Arsivinden Dosya Sec ve Hesapla":
         _secilen_arsiv_donemi = st.selectbox("Donem sec", options=_kayitli_donemler, key="arsiv_donem_sec")
 
         try:
-            _gelir_secenekleri = list_raw_files(_secilen_arsiv_donemi, "gelir")
-            _gider_secenekleri = list_raw_files(_secilen_arsiv_donemi, "gider")
-            _gider_carrier_map_ekran = load_gider_meta(_secilen_arsiv_donemi)
+            with st.spinner(f"🔄 '{_secilen_arsiv_donemi}' donemine ait dosya listesi yukleniyor..."):
+                _gelir_secenekleri = list_raw_files(_secilen_arsiv_donemi, "gelir")
+                _gider_secenekleri = list_raw_files(_secilen_arsiv_donemi, "gider")
+                _gider_carrier_map_ekran = load_gider_meta(_secilen_arsiv_donemi)
         except GithubStorageError as e:
             _gelir_secenekleri, _gider_secenekleri, _gider_carrier_map_ekran = [], [], {}
             st.warning(str(e))
@@ -767,16 +770,19 @@ elif analiz_secimi == "GitHub Arsivinden Dosya Sec ve Hesapla":
             help="Dosyalari Ana Sayfa'daki yukleme alanlarina ekler ve yonlendirir - orada dosya ekleyip/cikarabilir, sonra Hesapla'ya basabilirsin.",
         ):
             try:
-                for gelir_dosya in _secili_gelir_dosyalari:
-                    gelir_bytes = load_raw_file(_secilen_arsiv_donemi, "gelir", gelir_dosya)
-                    _dosya_listesine_ekle("gelir_dosyalari", gelir_dosya, gelir_bytes)
+                with st.spinner(
+                    f"📥 {len(_secili_gelir_dosyalari) + len(_secili_gider_dosyalari)} dosya GitHub'dan indiriliyor..."
+                ):
+                    for gelir_dosya in _secili_gelir_dosyalari:
+                        gelir_bytes = load_raw_file(_secilen_arsiv_donemi, "gelir", gelir_dosya)
+                        _dosya_listesine_ekle("gelir_dosyalari", gelir_dosya, gelir_bytes)
 
-                for gider_dosya in _secili_gider_dosyalari:
-                    gider_bytes = load_raw_file(_secilen_arsiv_donemi, "gider", gider_dosya)
-                    secilen_carrier = _gider_carrier_map_ekran.get(gider_dosya, BYELABEL_GROUP_LABEL)
-                    _dosya_listesine_ekle(
-                        "gider_dosyalari", gider_dosya, gider_bytes, {"firma": secilen_carrier}
-                    )
+                    for gider_dosya in _secili_gider_dosyalari:
+                        gider_bytes = load_raw_file(_secilen_arsiv_donemi, "gider", gider_dosya)
+                        secilen_carrier = _gider_carrier_map_ekran.get(gider_dosya, BYELABEL_GROUP_LABEL)
+                        _dosya_listesine_ekle(
+                            "gider_dosyalari", gider_dosya, gider_bytes, {"firma": secilen_carrier}
+                        )
 
                 st.session_state["analiz_secimi"] = None
                 st.success(
@@ -970,59 +976,60 @@ else:
     col_hesapla, col_yeniden = st.columns([2, 1])
     with col_hesapla:
         if st.button("Hesapla", type="primary", disabled=not st.session_state.get("gelir_dosyalari")):
-            # Dosyalari oku ve session_state'e kaydet
-            try:
-                _gelir_dfs = []
-                for _d in st.session_state["gelir_dosyalari"]:
-                    _gelir_dfs.append(
-                        load_income_file(
-                            io.BytesIO(_d["bytes"]),
-                            only_paid=only_paid,
-                            exclude_unassigned_carrier=exclude_unassigned_carrier,
-                        )
-                    )
-                st.session_state["income_df_cache"] = pd.concat(_gelir_dfs, ignore_index=True)
-            except ValueError as e:
-                st.error(f"Gelir dosyasi okunamadi: {e}")
-                st.stop()
-
-            cost_dfs = []
-            warnings_list = []
-            carrier_overhead_toplam = 0.0
-            breakdown_dfs = []
-            for _d in st.session_state.get("gider_dosyalari", []):
+            with st.spinner("⏳ Dosyalar okunuyor ve hesaplaniyor..."):
+                # Dosyalari oku ve session_state'e kaydet
                 try:
-                    secilen = _d.get("firma", BYELABEL_GROUP_LABEL)
-                    if secilen == BYELABEL_GROUP_LABEL:
-                        group_cost_dfs, group_warnings, group_genel_gider, group_breakdown_dfs = load_byelabel_group(
-                            io.BytesIO(_d["bytes"])
+                    _gelir_dfs = []
+                    for _d in st.session_state["gelir_dosyalari"]:
+                        _gelir_dfs.append(
+                            load_income_file(
+                                io.BytesIO(_d["bytes"]),
+                                only_paid=only_paid,
+                                exclude_unassigned_carrier=exclude_unassigned_carrier,
+                            )
                         )
-                        cost_dfs.extend(group_cost_dfs)
-                        warnings_list.extend(group_warnings)
-                        if group_genel_gider:
-                            carrier_overhead_toplam += group_genel_gider
-                        for bd in group_breakdown_dfs:
-                            breakdown_dfs.append(bd)
-                    else:
-                        cost_df, warning, genel_gider, breakdown_df = load_cost_file(
-                            io.BytesIO(_d["bytes"]), secilen
-                        )
-                        cost_dfs.append(cost_df)
-                        if warning:
-                            warnings_list.append(warning)
-                        if genel_gider:
-                            carrier_overhead_toplam += genel_gider
-                        if not breakdown_df.empty:
-                            breakdown_dfs.append(breakdown_df)
+                    st.session_state["income_df_cache"] = pd.concat(_gelir_dfs, ignore_index=True)
                 except ValueError as e:
-                    st.error(f"{_d['ad']} okunamadi: {e}")
+                    st.error(f"Gelir dosyasi okunamadi: {e}")
                     st.stop()
 
-            st.session_state["cost_dfs_cache"] = cost_dfs
-            st.session_state["breakdown_dfs_cache"] = breakdown_dfs
-            st.session_state["carrier_overhead_cache"] = carrier_overhead_toplam
-            st.session_state["warnings_cache"] = warnings_list
-            st.session_state["hesapla_tiklandi"] = True
+                cost_dfs = []
+                warnings_list = []
+                carrier_overhead_toplam = 0.0
+                breakdown_dfs = []
+                for _d in st.session_state.get("gider_dosyalari", []):
+                    try:
+                        secilen = _d.get("firma", BYELABEL_GROUP_LABEL)
+                        if secilen == BYELABEL_GROUP_LABEL:
+                            group_cost_dfs, group_warnings, group_genel_gider, group_breakdown_dfs = load_byelabel_group(
+                                io.BytesIO(_d["bytes"])
+                            )
+                            cost_dfs.extend(group_cost_dfs)
+                            warnings_list.extend(group_warnings)
+                            if group_genel_gider:
+                                carrier_overhead_toplam += group_genel_gider
+                            for bd in group_breakdown_dfs:
+                                breakdown_dfs.append(bd)
+                        else:
+                            cost_df, warning, genel_gider, breakdown_df = load_cost_file(
+                                io.BytesIO(_d["bytes"]), secilen
+                            )
+                            cost_dfs.append(cost_df)
+                            if warning:
+                                warnings_list.append(warning)
+                            if genel_gider:
+                                carrier_overhead_toplam += genel_gider
+                            if not breakdown_df.empty:
+                                breakdown_dfs.append(breakdown_df)
+                    except ValueError as e:
+                        st.error(f"{_d['ad']} okunamadi: {e}")
+                        st.stop()
+
+                st.session_state["cost_dfs_cache"] = cost_dfs
+                st.session_state["breakdown_dfs_cache"] = breakdown_dfs
+                st.session_state["carrier_overhead_cache"] = carrier_overhead_toplam
+                st.session_state["warnings_cache"] = warnings_list
+                st.session_state["hesapla_tiklandi"] = True
 
     with col_yeniden:
         yeniden_disabled = "income_df_cache" not in st.session_state
@@ -1049,35 +1056,36 @@ else:
         ) or not _arsiv_donemi.strip()
         if st.button("📤 GitHub'a Arsivle", key="arsivle_btn", disabled=_arsiv_disabled):
             try:
-                _sonuc_mesajlari = []
-                for _d in st.session_state.get("gelir_dosyalari", []):
-                    sonuc = merge_and_save_raw_file(_arsiv_donemi, "gelir", _d["ad"], _d["bytes"])
-                    if sonuc["durum"] == "yeni":
-                        _sonuc_mesajlari.append(f"📄 {_d['ad']}: yeni dosya olarak kaydedildi ({sonuc['sonuc_satir']} satir).")
-                    else:
-                        _sonuc_mesajlari.append(
-                            f"📄 {_d['ad']}: mevcut dosyayla birlestirildi "
-                            f"(eski {sonuc['eski_satir']} + yeni {sonuc['yeni_satir']} satir → "
-                            f"toplam {sonuc['sonuc_satir']} satir, tekrarlar elendi"
-                            + (f", anahtar: {sonuc['dedup_anahtari']}" if sonuc["dedup_anahtari"] else "")
-                            + ")."
-                        )
-                _gider_meta = {}
-                for _d in st.session_state.get("gider_dosyalari", []):
-                    sonuc = merge_and_save_raw_file(_arsiv_donemi, "gider", _d["ad"], _d["bytes"])
-                    _gider_meta[_d["ad"]] = _d.get("firma", BYELABEL_GROUP_LABEL)
-                    if sonuc["durum"] == "yeni":
-                        _sonuc_mesajlari.append(f"📄 {_d['ad']}: yeni dosya olarak kaydedildi ({sonuc['sonuc_satir']} satir).")
-                    else:
-                        _sonuc_mesajlari.append(
-                            f"📄 {_d['ad']}: mevcut dosyayla birlestirildi "
-                            f"(eski {sonuc['eski_satir']} + yeni {sonuc['yeni_satir']} satir → "
-                            f"toplam {sonuc['sonuc_satir']} satir, tekrarlar elendi"
-                            + (f", anahtar: {sonuc['dedup_anahtari']}" if sonuc["dedup_anahtari"] else "")
-                            + ")."
-                        )
-                if _gider_meta:
-                    save_gider_meta(_arsiv_donemi, _gider_meta)
+                with st.spinner("📤 GitHub'a kaydediliyor..."):
+                    _sonuc_mesajlari = []
+                    for _d in st.session_state.get("gelir_dosyalari", []):
+                        sonuc = merge_and_save_raw_file(_arsiv_donemi, "gelir", _d["ad"], _d["bytes"])
+                        if sonuc["durum"] == "yeni":
+                            _sonuc_mesajlari.append(f"📄 {_d['ad']}: yeni dosya olarak kaydedildi ({sonuc['sonuc_satir']} satir).")
+                        else:
+                            _sonuc_mesajlari.append(
+                                f"📄 {_d['ad']}: mevcut dosyayla birlestirildi "
+                                f"(eski {sonuc['eski_satir']} + yeni {sonuc['yeni_satir']} satir → "
+                                f"toplam {sonuc['sonuc_satir']} satir, tekrarlar elendi"
+                                + (f", anahtar: {sonuc['dedup_anahtari']}" if sonuc["dedup_anahtari"] else "")
+                                + ")."
+                            )
+                    _gider_meta = {}
+                    for _d in st.session_state.get("gider_dosyalari", []):
+                        sonuc = merge_and_save_raw_file(_arsiv_donemi, "gider", _d["ad"], _d["bytes"])
+                        _gider_meta[_d["ad"]] = _d.get("firma", BYELABEL_GROUP_LABEL)
+                        if sonuc["durum"] == "yeni":
+                            _sonuc_mesajlari.append(f"📄 {_d['ad']}: yeni dosya olarak kaydedildi ({sonuc['sonuc_satir']} satir).")
+                        else:
+                            _sonuc_mesajlari.append(
+                                f"📄 {_d['ad']}: mevcut dosyayla birlestirildi "
+                                f"(eski {sonuc['eski_satir']} + yeni {sonuc['yeni_satir']} satir → "
+                                f"toplam {sonuc['sonuc_satir']} satir, tekrarlar elendi"
+                                + (f", anahtar: {sonuc['dedup_anahtari']}" if sonuc["dedup_anahtari"] else "")
+                                + ")."
+                            )
+                    if _gider_meta:
+                        save_gider_meta(_arsiv_donemi, _gider_meta)
                 st.success(f"'{_arsiv_donemi}' donemine kaydedildi:")
                 for m in _sonuc_mesajlari:
                     st.caption(m)
