@@ -70,7 +70,7 @@ st.markdown(
     .main .block-container,
     [data-testid="stMainBlockContainer"] {
         background-color: var(--panel-bg) !important;
-        padding-top: 3.0rem !important;
+        padding-top: 0.5rem !important;
         max-width: 1400px !important;
     }
 
@@ -80,8 +80,9 @@ st.markdown(
        araç çubugu) gizleniyor, ok butonu gorunur kaliyor. */
     [data-testid="stHeader"] {
         background: var(--panel-bg) !important;
-        height: 2.75rem !important;
-        min-height: 2.75rem !important;
+        height: 2.2rem !important;
+        min-height: 2.2rem !important;
+        position: static !important;
     }
     [data-testid="stToolbar"] {
         visibility: hidden !important;
@@ -555,18 +556,7 @@ def indirme_butonlari(df, dosya_adi, key_prefix):
         )
 
 
-st.markdown(
-    """
-    <style>
-    [data-testid="stHorizontalBlock"]:has(#hesap-alani) {
-        align-items: center !important;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
-
-_col_baslik, _col_hesap = st.columns([3, 1])
+_col_baslik, _col_info, _col_btn = st.columns([3.2, 1, 0.7])
 with _col_baslik:
     st.markdown(
         """
@@ -581,22 +571,15 @@ with _col_baslik:
         """,
         unsafe_allow_html=True,
     )
-with _col_hesap:
-    st.markdown('<span id="hesap-alani"></span>', unsafe_allow_html=True)
+with _col_info:
     st.markdown(
         f"""
-        <style>
-        [data-testid="stVerticalBlock"]:has(#hesap-alani) [data-testid="stButton"] {{
-            display: flex;
-            justify-content: flex-end;
-        }}
-        </style>
         <div style="
             display: flex;
             align-items: center;
             justify-content: flex-end;
             gap: 10px;
-            margin-bottom: 6px;
+            height: 100%;
         ">
             <div style="
                 width: 34px; height: 34px;
@@ -615,6 +598,8 @@ with _col_hesap:
         """,
         unsafe_allow_html=True,
     )
+with _col_btn:
+    st.markdown('<div style="margin-top: 2px;"></div>', unsafe_allow_html=True)
     authenticator.logout("🚪 Cikis Yap", "main", key="cikis_butonu")
 
 st.divider()
