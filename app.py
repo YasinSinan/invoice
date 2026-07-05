@@ -314,6 +314,23 @@ def _hex_to_rgba(hex_renk, alpha):
     return f"rgba({r},{g},{b},{alpha})"
 
 
+def _dosya_listesine_ekle(liste_key, ad, veri_bytes, ekstra=None):
+    """Ana Sayfa'daki gelir/gider dosya listesine (session_state) bir dosya
+    ekler. Ayni isimde dosya varsa uzerine yazar (guncellenmis kabul edilir)."""
+    mevcut = {d["ad"]: d for d in st.session_state.get(liste_key, [])}
+    kayit = {"ad": ad, "bytes": veri_bytes}
+    if ekstra:
+        kayit.update(ekstra)
+    mevcut[ad] = kayit
+    st.session_state[liste_key] = list(mevcut.values())
+
+
+def _dosya_listesinden_cikar(liste_key, ad):
+    st.session_state[liste_key] = [
+        d for d in st.session_state.get(liste_key, []) if d["ad"] != ad
+    ]
+
+
 def renkli_kart(etiket, deger, renk, icon=""):
     """Sellivox tarzi: beyaz kart, hafif golge, sol renkli kenarlik."""
     st.markdown(
@@ -640,71 +657,30 @@ elif analiz_secimi == "GitHub Arsivinden Dosya Sec ve Hesapla":
             type="primary",
             key="arsiv_hesapla_btn",
             disabled=not _secili_gelir_dosyalari,
-            help="Dosyalari yukler ve Ana Sayfa'ya yonlendirir - orada manuel gelir/gider ekleyip Yeniden Hesapla'ya basabilirsin.",
+            help="Dosyalari Ana Sayfa'daki yukleme alanlarina ekler ve yonlendirir - orada dosya ekleyip/cikarabilir, sonra Hesapla'ya basabilirsin.",
         ):
             try:
-                gider_carrier_map = _gider_carrier_map_ekran
-
-                gelir_dfs_arsiv = []
                 for gelir_dosya in _secili_gelir_dosyalari:
                     gelir_bytes = load_raw_file(_secilen_arsiv_donemi, "gelir", gelir_dosya)
-                    gelir_dfs_arsiv.append(
-                        load_income_file(
-                            io.BytesIO(gelir_bytes),
-                            only_paid=True,
-                            exclude_unassigned_carrier=True,
-                        )
-                    )
-                income_df_arsiv = pd.concat(gelir_dfs_arsiv, ignore_index=True)
+                    _dosya_listesine_ekle("gelir_dosyalari", gelir_dosya, gelir_bytes)
 
-                cost_dfs_arsiv = []
-                warnings_arsiv = []
-                carrier_overhead_arsiv = 0.0
-                breakdown_dfs_arsiv = []
                 for gider_dosya in _secili_gider_dosyalari:
                     gider_bytes = load_raw_file(_secilen_arsiv_donemi, "gider", gider_dosya)
-                    secilen_carrier = gider_carrier_map.get(gider_dosya, BYELABEL_GROUP_LABEL)
-                    if secilen_carrier == BYELABEL_GROUP_LABEL:
-                        g_cost_dfs, g_warnings, g_genel_gider, g_breakdown_dfs = load_byelabel_group(
-                            io.BytesIO(gider_bytes)
-                        )
-                        cost_dfs_arsiv.extend(g_cost_dfs)
-                        warnings_arsiv.extend(g_warnings)
-                        carrier_overhead_arsiv += g_genel_gider
-                        breakdown_dfs_arsiv.extend(g_breakdown_dfs)
-                    else:
-                        cost_df, warning, genel_gider, breakdown_df = load_cost_file(
-                            io.BytesIO(gider_bytes), secilen_carrier
-                        )
-                        cost_dfs_arsiv.append(cost_df)
-                        if warning:
-                            warnings_arsiv.append(warning)
-                        carrier_overhead_arsiv += genel_gider
-                        if not breakdown_df.empty:
-                            breakdown_dfs_arsiv.append(breakdown_df)
+                    secilen_carrier = _gider_carrier_map_ekran.get(gider_dosya, BYELABEL_GROUP_LABEL)
+                    _dosya_listesine_ekle(
+                        "gider_dosyalari", gider_dosya, gider_bytes, {"firma": secilen_carrier}
+                    )
 
-                # Not: burada hesapla_tiklandi=True SET EDILMIYOR - kullanici
-                # once Ana Sayfa'da manuel gelir/gider eklemeli, sonra kendi
-                # "Yeniden Hesapla"ya basarak hesaplamayi tetiklemeli. Onceki
-                # bir hesaplamadan kalma bayrak varsa temizlenir, aksi halde
-                # otomatik olarak rapor sekmesine yonlendirilir.
-                st.session_state["hesapla_tiklandi"] = False
-                st.session_state["income_df_cache"] = income_df_arsiv
-                st.session_state["cost_dfs_cache"] = cost_dfs_arsiv
-                st.session_state["breakdown_dfs_cache"] = breakdown_dfs_arsiv
-                st.session_state["carrier_overhead_cache"] = carrier_overhead_arsiv
-                st.session_state["warnings_cache"] = warnings_arsiv
                 st.session_state["analiz_secimi"] = None
                 st.success(
-                    f"'{_secilen_arsiv_donemi}' donemi dosyalari yuklendi. Ana Sayfa'ya "
-                    "yonlendiriliyorsunuz - istersen manuel gelir/gider ekleyip "
-                    "'Yeniden Hesapla'ya bas."
+                    f"'{_secilen_arsiv_donemi}' donemi dosyalari Ana Sayfa'daki yukleme "
+                    "alanlarina eklendi. Istersen baska dosya da ekleyip 'Hesapla'ya bas."
                 )
                 st.rerun()
             except GithubStorageError as e:
                 st.error(str(e))
             except Exception as e:
-                st.error(f"Hesaplanirken hata olustu: {e}")
+                st.error(f"Dosyalar yuklenirken hata olustu: {e}")
 
 # ------------------------------------------------------------- ana sayfa ---
 else:
@@ -718,7 +694,33 @@ else:
     with col1:
         st.subheader("Gelir")
         st.caption("WH_CUSTOMER_SHIPMENT_LIST formatinda, musteriden alinan tutarlari iceren dosya.")
-        income_file = st.file_uploader("Gelir Excel dosyasini secin", type=["xlsx"], key="income")
+
+        if "gelir_dosyalari" not in st.session_state:
+            st.session_state["gelir_dosyalari"] = []
+        if "gelir_uploader_versiyon" not in st.session_state:
+            st.session_state["gelir_uploader_versiyon"] = 0
+
+        _gelir_listesi = st.session_state["gelir_dosyalari"]
+        if _gelir_listesi:
+            for _d in list(_gelir_listesi):
+                _c1, _c2 = st.columns([6, 1])
+                _c1.markdown(f"📄 {_d['ad']}")
+                if _c2.button("🗑️", key=f"gelir_sil_{_d['ad']}", help="Listeden cikar"):
+                    _dosya_listesinden_cikar("gelir_dosyalari", _d["ad"])
+                    st.rerun()
+
+        _yeni_gelir_dosyalari = st.file_uploader(
+            "Gelir Excel dosyasi ekle" if _gelir_listesi else "Gelir Excel dosyasini secin",
+            type=["xlsx"],
+            accept_multiple_files=True,
+            key=f"income_uploader_{st.session_state['gelir_uploader_versiyon']}",
+        )
+        if _yeni_gelir_dosyalari:
+            for _f in _yeni_gelir_dosyalari:
+                _dosya_listesine_ekle("gelir_dosyalari", _f.name, _f.getvalue())
+            st.session_state["gelir_uploader_versiyon"] += 1
+            st.rerun()
+
         only_paid = st.checkbox(
             "Sadece odenmis gonderileri dahil et (Status = Paid)",
             value=_params.get("only_paid", True),
@@ -752,22 +754,48 @@ else:
     with col2:
         st.subheader("Gider")
         st.caption("Kargo firmasindan gelen fatura dosyalari. Birden fazla dosya secebilirsiniz.")
-        cost_files = st.file_uploader(
-            "Gider Excel dosyasini/dosyalarini secin",
+
+        if "gider_dosyalari" not in st.session_state:
+            st.session_state["gider_dosyalari"] = []
+        if "gider_uploader_versiyon" not in st.session_state:
+            st.session_state["gider_uploader_versiyon"] = 0
+
+        _tum_firma_secenekleri = list(CARRIER_PROFILES.keys()) + [BYELABEL_GROUP_LABEL]
+        _gider_listesi = st.session_state["gider_dosyalari"]
+        if _gider_listesi:
+            for _d in list(_gider_listesi):
+                _c1, _c2, _c3 = st.columns([4, 3, 1])
+                _c1.markdown(f"📄 {_d['ad']}")
+                _mevcut_firma = _d.get("firma", BYELABEL_GROUP_LABEL)
+                _yeni_firma = _c2.selectbox(
+                    "Firma",
+                    options=_tum_firma_secenekleri,
+                    index=_tum_firma_secenekleri.index(_mevcut_firma) if _mevcut_firma in _tum_firma_secenekleri else 0,
+                    key=f"gider_firma_{_d['ad']}",
+                    label_visibility="collapsed",
+                )
+                if _yeni_firma != _mevcut_firma:
+                    _d["firma"] = _yeni_firma
+                    st.session_state["gider_dosyalari"] = _gider_listesi
+                if _c3.button("🗑️", key=f"gider_sil_{_d['ad']}", help="Listeden cikar"):
+                    _dosya_listesinden_cikar("gider_dosyalari", _d["ad"])
+                    st.rerun()
+
+        _yeni_gider_dosyalari = st.file_uploader(
+            "Gider Excel dosyasi ekle" if _gider_listesi else "Gider Excel dosyasini/dosyalarini secin",
             type=["xlsx"],
             accept_multiple_files=True,
-            key="cost",
+            key=f"cost_uploader_{st.session_state['gider_uploader_versiyon']}",
         )
-
-        carrier_for_file = {}
-        if cost_files:
-            st.write("Her dosya icin kargo firmasini secin:")
-            for f in cost_files:
-                carrier_for_file[f.name] = st.selectbox(
-                    f"  {f.name}",
-                    options=list(CARRIER_PROFILES.keys()) + [BYELABEL_GROUP_LABEL],
-                    key=f"carrier_{f.name}",
+        if _yeni_gider_dosyalari:
+            for _f in _yeni_gider_dosyalari:
+                _dosya_listesine_ekle(
+                    "gider_dosyalari", _f.name, _f.getvalue(), {"firma": BYELABEL_GROUP_LABEL}
                 )
+            st.session_state["gider_uploader_versiyon"] += 1
+            st.rerun()
+
+        if _gider_listesi:
             st.caption(
                 "Su an Asendia, UniUni, UPS ve Asendia'nin ayri Vergi/Gumruk dosyasi "
                 "dogrudan destekleniyor. ByeLabel dosyasini (shipments-...xlsx) sectiginde "
@@ -834,12 +862,19 @@ else:
 
     col_hesapla, col_yeniden = st.columns([2, 1])
     with col_hesapla:
-        if st.button("Hesapla", type="primary", disabled=income_file is None):
+        if st.button("Hesapla", type="primary", disabled=not st.session_state.get("gelir_dosyalari")):
             # Dosyalari oku ve session_state'e kaydet
             try:
-                st.session_state["income_df_cache"] = load_income_file(
-                    income_file, only_paid=only_paid, exclude_unassigned_carrier=exclude_unassigned_carrier
-                )
+                _gelir_dfs = []
+                for _d in st.session_state["gelir_dosyalari"]:
+                    _gelir_dfs.append(
+                        load_income_file(
+                            io.BytesIO(_d["bytes"]),
+                            only_paid=only_paid,
+                            exclude_unassigned_carrier=exclude_unassigned_carrier,
+                        )
+                    )
+                st.session_state["income_df_cache"] = pd.concat(_gelir_dfs, ignore_index=True)
             except ValueError as e:
                 st.error(f"Gelir dosyasi okunamadi: {e}")
                 st.stop()
@@ -848,11 +883,13 @@ else:
             warnings_list = []
             carrier_overhead_toplam = 0.0
             breakdown_dfs = []
-            for f in cost_files or []:
+            for _d in st.session_state.get("gider_dosyalari", []):
                 try:
-                    secilen = carrier_for_file[f.name]
+                    secilen = _d.get("firma", BYELABEL_GROUP_LABEL)
                     if secilen == BYELABEL_GROUP_LABEL:
-                        group_cost_dfs, group_warnings, group_genel_gider, group_breakdown_dfs = load_byelabel_group(f)
+                        group_cost_dfs, group_warnings, group_genel_gider, group_breakdown_dfs = load_byelabel_group(
+                            io.BytesIO(_d["bytes"])
+                        )
                         cost_dfs.extend(group_cost_dfs)
                         warnings_list.extend(group_warnings)
                         if group_genel_gider:
@@ -860,7 +897,9 @@ else:
                         for bd in group_breakdown_dfs:
                             breakdown_dfs.append(bd)
                     else:
-                        cost_df, warning, genel_gider, breakdown_df = load_cost_file(f, secilen)
+                        cost_df, warning, genel_gider, breakdown_df = load_cost_file(
+                            io.BytesIO(_d["bytes"]), secilen
+                        )
                         cost_dfs.append(cost_df)
                         if warning:
                             warnings_list.append(warning)
@@ -869,7 +908,7 @@ else:
                         if not breakdown_df.empty:
                             breakdown_dfs.append(breakdown_df)
                 except ValueError as e:
-                    st.error(f"{f.name} okunamadi: {e}")
+                    st.error(f"{_d['ad']} okunamadi: {e}")
                     st.stop()
 
             st.session_state["cost_dfs_cache"] = cost_dfs
@@ -890,7 +929,7 @@ else:
     # ------------------------------------------------------- github arsivle ---
     with st.expander("🗄️ Bu Dosyalari GitHub'a Arsivle", expanded=False):
         st.caption(
-            "Yukarida sectigin gelir/gider dosyalarini bir doneme (orn. ay) etiketleyip "
+            "Yukarida ekledigin gelir/gider dosyalarini bir doneme (orn. ay) etiketleyip "
             "GitHub'a kaydeder. Ayni isimli dosyayi tekrar yuklersen, eski veriyle "
             "otomatik birlestirilir: ayni takip numarasina sahip satirlar guncellenir, "
             "yeni satirlar eklenir - hicbir veri kaybolmaz."
@@ -898,31 +937,33 @@ else:
         _arsiv_donemi = st.text_input(
             "Donem etiketi (orn. 2026-07)", value="", key="arsiv_donem_input", placeholder="orn. 2026-07"
         )
-        _arsiv_disabled = (income_file is None and not cost_files) or not _arsiv_donemi.strip()
+        _arsiv_disabled = (
+            not st.session_state.get("gelir_dosyalari") and not st.session_state.get("gider_dosyalari")
+        ) or not _arsiv_donemi.strip()
         if st.button("📤 GitHub'a Arsivle", key="arsivle_btn", disabled=_arsiv_disabled):
             try:
                 _sonuc_mesajlari = []
-                if income_file is not None:
-                    sonuc = merge_and_save_raw_file(_arsiv_donemi, "gelir", income_file.name, income_file.getvalue())
+                for _d in st.session_state.get("gelir_dosyalari", []):
+                    sonuc = merge_and_save_raw_file(_arsiv_donemi, "gelir", _d["ad"], _d["bytes"])
                     if sonuc["durum"] == "yeni":
-                        _sonuc_mesajlari.append(f"📄 {income_file.name}: yeni dosya olarak kaydedildi ({sonuc['sonuc_satir']} satir).")
+                        _sonuc_mesajlari.append(f"📄 {_d['ad']}: yeni dosya olarak kaydedildi ({sonuc['sonuc_satir']} satir).")
                     else:
                         _sonuc_mesajlari.append(
-                            f"📄 {income_file.name}: mevcut dosyayla birlestirildi "
+                            f"📄 {_d['ad']}: mevcut dosyayla birlestirildi "
                             f"(eski {sonuc['eski_satir']} + yeni {sonuc['yeni_satir']} satir → "
                             f"toplam {sonuc['sonuc_satir']} satir, tekrarlar elendi"
                             + (f", anahtar: {sonuc['dedup_anahtari']}" if sonuc["dedup_anahtari"] else "")
                             + ")."
                         )
                 _gider_meta = {}
-                for f in cost_files or []:
-                    sonuc = merge_and_save_raw_file(_arsiv_donemi, "gider", f.name, f.getvalue())
-                    _gider_meta[f.name] = carrier_for_file.get(f.name, BYELABEL_GROUP_LABEL)
+                for _d in st.session_state.get("gider_dosyalari", []):
+                    sonuc = merge_and_save_raw_file(_arsiv_donemi, "gider", _d["ad"], _d["bytes"])
+                    _gider_meta[_d["ad"]] = _d.get("firma", BYELABEL_GROUP_LABEL)
                     if sonuc["durum"] == "yeni":
-                        _sonuc_mesajlari.append(f"📄 {f.name}: yeni dosya olarak kaydedildi ({sonuc['sonuc_satir']} satir).")
+                        _sonuc_mesajlari.append(f"📄 {_d['ad']}: yeni dosya olarak kaydedildi ({sonuc['sonuc_satir']} satir).")
                     else:
                         _sonuc_mesajlari.append(
-                            f"📄 {f.name}: mevcut dosyayla birlestirildi "
+                            f"📄 {_d['ad']}: mevcut dosyayla birlestirildi "
                             f"(eski {sonuc['eski_satir']} + yeni {sonuc['yeni_satir']} satir → "
                             f"toplam {sonuc['sonuc_satir']} satir, tekrarlar elendi"
                             + (f", anahtar: {sonuc['dedup_anahtari']}" if sonuc["dedup_anahtari"] else "")
@@ -949,14 +990,20 @@ else:
         breakdown_dfs = st.session_state["breakdown_dfs_cache"]
         carrier_overhead_toplam = st.session_state["carrier_overhead_cache"]
 
-        # Filtreler degismisse gelir dosyasini cache'den yeniden isle
+        # Filtreler degismisse gelir dosyalarini cache'deki listeden yeniden isle
         # (only_paid / exclude_unassigned_carrier degisebilir - bunlar dosya
         # okumadan ayri hesaplama adimi oldugu icin burada uygulanir)
-        if income_file is not None:
+        if st.session_state.get("gelir_dosyalari"):
             try:
-                income_df = load_income_file(
-                    income_file, only_paid=only_paid, exclude_unassigned_carrier=exclude_unassigned_carrier
-                )
+                _gelir_dfs_yeniden = [
+                    load_income_file(
+                        io.BytesIO(_d["bytes"]),
+                        only_paid=only_paid,
+                        exclude_unassigned_carrier=exclude_unassigned_carrier,
+                    )
+                    for _d in st.session_state["gelir_dosyalari"]
+                ]
+                income_df = pd.concat(_gelir_dfs_yeniden, ignore_index=True)
             except Exception:
                 pass  # cache'dekini kullanmaya devam et
 
