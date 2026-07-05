@@ -606,7 +606,7 @@ REPORT_MENU_ITEMS = [
     ("🔍", "Gider Bulunamayanlar"),
     ("⚖️", "Eslesmeyen Gider"),
 ]
-MENU_ITEMS = BASE_MENU_ITEMS + (REPORT_MENU_ITEMS if _hesapla_var else [])
+MENU_ITEMS = BASE_MENU_ITEMS + REPORT_MENU_ITEMS
 
 if "analiz_secimi" not in st.session_state:
     st.session_state["analiz_secimi"] = None  # None = Ana Sayfa
@@ -716,12 +716,11 @@ with st.sidebar:
             st.session_state["analiz_secimi"] = label
             st.rerun()
 
-    if _hesapla_var:
-        st.markdown('<div class="sidebar-section">Raporlar</div>', unsafe_allow_html=True)
-        for icon, label in REPORT_MENU_ITEMS:
-            if st.button(f"{icon}  {label}", key=f"nav_{label}", width="stretch"):
-                st.session_state["analiz_secimi"] = label
-                st.rerun()
+    st.markdown('<div class="sidebar-section">Raporlar</div>', unsafe_allow_html=True)
+    for icon, label in REPORT_MENU_ITEMS:
+        if st.button(f"{icon}  {label}", key=f"nav_{label}", width="stretch"):
+            st.session_state["analiz_secimi"] = label
+            st.rerun()
 
     st.markdown('<div class="sidebar-section">Hesap</div>', unsafe_allow_html=True)
     st.caption(f"👤 {st.session_state.get('name', '')}")
@@ -860,6 +859,10 @@ elif analiz_secimi == "GitHub Arsivinden Dosya Sec ve Hesapla":
 
 # ------------------------------------------------------------- ana sayfa ---
 else:
+
+    _rapor_etiketleri_tumu = [label for _, label in REPORT_MENU_ITEMS]
+    if analiz_secimi in _rapor_etiketleri_tumu and not _hesapla_var:
+        st.warning("⚠️ Once dosyalarini yukleyip 'Hesapla'ya basmalisin. Asagida dosyalarini yukleyebilirsin.")
 
     # Yuklu parametreler varsa widget varsayilan degerlerine uygula
     _params = st.session_state.get("yuklu_parametreler", {})
