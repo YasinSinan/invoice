@@ -80,9 +80,10 @@ st.markdown(
        araç çubugu) gizleniyor, ok butonu gorunur kaliyor. */
     [data-testid="stHeader"] {
         background: var(--panel-bg) !important;
-        height: 2.2rem !important;
-        min-height: 2.2rem !important;
+        height: 0.6rem !important;
+        min-height: 0.6rem !important;
         position: static !important;
+        overflow: visible !important;
     }
     [data-testid="stToolbar"] {
         visibility: hidden !important;
@@ -556,10 +557,22 @@ def indirme_butonlari(df, dosya_adi, key_prefix):
         )
 
 
-_col_baslik, _col_info, _col_btn = st.columns([3.2, 1, 0.7])
+st.markdown(
+    """
+    <style>
+    [data-testid="stHorizontalBlock"]:has(#baslik-satiri) {
+        align-items: center !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+_col_baslik, _col_info, _col_btn = st.columns([3.2, 1.2, 0.6])
 with _col_baslik:
     st.markdown(
         """
+        <span id="baslik-satiri"></span>
         <div style="padding: 2px 0;">
             <div style="font-size: 24px; font-weight: 800; color: #1f2430; line-height: 1.2;">
                 📦 Depo Paneli
@@ -574,7 +587,7 @@ with _col_baslik:
 with _col_info:
     st.markdown(
         f"""
-        <div style="display: flex; align-items: center; justify-content: flex-end; gap: 8px;">
+        <div style="display: flex; align-items: center; justify-content: flex-end; gap: 8px; white-space: nowrap;">
             <div style="
                 width: 28px; height: 28px;
                 background: #eef4ff;
@@ -584,16 +597,13 @@ with _col_info:
                 flex-shrink: 0;
                 border: 1.5px solid #c7cbd6;
             ">👤</div>
-            <div style="font-size: 13px; font-weight: 700; color: #1f2430;">{st.session_state.get('name', '')}</div>
-        </div>
-        <div style="text-align: right; font-size: 11px; color: #8a90a0; margin-top: 4px;">
-            Giris yapildi
+            <span style="font-size: 13px; font-weight: 700; color: #1f2430;">{st.session_state.get('name', '')}</span>
+            <span style="font-size: 11px; color: #8a90a0;">· Giris yapildi</span>
         </div>
         """,
         unsafe_allow_html=True,
     )
 with _col_btn:
-    st.markdown('<div style="height: 34px;"></div>', unsafe_allow_html=True)
     authenticator.logout("🚪 Cikis Yap", "main", key="cikis_butonu")
 
 st.divider()
