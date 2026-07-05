@@ -200,33 +200,43 @@ st.markdown(
         border-radius: 10px !important;
     }
 
-    /* Dosya yukleme kutusu - lacivert zemin, acik renk yazi */
+    /* Dosya yukleme alani (dropzone + yuklenen dosya satirlari) - lacivert
+       zemin, acik renk yazi. Yuklenen dosyanin adi da bu alanin icinde
+       render edildigi icin genis bir secici (stFileUploader) kullaniliyor. */
+    [data-testid="stFileUploader"] {
+        background-color: transparent !important;
+    }
     [data-testid="stFileUploaderDropzone"] {
         background-color: #16213e !important;
         border: 1px dashed #2e3f66 !important;
         border-radius: 10px !important;
     }
-    [data-testid="stFileUploaderDropzone"] * {
+    [data-testid="stFileUploaderDropzone"] *,
+    [data-testid="stFileUploader"] * {
         color: #e5e9f2 !important;
     }
-    [data-testid="stFileUploaderDropzone"] svg {
+    [data-testid="stFileUploaderDropzone"] svg,
+    [data-testid="stFileUploader"] svg {
         fill: #e5e9f2 !important;
     }
     [data-testid="stFileUploaderDropzone"] small {
         color: #a9b2c6 !important;
     }
-    [data-testid="stFileUploaderDropzone"] button {
+    [data-testid="stFileUploaderDropzone"] button,
+    [data-testid="stFileUploader"] button {
         background-color: #223258 !important;
         color: #ffffff !important;
         border: 1px solid #3b4c7a !important;
         border-radius: 6px !important;
     }
-    [data-testid="stFileUploaderFile"] {
+    [data-testid="stFileUploaderFile"],
+    [data-testid="stFileUploaderFileName"] {
         background-color: #16213e !important;
         color: #e5e9f2 !important;
         border-radius: 8px !important;
     }
-    [data-testid="stFileUploaderFile"] * {
+    [data-testid="stFileUploaderFile"] *,
+    [data-testid="stFileUploaderFileName"] * {
         color: #e5e9f2 !important;
     }
 
@@ -296,9 +306,24 @@ st.markdown(
     [data-baseweb="select"] {
         background: var(--card-bg) !important;
     }
+    [data-baseweb="select"] * {
+        color: var(--text-dark) !important;
+    }
     [data-baseweb="menu"] {
         background: var(--card-bg) !important;
         border: 1px solid var(--border-light) !important;
+    }
+    [data-baseweb="menu"] * {
+        color: var(--text-dark) !important;
+    }
+    [data-baseweb="tag"] {
+        background: var(--accent-blue) !important;
+    }
+    [data-baseweb="tag"] * {
+        color: #ffffff !important;
+    }
+    [data-testid="stTooltipIcon"] svg {
+        fill: var(--text-muted) !important;
     }
     </style>
     """,
@@ -1012,9 +1037,14 @@ else:
             key="manual_carrier_expenses_editor",
         )
 
-    col_hesapla, col_yeniden = st.columns([2, 1])
-    with col_hesapla:
-        if st.button("Hesapla", type="primary", disabled=not st.session_state.get("gelir_dosyalari")):
+    _bos_sol, _hesapla_orta, _bos_sag = st.columns([1, 1, 1])
+    with _hesapla_orta:
+        if st.button(
+            "Hesapla",
+            type="primary",
+            disabled=not st.session_state.get("gelir_dosyalari"),
+            width="stretch",
+        ):
             with st.spinner("⏳ Dosyalar okunuyor ve hesaplaniyor..."):
                 # Dosyalari oku ve session_state'e kaydet
                 try:
@@ -1070,75 +1100,13 @@ else:
                 st.session_state["warnings_cache"] = warnings_list
                 st.session_state["hesapla_tiklandi"] = True
 
-    with col_yeniden:
-        yeniden_disabled = "income_df_cache" not in st.session_state
-        if st.button(
-            "Yeniden Hesapla",
-            disabled=yeniden_disabled,
-            help="Dosyalari tekrar yuklemeden, sadece filtre/manuel giris degisikliklerini uygular.",
-        ):
-            st.session_state["hesapla_tiklandi"] = True
-
-    # ------------------------------------------------------- github arsivle ---
-    with st.expander("🗄️ Bu Dosyalari GitHub'a Arsivle", expanded=False):
-        st.caption(
-            "Yukarida ekledigin gelir/gider dosyalarini bir doneme (orn. ay) etiketleyip "
-            "GitHub'a kaydeder. Ayni isimli dosyayi tekrar yuklersen, eski veriyle "
-            "otomatik birlestirilir: ayni takip numarasina sahip satirlar guncellenir, "
-            "yeni satirlar eklenir - hicbir veri kaybolmaz."
-        )
-        _arsiv_donemi = st.text_input(
-            "Donem etiketi (orn. 2026-07)", value="", key="arsiv_donem_input", placeholder="orn. 2026-07"
-        )
-        _arsiv_disabled = (
-            not st.session_state.get("gelir_dosyalari") and not st.session_state.get("gider_dosyalari")
-        ) or not _arsiv_donemi.strip()
-        if st.button("📤 GitHub'a Arsivle", key="arsivle_btn", disabled=_arsiv_disabled):
-            try:
-                with st.spinner("📤 GitHub'a kaydediliyor..."):
-                    _sonuc_mesajlari = []
-                    for _d in st.session_state.get("gelir_dosyalari", []):
-                        sonuc = merge_and_save_raw_file(_arsiv_donemi, "gelir", _d["ad"], _d["bytes"])
-                        if sonuc["durum"] == "yeni":
-                            _sonuc_mesajlari.append(f"📄 {_d['ad']}: yeni dosya olarak kaydedildi ({sonuc['sonuc_satir']} satir).")
-                        else:
-                            _sonuc_mesajlari.append(
-                                f"📄 {_d['ad']}: mevcut dosyayla birlestirildi "
-                                f"(eski {sonuc['eski_satir']} + yeni {sonuc['yeni_satir']} satir → "
-                                f"toplam {sonuc['sonuc_satir']} satir, tekrarlar elendi"
-                                + (f", anahtar: {sonuc['dedup_anahtari']}" if sonuc["dedup_anahtari"] else "")
-                                + ")."
-                            )
-                    _gider_meta = {}
-                    for _d in st.session_state.get("gider_dosyalari", []):
-                        sonuc = merge_and_save_raw_file(_arsiv_donemi, "gider", _d["ad"], _d["bytes"])
-                        _gider_meta[_d["ad"]] = _d.get("firma", BYELABEL_GROUP_LABEL)
-                        if sonuc["durum"] == "yeni":
-                            _sonuc_mesajlari.append(f"📄 {_d['ad']}: yeni dosya olarak kaydedildi ({sonuc['sonuc_satir']} satir).")
-                        else:
-                            _sonuc_mesajlari.append(
-                                f"📄 {_d['ad']}: mevcut dosyayla birlestirildi "
-                                f"(eski {sonuc['eski_satir']} + yeni {sonuc['yeni_satir']} satir → "
-                                f"toplam {sonuc['sonuc_satir']} satir, tekrarlar elendi"
-                                + (f", anahtar: {sonuc['dedup_anahtari']}" if sonuc["dedup_anahtari"] else "")
-                                + ")."
-                            )
-                    if _gider_meta:
-                        save_gider_meta(_arsiv_donemi, _gider_meta)
-                st.success(f"'{_arsiv_donemi}' donemine kaydedildi:")
-                for m in _sonuc_mesajlari:
-                    st.caption(m)
-            except GithubStorageError as e:
-                st.error(str(e))
-            except Exception as e:
-                st.error(f"Arsivlenirken hata olustu: {e}")
-
     # ---------------------------------------------------------------- hesapla ---
     if st.session_state.get("hesapla_tiklandi") and "income_df_cache" in st.session_state:
 
         # Dosyalari her seferinde yeniden yuklemek yerine cache'den al.
-        # Sadece "Hesapla" butonuna basildiginda cache guncellenir.
-        # "Yeniden Hesapla" ise ayni cache'i kullanarak filtre/girdi degisikliklerini uygular.
+        # "Hesapla" butonuna basildiginda cache guncellenir; sayfa tekrar
+        # render edildiginde (orn. filtre degisince) asagidaki blok mevcut
+        # dosya listesinden guncel filtrelerle income_df'i yeniden hesaplar.
         income_df = st.session_state["income_df_cache"]
         cost_dfs = st.session_state["cost_dfs_cache"]
         breakdown_dfs = st.session_state["breakdown_dfs_cache"]
