@@ -1244,11 +1244,13 @@ else:
                     )
 
         st.markdown("")
-        _, kar_orta, _ = st.columns([1, 1, 1])
+        _, kar_orta, kar_yuzde_orta, _ = st.columns([1, 1, 1, 1])
         with kar_orta:
             net_kar_renk = "#10b981" if summary["net_kar"] >= 0 else "#dc2626"
             net_kar_icon = "📈" if summary["net_kar"] >= 0 else "📉"
             renkli_kart("Net Kar", f"${summary['net_kar']:,.2f}", net_kar_renk, net_kar_icon)
+        with kar_yuzde_orta:
+            renkli_kart("Net Kar Yuzdesi (%)", f"%{summary['net_kar_yuzde']:,.1f}", net_kar_renk, net_kar_icon)
 
         if not genel_gider_kategori_detay.empty:
             st.caption("⚠️ Pakete baglanamayan vergi/komisyon - otomatik tespit edilen (Net Kar'a dahil):")
@@ -1320,8 +1322,9 @@ else:
                         "Toplam Gider": "${:,.2f}",
                         "Kar/Zarar": "${:,.2f}",
                         "Paket Basi Kar/Zarar": "${:,.2f}",
+                        "Kar Yuzdesi (%)": "{:,.1f}%",
                     }
-                ).map(kar_zarar_stil, subset=["Kar/Zarar", "Paket Basi Kar/Zarar"]),
+                ).map(kar_zarar_stil, subset=["Kar/Zarar", "Paket Basi Kar/Zarar", "Kar Yuzdesi (%)"]),
                 width="stretch",
                 hide_index=True,
             )
@@ -1380,8 +1383,9 @@ else:
                         "Toplam_Gider": "${:,.2f}",
                         "Kar": "${:,.2f}",
                         "Paket_Basi_Kar": "${:,.2f}",
+                        "Kar_Yuzde": "{:,.1f}%",
                     }
-                ).map(kar_zarar_stil, subset=["Kar", "Paket_Basi_Kar"]),
+                ).map(kar_zarar_stil, subset=["Kar", "Paket_Basi_Kar", "Kar_Yuzde"]),
                 width="stretch",
                 hide_index=True,
             )
@@ -1427,6 +1431,7 @@ else:
                     eu_renk = "#10b981" if eu["kar_zarar"] >= 0 else "#dc2626"
                     eu_icon = "📈" if eu["kar_zarar"] >= 0 else "📉"
                     renkli_kart("Kar/Zarar", f"${eu['kar_zarar']:,.2f}", eu_renk, eu_icon)
+                    renkli_kart("Kar Yuzdesi (%)", f"%{eu['kar_yuzde']:,.1f}", eu_renk, eu_icon)
             else:
                 st.info("Avrupa ulkelerine ait gonderi bulunamadi.")
 
@@ -1446,8 +1451,9 @@ else:
                         "Firmaya Odenen (Gider)": "${:,.2f}",
                         "Kar/Zarar": "${:,.2f}",
                         "Paket Basi Kar/Zarar": "${:,.2f}",
+                        "Kar Yuzdesi (%)": "{:,.1f}%",
                     }
-                ).map(kar_zarar_stil, subset=["Kar/Zarar", "Paket Basi Kar/Zarar"]),
+                ).map(kar_zarar_stil, subset=["Kar/Zarar", "Paket Basi Kar/Zarar", "Kar Yuzdesi (%)"]),
                 width="stretch",
                 hide_index=True,
             )
@@ -1488,8 +1494,9 @@ else:
                         "Gelir": "${:,.2f}",
                         "Gider": "${:,.2f}",
                         "Kar/Zarar": "${:,.2f}",
+                        "Kar Yuzdesi (%)": "{:,.1f}%",
                     }
-                ).map(kar_zarar_stil, subset=["Kar/Zarar"]),
+                ).map(kar_zarar_stil, subset=["Kar/Zarar", "Kar Yuzdesi (%)"]),
                 width="stretch",
                 hide_index=True,
             )
