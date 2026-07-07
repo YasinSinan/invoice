@@ -562,15 +562,18 @@ def summarize(merged, genel_gider=0.0, manuel_gelir=0.0):
     """
     matched = merged[merged["Durum"] == "Eslesti"]
     toplam_kar = matched["Kar"].sum()
+    toplam_gelir = merged["Invoice Amount"].sum()
+    net_kar = toplam_kar - genel_gider + manuel_gelir
     return {
-        "toplam_gelir": merged["Invoice Amount"].sum(),
+        "toplam_gelir": toplam_gelir,
         "toplam_gider_kargo": matched["Gider_Kargo"].sum(),
         "toplam_gider_tax": matched["Gider_Tax"].sum(),
         "toplam_gider_eslesen": matched["Gider"].sum(),
         "toplam_kar": toplam_kar,
         "genel_gider": genel_gider,
         "manuel_gelir": manuel_gelir,
-        "net_kar": toplam_kar - genel_gider + manuel_gelir,
+        "net_kar": net_kar,
+        "net_kar_yuzde": (net_kar / toplam_gelir * 100) if toplam_gelir else 0.0,
         "toplam_gonderi": len(merged),
         "eslesen_sayisi": len(matched),
         "takip_no_yok_sayisi": (merged["Durum"] == "Takip no yok").sum(),
@@ -720,6 +723,10 @@ def country_breakdown(merged):
         (kar / sayi) if sayi > 0 else 0.0
         for kar, sayi in zip(out["Kar"], out["Eslesen_Sayisi"])
     ]
+    out["Kar_Yuzde"] = [
+        (kar / gelir * 100) if gelir else 0.0
+        for kar, gelir in zip(out["Kar"], out["Eslesen_Gelir"])
+    ]
     return out
 
 
@@ -758,6 +765,10 @@ def carrier_breakdown(merged):
     out["Paket Basi Kar/Zarar"] = [
         (kar / sayi) if sayi > 0 else 0.0
         for kar, sayi in zip(out["Kar/Zarar"], out["Eslesen Sayisi"])
+    ]
+    out["Kar Yuzdesi (%)"] = [
+        (kar / gelir * 100) if gelir else 0.0
+        for kar, gelir in zip(out["Kar/Zarar"], out["Eslesen Gelir"])
     ]
     return out
 
@@ -844,6 +855,10 @@ def customer_breakdown(merged):
         (kar / sayi) if sayi > 0 else 0.0
         for kar, sayi in zip(out["Kar/Zarar"], out["Eslesen Sayisi"])
     ]
+    out["Kar Yuzdesi (%)"] = [
+        (kar / gelir * 100) if gelir else 0.0
+        for kar, gelir in zip(out["Kar/Zarar"], out["Bize Odenen (Gelir)"])
+    ]
     return out
 
 
@@ -873,6 +888,10 @@ def customer_country_breakdown(merged):
         .reset_index(drop=True)
     )
     out["Ulke"] = out["Ulke"].apply(format_country_with_flag)
+    out["Kar Yuzdesi (%)"] = [
+        (kar / gelir * 100) if gelir else 0.0
+        for kar, gelir in zip(out["Kar/Zarar"], out["Gelir"])
+    ]
     return out
 
 
@@ -944,5 +963,8 @@ def europe_summary(merged):
         "vergi_gideri": float(eslesen["Gider_Tax"].sum()),
         "toplam_gider": float(eslesen["Gider"].sum()),
         "kar_zarar": float(eslesen["Kar"].sum()),
+        "kar_yuzde": (
+            float(eslesen["Kar"].sum() / eslesen["Invoice Amount"].sum() * 100)
+            if eslesen["Invoice Amount"].sum() else 0.0
+        ),
     }
-
