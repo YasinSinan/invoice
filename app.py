@@ -8,6 +8,7 @@ Calistirmak icin:
 import io
 from datetime import datetime, timezone
 
+import altair as alt
 import pandas as pd
 import streamlit as st
 import streamlit_authenticator as stauth
@@ -625,7 +626,6 @@ REPORT_MENU_ITEMS = [
     ("📋", "Detayli Rapor"),
     ("🔍", "Gider Bulunamayanlar"),
     ("⚖️", "Eslesmeyen Gider"),
-    ("📊", "Power BI Raporu"),
 ]
 MENU_ITEMS = BASE_MENU_ITEMS + REPORT_MENU_ITEMS
 
@@ -887,36 +887,6 @@ elif analiz_secimi == "GitHub Arsivinden Dosya Sec ve Hesapla":
                 st.error(str(e))
             except Exception as e:
                 st.error(f"Dosyalar yuklenirken hata olustu: {e}")
-
-# ------------------------------------------------------------- power bi ---
-elif analiz_secimi == "Power BI Raporu":
-    st.subheader("📊 Power BI Raporu")
-
-    _pbi_url = None
-    try:
-        _pbi_url = st.secrets.get("powerbi", {}).get("embed_url")
-    except Exception:
-        _pbi_url = None
-
-    if not _pbi_url:
-        st.info(
-            "Power BI raporu henuz baglanmadi. Streamlit Cloud'da **Settings → Secrets** "
-            "bolumune asagidaki gibi bir ayar eklemen gerekiyor:"
-        )
-        st.code(
-            '[powerbi]\nembed_url = "https://app.powerbi.com/view?r=...."',
-            language="toml",
-        )
-        st.caption(
-            "Bu linki almak icin Power BI Service'te raporunu ac → Dosya → "
-            "**Web'de yayinla (public)** → olusan embed linkini yukaridaki "
-            "'embed_url' alanina yapistir.\n\n"
-            "⚠️ Not: 'Web'de yayinla' linki herkese acik olur - linki bilen "
-            "herkes raporu gorebilir, giris istemez. Hassas veri icin bu "
-            "yontemi kullanmadan once bunu goz onunde bulundur."
-        )
-    else:
-        st.components.v1.iframe(_pbi_url, height=650, scrolling=True)
 
 # ------------------------------------------------------------- ana sayfa ---
 else:
@@ -1357,6 +1327,29 @@ else:
             )
             indirme_butonlari(carrier_table, "kargo_firmasi_analizi", "carrier_table")
 
+            if not carrier_table.empty:
+                st.markdown("**📊 Kargo firmasina gore Kar/Zarar**")
+                _carrier_chart_df = carrier_table[["Kargo Firmasi", "Kar/Zarar"]].copy()
+                _carrier_chart_df["Renk"] = _carrier_chart_df["Kar/Zarar"].apply(
+                    lambda v: "Kar" if v >= 0 else "Zarar"
+                )
+                _carrier_chart = (
+                    alt.Chart(_carrier_chart_df)
+                    .mark_bar()
+                    .encode(
+                        x=alt.X("Kar/Zarar:Q", title="Kar/Zarar ($)"),
+                        y=alt.Y("Kargo Firmasi:N", sort="-x", title=None),
+                        color=alt.Color(
+                            "Renk:N",
+                            scale=alt.Scale(domain=["Kar", "Zarar"], range=["#10b981", "#dc2626"]),
+                            legend=None,
+                        ),
+                        tooltip=["Kargo Firmasi", alt.Tooltip("Kar/Zarar:Q", format="$,.2f")],
+                    )
+                    .properties(height=max(120, 32 * len(_carrier_chart_df)))
+                )
+                st.altair_chart(_carrier_chart, width="stretch")
+
             if not full_breakdown.empty:
                 st.caption(
                     "Asagidaki tablo her dosyada hangi kategori/sutunun Kargo, hangisinin "
@@ -1393,6 +1386,21 @@ else:
                 hide_index=True,
             )
             indirme_butonlari(cb, "ulkeye_gore_analiz", "country_table")
+
+            if not cb.empty:
+                st.markdown("**📊 En cok gelir getiren 10 ulke**")
+                _cb_top = cb.nlargest(10, "Toplam_Gelir")[["Ulke", "Toplam_Gelir", "Kar"]]
+                _cb_chart = (
+                    alt.Chart(_cb_top)
+                    .mark_bar(color="#3b82f6")
+                    .encode(
+                        x=alt.X("Toplam_Gelir:Q", title="Toplam Gelir ($)"),
+                        y=alt.Y("Ulke:N", sort="-x", title=None),
+                        tooltip=["Ulke", alt.Tooltip("Toplam_Gelir:Q", format="$,.2f"), alt.Tooltip("Kar:Q", format="$,.2f")],
+                    )
+                    .properties(height=max(120, 32 * len(_cb_top)))
+                )
+                st.altair_chart(_cb_chart, width="stretch")
 
         elif analiz_secimi == "Avrupa Ozeti":
             eu = europe_summary(merged)
@@ -1444,6 +1452,27 @@ else:
                 hide_index=True,
             )
             indirme_butonlari(cust_table, "musteriye_gore_analiz", "cust_table")
+
+            if not cust_table.empty:
+                st.markdown("**📊 En cok gelir getiren 10 musteri**")
+                _cust_top = cust_table.nlargest(10, "Bize Odenen (Gelir)")[
+                    ["Musteri Adi", "Bize Odenen (Gelir)", "Kar/Zarar"]
+                ]
+                _cust_chart = (
+                    alt.Chart(_cust_top)
+                    .mark_bar(color="#8b5cf6")
+                    .encode(
+                        x=alt.X("Bize Odenen (Gelir):Q", title="Bize Odenen ($)"),
+                        y=alt.Y("Musteri Adi:N", sort="-x", title=None),
+                        tooltip=[
+                            "Musteri Adi",
+                            alt.Tooltip("Bize Odenen (Gelir):Q", format="$,.2f"),
+                            alt.Tooltip("Kar/Zarar:Q", format="$,.2f"),
+                        ],
+                    )
+                    .properties(height=max(120, 32 * len(_cust_top)))
+                )
+                st.altair_chart(_cust_chart, width="stretch")
 
         elif analiz_secimi == "Musteri x Ulke":
             st.subheader("👥 Musteri x Ulke Analizi")
