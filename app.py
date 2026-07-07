@@ -72,7 +72,9 @@ st.markdown(
     [data-testid="stMainBlockContainer"] {
         background-color: var(--panel-bg) !important;
         padding-top: 0 !important;
-        max-width: 1400px !important;
+        padding-left: 2rem !important;
+        padding-right: 2rem !important;
+        max-width: 100% !important;
     }
 
     /* Streamlit'in ust bosluk birakan gizli header/toolbar alani.
