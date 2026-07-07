@@ -625,6 +625,7 @@ REPORT_MENU_ITEMS = [
     ("📋", "Detayli Rapor"),
     ("🔍", "Gider Bulunamayanlar"),
     ("⚖️", "Eslesmeyen Gider"),
+    ("📊", "Power BI Raporu"),
 ]
 MENU_ITEMS = BASE_MENU_ITEMS + REPORT_MENU_ITEMS
 
@@ -886,6 +887,36 @@ elif analiz_secimi == "GitHub Arsivinden Dosya Sec ve Hesapla":
                 st.error(str(e))
             except Exception as e:
                 st.error(f"Dosyalar yuklenirken hata olustu: {e}")
+
+# ------------------------------------------------------------- power bi ---
+elif analiz_secimi == "Power BI Raporu":
+    st.subheader("📊 Power BI Raporu")
+
+    _pbi_url = None
+    try:
+        _pbi_url = st.secrets.get("powerbi", {}).get("embed_url")
+    except Exception:
+        _pbi_url = None
+
+    if not _pbi_url:
+        st.info(
+            "Power BI raporu henuz baglanmadi. Streamlit Cloud'da **Settings → Secrets** "
+            "bolumune asagidaki gibi bir ayar eklemen gerekiyor:"
+        )
+        st.code(
+            '[powerbi]\nembed_url = "https://app.powerbi.com/view?r=...."',
+            language="toml",
+        )
+        st.caption(
+            "Bu linki almak icin Power BI Service'te raporunu ac → Dosya → "
+            "**Web'de yayinla (public)** → olusan embed linkini yukaridaki "
+            "'embed_url' alanina yapistir.\n\n"
+            "⚠️ Not: 'Web'de yayinla' linki herkese acik olur - linki bilen "
+            "herkes raporu gorebilir, giris istemez. Hassas veri icin bu "
+            "yontemi kullanmadan once bunu goz onunde bulundur."
+        )
+    else:
+        st.components.v1.iframe(_pbi_url, height=650, scrolling=True)
 
 # ------------------------------------------------------------- ana sayfa ---
 else:
