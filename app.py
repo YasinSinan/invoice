@@ -626,6 +626,8 @@ REPORT_MENU_ITEMS = [
     ("👥", "Musterilere Gore"),
     ("🔗", "Musteri x Ulke"),
     ("📋", "Detayli Rapor"),
+    ("🔎", "Takip No Sorgula"),
+    ("💰", "Tahsil Edilmeyen Vergi/Gumruk"),
     ("🔍", "Gider Bulunamayanlar"),
     ("⚖️", "Eslesmeyen Gider"),
 ]
@@ -1524,6 +1526,127 @@ else:
                 hide_index=True,
             )
             indirme_butonlari(detayli_rapor_df, "detayli_rapor", "tab1")
+
+        elif analiz_secimi == "Takip No Sorgula":
+            st.subheader("🔎 Takip No Sorgula")
+            st.caption(
+                "Bir veya birden fazla takip numarasi gir (her satira bir tane, "
+                "veya virgulle ayirarak da yazabilirsin) - gelir ve giderini "
+                "yan yana, her biri alt alta gorursun."
+            )
+            _takip_girdi = st.text_area(
+                "Takip numaralari",
+                placeholder="orn.\n1Z999AA10123456784\n1Z999AA10123456785\n... (10'a kadar veya daha fazla)",
+                height=140,
+                key="takip_no_sorgu_girdi",
+            )
+
+            if st.button("🔎 Sorgula", type="primary", key="takip_no_sorgula_btn"):
+                _ham_liste = [
+                    p.strip()
+                    for parca in _takip_girdi.splitlines()
+                    for p in parca.split(",")
+                ]
+                _takip_listesi = [t for t in _ham_liste if t]
+
+                if not _takip_listesi:
+                    st.warning("Once en az bir takip numarasi gir.")
+                else:
+                    _sonuc_satirlari = []
+                    for _tn in _takip_listesi:
+                        _eslesen = merged[
+                            merged["Track Number"].astype(str).str.strip().str.lower() == _tn.lower()
+                        ]
+                        if _eslesen.empty:
+                            _sonuc_satirlari.append({
+                                "Takip No": _tn,
+                                "Durum": "Bulunamadi",
+                                "Kargo Firmasi": "-",
+                                "Musteri": "-",
+                                "Ulke": "-",
+                                "Gelir": None,
+                                "Gider": None,
+                                "Kar/Zarar": None,
+                            })
+                        else:
+                            for _, _satir in _eslesen.iterrows():
+                                _sonuc_satirlari.append({
+                                    "Takip No": _tn,
+                                    "Durum": _satir["Durum"],
+                                    "Kargo Firmasi": _satir["Carrier Name"],
+                                    "Musteri": _satir.get("User Name", "-"),
+                                    "Ulke": _satir.get("Receiver Country", "-"),
+                                    "Gelir": _satir["Invoice Amount"],
+                                    "Gider": _satir["Gider"] if pd.notna(_satir["Gider"]) else None,
+                                    "Kar/Zarar": _satir["Kar"] if pd.notna(_satir["Kar"]) else None,
+                                })
+
+                    _sonuc_df = pd.DataFrame(_sonuc_satirlari)
+                    _bulunan_sayisi = (_sonuc_df["Durum"] != "Bulunamadi").sum()
+                    st.caption(f"{len(_takip_listesi)} takip numarasi sorgulandi, {_bulunan_sayisi} tanesi bulundu.")
+
+                    st.dataframe(
+                        _sonuc_df.style.format(
+                            {"Gelir": "${:,.2f}", "Gider": "${:,.2f}", "Kar/Zarar": "${:,.2f}"},
+                            na_rep="-",
+                        ).map(kar_zarar_stil, subset=["Kar/Zarar"]),
+                        width="stretch",
+                        hide_index=True,
+                    )
+                    indirme_butonlari(_sonuc_df, "takip_no_sorgu_sonuclari", "takip_sorgu")
+
+        elif analiz_secimi == "Tahsil Edilmeyen Vergi/Gumruk":
+            st.subheader("💰 Tahsil Edilmeyen Vergi/Gumruk")
+            st.caption(
+                "Kargo firmasina odedigimiz vergi/gumruk (Gider_Tax) ile musteriden "
+                "gelir dosyasindaki 'Customs Duty Fee' sutunundan tahsil ettigimiz "
+                "tutari karsilastirir. Odedigimizden AZ tahsil ettigimiz (veya hic "
+                "tahsil etmedigimiz) gonderileri listeler."
+            )
+
+            _vergi_df = merged[merged["Durum"] == "Eslesti"].copy()
+            _vergi_df["Musteriden_Alinan_Vergi"] = _vergi_df["Musteriden_Alinan_Vergi"].fillna(0.0)
+            _vergi_df["Odenen_Vergi"] = _vergi_df["Gider_Tax"].fillna(0.0)
+            _vergi_df["Fark"] = _vergi_df["Odenen_Vergi"] - _vergi_df["Musteriden_Alinan_Vergi"]
+
+            _eksik_tahsilat = _vergi_df[_vergi_df["Fark"] > 0.01][
+                [
+                    "Track Number", "Carrier Name", "User Name", "Receiver Country",
+                    "Odenen_Vergi", "Musteriden_Alinan_Vergi", "Fark",
+                ]
+            ].rename(columns={
+                "Track Number": "Takip No",
+                "Carrier Name": "Kargo Firmasi",
+                "User Name": "Musteri",
+                "Receiver Country": "Ulke",
+                "Odenen_Vergi": "Firmaya Odenen Vergi",
+                "Musteriden_Alinan_Vergi": "Musteriden Tahsil Edilen",
+                "Fark": "Eksik Tahsilat",
+            }).sort_values("Eksik Tahsilat", ascending=False)
+
+            if _eksik_tahsilat.empty:
+                st.success("Butun eslesen gonderilerde vergi/gumruk tam tahsil edilmis gorunuyor. 🎉")
+            else:
+                _toplam_eksik = _eksik_tahsilat["Eksik Tahsilat"].sum()
+                renkli_kart(
+                    "Toplam Eksik Tahsilat", f"${_toplam_eksik:,.2f}", "#dc2626", "⚠️"
+                )
+                st.caption(f"{len(_eksik_tahsilat)} gonderide musteriden eksik vergi/gumruk tahsil edilmis.")
+                st.dataframe(
+                    _eksik_tahsilat.style.format(
+                        {
+                            "Firmaya Odenen Vergi": "${:,.2f}",
+                            "Musteriden Tahsil Edilen": "${:,.2f}",
+                            "Eksik Tahsilat": "${:,.2f}",
+                        }
+                    ).map(
+                        lambda v: "background-color: rgba(220, 38, 38, 0.08); color: #b91c1c; font-weight: 700;",
+                        subset=["Eksik Tahsilat"],
+                    ),
+                    width="stretch",
+                    hide_index=True,
+                )
+                indirme_butonlari(_eksik_tahsilat, "tahsil_edilmeyen_vergi", "vergi_farki")
 
         elif analiz_secimi == "Gider Bulunamayanlar":
             st.subheader("🔍 Gider Bulunamayanlar")
