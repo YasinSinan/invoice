@@ -628,6 +628,7 @@ REPORT_MENU_ITEMS = [
     ("📋", "Detayli Rapor"),
     ("🔎", "Takip No Sorgula"),
     ("💰", "Tahsil Edilmeyen Vergi/Gumruk"),
+    ("📦", "Boyut/Agirlik Uyusmazligi"),
     ("🔍", "Gider Bulunamayanlar"),
     ("⚖️", "Eslesmeyen Gider"),
 ]
@@ -1648,6 +1649,80 @@ else:
                     hide_index=True,
                 )
                 indirme_butonlari(_eksik_tahsilat, "tahsil_edilmeyen_vergi", "vergi_farki")
+
+        elif analiz_secimi == "Boyut/Agirlik Uyusmazligi":
+            st.subheader("📦 Boyut/Agirlik Uyusmazligi (Zarar Eden Paketler)")
+            st.caption(
+                "Musteriye beyan ettigimiz (gelir dosyasindaki) boyut/agirlik ile "
+                "kargo firmasinin faturasindaki olculen boyut/agirligi karsilastirir. "
+                "Sadece ZARAR ettigimiz (Kar/Zarar < 0) ve firmanin boyut verisi olan "
+                "gonderileri gosterir - genelde firma bizim beyan ettigimizden daha "
+                "buyuk/agir olcup daha fazla ucret yansittiginda zarar olusur.\n\n"
+                "⚠️ Not: Su an sadece **FedEx, Asendia ve UniUni** fatura dosyalarinda "
+                "boyut/agirlik bilgisi bulunuyor. UPS ve ByeLabel grubu firmalarinin "
+                "fatura formatlarinda bu bilgi yok, bu yuzden o gonderiler bu listede "
+                "gorunmez."
+            )
+
+            _boyut_df = merged[
+                (merged["Durum"] == "Eslesti")
+                & (merged["Kar"] < 0)
+                & (merged["Firma_Weight"].notna())
+            ].copy()
+
+            if _boyut_df.empty:
+                st.success("Zarar eden ve firma boyut verisi olan bir gonderi bulunamadi. 🎉")
+            else:
+                _boyut_tablo = _boyut_df[[
+                    "Track Number", "Carrier Name", "User Name",
+                    "Musteri_Weight", "Firma_Weight",
+                    "Musteri_Length", "Firma_Length",
+                    "Musteri_Width", "Firma_Width",
+                    "Musteri_Height", "Firma_Height",
+                    "Kar",
+                ]].rename(columns={
+                    "Track Number": "Takip No",
+                    "Carrier Name": "Kargo Firmasi",
+                    "User Name": "Musteri",
+                    "Musteri_Weight": "Bizim Agirlik",
+                    "Firma_Weight": "Firma Agirlik",
+                    "Musteri_Length": "Bizim Uzunluk",
+                    "Firma_Length": "Firma Uzunluk",
+                    "Musteri_Width": "Bizim Genislik",
+                    "Firma_Width": "Firma Genislik",
+                    "Musteri_Height": "Bizim Yukseklik",
+                    "Firma_Height": "Firma Yukseklik",
+                    "Kar": "Kar/Zarar",
+                }).sort_values("Kar/Zarar")
+                _boyut_tablo["Takip No"] = _boyut_tablo["Takip No"].astype(str)
+
+                renkli_kart(
+                    "Zarar Eden Boyut Uyusmazlikli Paket Sayisi", f"{len(_boyut_tablo)}", "#dc2626", "📦"
+                )
+                st.caption(
+                    f"Toplam zarar: ${_boyut_tablo['Kar/Zarar'].sum():,.2f} "
+                    f"({len(_boyut_tablo)} gonderi)"
+                )
+
+                st.dataframe(
+                    _boyut_tablo.style.format(
+                        {
+                            "Bizim Agirlik": "{:,.2f}",
+                            "Firma Agirlik": "{:,.2f}",
+                            "Bizim Uzunluk": "{:,.1f}",
+                            "Firma Uzunluk": "{:,.1f}",
+                            "Bizim Genislik": "{:,.1f}",
+                            "Firma Genislik": "{:,.1f}",
+                            "Bizim Yukseklik": "{:,.1f}",
+                            "Firma Yukseklik": "{:,.1f}",
+                            "Kar/Zarar": "${:,.2f}",
+                        },
+                        na_rep="-",
+                    ).map(kar_zarar_stil, subset=["Kar/Zarar"]),
+                    width="stretch",
+                    hide_index=True,
+                )
+                indirme_butonlari(_boyut_tablo, "boyut_agirlik_uyusmazligi", "boyut_uyusmazlik")
 
         elif analiz_secimi == "Gider Bulunamayanlar":
             st.subheader("🔍 Gider Bulunamayanlar")
