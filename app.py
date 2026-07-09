@@ -1611,12 +1611,13 @@ else:
 
             _eksik_tahsilat = _vergi_df[_vergi_df["Fark"] > 0.01][
                 [
-                    "Track Number", "Carrier Name", "User Name", "Receiver Country",
+                    "Track Number", "Carrier Name", "User No", "User Name", "Receiver Country",
                     "Odenen_Vergi", "Musteriden_Alinan_Vergi", "Fark",
                 ]
             ].rename(columns={
                 "Track Number": "Takip No",
                 "Carrier Name": "Kargo Firmasi",
+                "User No": "Musteri No",
                 "User Name": "Musteri",
                 "Receiver Country": "Ulke",
                 "Odenen_Vergi": "Firmaya Odenen Vergi",
