@@ -225,6 +225,16 @@ def load_income_file(file_obj, only_paid=True, exclude_unassigned_carrier=True):
         raise ValueError(f"Gelir dosyasinda eksik kolon(lar): {', '.join(missing)}")
 
     out = df[required].copy()
+
+    # Musteriden tahsil edilen vergi/gumruk/duty tutari (opsiyonel kolon -
+    # dosyada yoksa 0 kabul edilir, eski format dosyalarla da uyumlu olsun diye).
+    if "Customs Duty Fee" in df.columns:
+        out["Musteriden_Alinan_Vergi"] = pd.to_numeric(
+            df["Customs Duty Fee"], errors="coerce"
+        ).fillna(0.0)
+    else:
+        out["Musteriden_Alinan_Vergi"] = 0.0
+
     if only_paid:
         out = out[out["Status"] == "Paid"].reset_index(drop=True)
     if exclude_unassigned_carrier:
