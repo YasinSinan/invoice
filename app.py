@@ -398,14 +398,15 @@ _ana_css = """
     .stApp {
         background-color: var(--panel-bg) !important;
         color: var(--text-dark) !important;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", Helvetica, Arial, sans-serif !important;
     }
 
     .main .block-container,
     [data-testid="stMainBlockContainer"] {
         background-color: var(--panel-bg) !important;
         padding-top: 0 !important;
-        padding-left: 2rem !important;
-        padding-right: 2rem !important;
+        padding-left: 0.75rem !important;
+        padding-right: 0.75rem !important;
         max-width: 100% !important;
     }
 
@@ -877,15 +878,15 @@ def renkli_kart(etiket, deger, renk, icon=""):
             background: #ffffff;
             border-left: 5px solid {renk};
             border-radius: 10px;
-            padding: 14px 18px;
+            padding: 16px 20px;
             margin-bottom: 6px;
             box-shadow: 0 1px 4px rgba(16, 24, 40, 0.10);
             border-top: 1.5px solid #c7cbd6;
             border-right: 1.5px solid #c7cbd6;
             border-bottom: 1.5px solid #c7cbd6;
         ">
-            <div style="font-size: 25px; font-weight: 800; color: #1f2430; line-height: 1.2;">{icon} {deger}</div>
-            <div style="font-size: 12px; font-weight: 600; color: #5f6779; letter-spacing: 0.04em; margin-top: 4px;">{etiket}</div>
+            <div style="font-size: 30px; font-weight: 800; color: #1f2430; line-height: 1.15; letter-spacing: -0.02em;">{icon} {deger}</div>
+            <div style="font-size: 13px; font-weight: 500; color: #6b7280; margin-top: 4px;">{etiket}</div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -1037,10 +1038,10 @@ with _col_baslik:
         f"""
         <span id="baslik-satiri"></span>
         <div style="padding: 2px 0;">
-            <div style="font-size: 24px; font-weight: 800; color: #1f2430; line-height: 1.2;">
+            <div style="font-size: 34px; font-weight: 800; color: #1f2430; line-height: 1.15; letter-spacing: -0.02em;">
                 📦 {t('app_baslik')}
             </div>
-            <div style="font-size: 13px; color: #5f6779; margin-top: 2px;">
+            <div style="font-size: 13px; color: #6b7280; margin-top: 2px;">
                 {t('app_altbaslik')}
             </div>
         </div>
