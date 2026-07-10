@@ -45,10 +45,35 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
 )
+
+# --------------------------------------------------------------- temalar ---
+TEMALAR = {
+    "Warmlime x Olive Ink": {"accent": "#a8c93a", "koyu": "#2b2f1e", "koyu2": "#363c26", "yazi": "#1f2430"},
+    "Burnt Orange x Vanilla": {"accent": "#cc6a2e", "koyu": "#2e2013", "koyu2": "#3a2a19", "yazi": "#ffffff"},
+    "Electric Orchid x Deep Plum": {"accent": "#d946c4", "koyu": "#2f0a38", "koyu2": "#3c1246", "yazi": "#ffffff"},
+    "Sky Mint x Graphite": {"accent": "#3ddc97", "koyu": "#24262a", "koyu2": "#2f3236", "yazi": "#ffffff"},
+    "Electric Indigo x Soft Lilac": {"accent": "#6f2dda", "koyu": "#241335", "koyu2": "#301a43", "yazi": "#ffffff"},
+    "Neon Lime x Violet Ink": {"accent": "#c6ff00", "koyu": "#221333", "koyu2": "#2c1a41", "yazi": "#1f2430"},
+}
+_TEMA_SIRASI = list(TEMALAR.keys())
+
+if "secili_tema" not in st.session_state:
+    st.session_state["secili_tema"] = _TEMA_SIRASI[0]
+
+_tema = TEMALAR[st.session_state["secili_tema"]]
+
+
+def _hex_to_rgb(h):
+    h = h.lstrip("#")
+    return tuple(int(h[i:i + 2], 16) for i in (0, 2, 4))
+
+
+_accent_rgb = _hex_to_rgb(_tema["accent"])
+_ACCENT_RGBA_16 = f"rgba({_accent_rgb[0]}, {_accent_rgb[1]}, {_accent_rgb[2]}, 0.16)"
+
 # "Sellivox" tarzi acik panel temasi: koyu genis sidebar + beyaz ana alan +
 # renkli sol-kenarlikli KPI kartlari.
-st.markdown(
-    """
+_ana_css = """
     <style>
     :root {
         --panel-bg: #f4f5f8;
@@ -56,9 +81,9 @@ st.markdown(
         --text-dark: #1f2430;
         --text-muted: #5f6779;
         --border-light: #c7cbd6;
-        --accent-blue: #3b82f6;
-        --sidebar-bg: #14161c;
-        --sidebar-bg-2: #1b1e26;
+        --accent-blue: %%ACCENT%%;
+        --sidebar-bg: %%KOYU%%;
+        --sidebar-bg-2: %%KOYU2%%;
         --sidebar-text: #c3c9d4;
     }
 
@@ -331,9 +356,15 @@ st.markdown(
         fill: var(--text-muted) !important;
     }
     </style>
-    """,
-    unsafe_allow_html=True,
+    """
+
+_ana_css = (
+    _ana_css
+    .replace("%%ACCENT%%", _tema["accent"])
+    .replace("%%KOYU%%", _tema["koyu"])
+    .replace("%%KOYU2%%", _tema["koyu2"])
 )
+st.markdown(_ana_css, unsafe_allow_html=True)
 
 # ------------------------------------------------------------- giris (auth) ---
 def _kimlik_dogrulayici_olustur():
@@ -559,10 +590,41 @@ st.markdown(
     [data-testid="stHorizontalBlock"]:has(#baslik-satiri) {
         align-items: center !important;
     }
+    .tema-yuvarlak {
+        width: 100%;
+        height: 34px;
+        border-radius: 8px;
+        margin-bottom: 4px;
+        border: 1.5px solid var(--border-light);
+    }
     </style>
     """,
     unsafe_allow_html=True,
 )
+
+# --------------------------------------------------------- tema secici ---
+with st.container():
+    _tema_kolonlari = st.columns(len(_TEMA_SIRASI))
+    for _i, _tema_adi in enumerate(_TEMA_SIRASI):
+        _renkler = TEMALAR[_tema_adi]
+        with _tema_kolonlari[_i]:
+            st.markdown(
+                f"""
+                <div class="tema-yuvarlak" style="
+                    background: linear-gradient(90deg, {_renkler['accent']} 50%, {_renkler['koyu']} 50%);
+                "></div>
+                """,
+                unsafe_allow_html=True,
+            )
+            _secili_mi = st.session_state["secili_tema"] == _tema_adi
+            if st.button(
+                ("✓ " if _secili_mi else "") + _tema_adi,
+                key=f"tema_sec_{_i}",
+                width="stretch",
+                help=_tema_adi,
+            ):
+                st.session_state["secili_tema"] = _tema_adi
+                st.rerun()
 
 _col_baslik, _col_info, _col_btn = st.columns([3.2, 1.2, 0.6])
 with _col_baslik:
@@ -586,12 +648,12 @@ with _col_info:
         <div style="display: flex; align-items: center; justify-content: flex-end; gap: 8px; white-space: nowrap;">
             <div style="
                 width: 28px; height: 28px;
-                background: #eef4ff;
+                background: {_ACCENT_RGBA_16};
                 border-radius: 50%;
                 display: flex; align-items: center; justify-content: center;
                 font-size: 13px;
                 flex-shrink: 0;
-                border: 1.5px solid #c7cbd6;
+                border: 1.5px solid {_tema['accent']};
             ">👤</div>
             <span style="font-size: 13px; font-weight: 700; color: #1f2430;">{st.session_state.get('name', '')}</span>
             <span style="font-size: 11px; color: #8a90a0;">· Giris yapildi</span>
@@ -633,13 +695,12 @@ if "analiz_secimi" not in st.session_state:
     st.session_state["analiz_secimi"] = None  # None = Ana Sayfa
 
 with st.sidebar:
-    st.markdown(
-        """
+    _sidebar_css = """
         <style>
         [data-testid="stSidebar"] {
             min-width: 248px !important;
             max-width: 248px !important;
-            background-color: #14161c;
+            background-color: %%KOYU%%;
             border-right: 1px solid #22252d;
         }
         [data-testid="stSidebar"] > div:first-child {
@@ -694,7 +755,7 @@ with st.sidebar:
         }
         .sidebar-logo .box {
             width: 32px; height: 32px;
-            background: linear-gradient(135deg, #3b82f6, #6366f1);
+            background: linear-gradient(135deg, %%ACCENT%%, %%KOYU2%%);
             border-radius: 8px;
             display: flex; align-items: center; justify-content: center;
             font-size: 16px;
@@ -717,9 +778,14 @@ with st.sidebar:
             <div class="box">📦</div>
             <div class="name">ComfyShip</div>
         </div>
-        """,
-        unsafe_allow_html=True,
+        """
+    _sidebar_css = (
+        _sidebar_css
+        .replace("%%ACCENT%%", _tema["accent"])
+        .replace("%%KOYU%%", _tema["koyu"])
+        .replace("%%KOYU2%%", _tema["koyu2"])
     )
+    st.markdown(_sidebar_css, unsafe_allow_html=True)
 
     _aktif_etiket = st.session_state["analiz_secimi"] or "Ana Sayfa"
     _tum_etiketler = [label for _, label in MENU_ITEMS]
@@ -729,9 +795,9 @@ with st.sidebar:
             f"""
             <style>
             div[data-testid="stSidebarContent"] .stButton:nth-of-type({active_index + 1}) button {{
-                background: rgba(59, 130, 246, 0.16) !important;
+                background: {_ACCENT_RGBA_16} !important;
                 color: #ffffff !important;
-                box-shadow: inset 3px 0 0 #3b82f6 !important;
+                box-shadow: inset 3px 0 0 {_tema['accent']} !important;
             }}
             </style>
             """,
