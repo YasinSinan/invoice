@@ -167,6 +167,13 @@ CEVIRI = {
         "boyut_agirlik_baslik": "📦 Boyut/Agirlik Uyusmazligi (Zarar Eden Paketler)",
         "gider_bulunamayan_baslik": "🔍 Gider Bulunamayanlar",
         "eslesmeyen_gider_baslik": "⚖️ Eslesmeyen Gider",
+        "eslesme_orani_metni": "Eslesme orani: %{oran:.1f}",
+        "toplam_gonderi_ozet": "Toplam {toplam} gonderi  |  {eslesen} eslesti  |  {bulunamadi} gider bulunamadi  |  {takipsiz} takip no yok",
+        "kaynak_kolon_metni": "📂 {firma} icin kaynak kolon: *{sutun}*",
+        "avrupa_ozet_metni": "UK, Turkiye, Kibris, Israel dahil tum Avrupa ulkelerine ait gonderilerin toplu ozeti. Dahil edilen ulkeler: {ulkeler}",
+        "takip_sorgu_ozet": "{toplam} takip numarasi sorgulandi, {bulunan} tanesi bulundu.",
+        "eksik_tahsilat_ozet": "{sayi} gonderide musteriden eksik vergi/gumruk tahsil edilmis.",
+        "toplam_zarar_metni": "Toplam zarar: ${tutar:,.2f} ({sayi} gonderi)",
     },
     "en": {
         "app_baslik": "Warehouse Panel",
@@ -227,6 +234,13 @@ CEVIRI = {
         "boyut_agirlik_baslik": "📦 Dimension/Weight Mismatch (Loss-Making Packages)",
         "gider_bulunamayan_baslik": "🔍 Missing Expenses",
         "eslesmeyen_gider_baslik": "⚖️ Unmatched Expenses",
+        "eslesme_orani_metni": "Match rate: {oran:.1f}%",
+        "toplam_gonderi_ozet": "Total {toplam} shipments  |  {eslesen} matched  |  {bulunamadi} expense not found  |  {takipsiz} no tracking number",
+        "kaynak_kolon_metni": "📂 Source column for {firma}: *{sutun}*",
+        "avrupa_ozet_metni": "Combined summary of shipments to all European countries including UK, Turkey, Cyprus, Israel. Included countries: {ulkeler}",
+        "takip_sorgu_ozet": "{toplam} tracking numbers looked up, {bulunan} found.",
+        "eksik_tahsilat_ozet": "{sayi} shipments have under-collected tax/duty from the customer.",
+        "toplam_zarar_metni": "Total loss: ${tutar:,.2f} ({sayi} shipments)",
     },
 }
 
@@ -235,6 +249,62 @@ def t(anahtar):
     """Secili dile gore ceviri metnini dondurur. Anahtar bulunamazsa
     anahtarin kendisini dondurur (cevrilmemis oldugunu belli eder)."""
     return CEVIRI.get(st.session_state["dil"], CEVIRI["tr"]).get(anahtar, anahtar)
+
+
+# Uzun serbest metinler (st.caption/st.markdown aciklamalari) icin Turkce
+# metni birebir anahtar olarak kullanan bir ceviri sozlugu. tc() sadece
+# dil="en" oldugunda karsiligini arar, bulamazsa Turkce metni oldugu gibi
+# dondurur (hicbir caption cevrilmeden kalmaz, en kotu ihtimalle Turkce gorunur).
+_CAPTION_EN = {
+    "Bir kargo firmasindan fatura geldikce, tum formu doldurmadan sadece o dosyayi secip GitHub'a kaydet. Ayni doneme, ayni firmadan tekrar dosya yuklersen otomatik birlestirilir (tekrarlar elenir, yeni satirlar eklenir).":
+        "As invoices come in from a carrier, select just that file and save it to GitHub without filling out the whole form. If you upload another file from the same carrier for the same period again, it's automatically merged (duplicates removed, new rows added).",
+    "Bilgisayarindan dosya yuklemek yerine, daha once GitHub'a arsivledigin gelir/gider dosyalarindan istedigini sec ve Hesapla'ya bas.":
+        "Instead of uploading files from your computer, pick from the income/expense files you've previously archived to GitHub and click Calculate.",
+    "WH_CUSTOMER_SHIPMENT_LIST formatinda, musteriden alinan tutarlari iceren dosya.":
+        "File in WH_CUSTOMER_SHIPMENT_LIST format, containing amounts collected from customers.",
+    "Hicbir pakete baglanmayan, dogrudan net kara eklenecek gelirler (orn. depo kirasi geliri, danismanlik geliri).":
+        "Income not tied to any package, added directly to net profit (e.g. warehouse rental income, consulting income).",
+    "Kargo firmasindan gelen fatura dosyalari. Birden fazla dosya secebilirsiniz.":
+        "Invoice files from the carrier. You can select multiple files.",
+    "Su an Asendia, UniUni, UPS ve Asendia'nin ayri Vergi/Gumruk dosyasi dogrudan destekleniyor. ByeLabel dosyasini (shipments-...xlsx) sectiginde icindeki tum firmalar (ePost Global, DHL, intelcom, APC, USPS, Evri, Purolator, FedEx, UPS) otomatik ayri ayri islenir.":
+        "Asendia, UniUni, UPS and Asendia's separate Tax/Duty file are currently supported directly. When you select a ByeLabel file (shipments-...xlsx), all carriers inside it (ePost Global, DHL, intelcom, APC, USPS, Evri, Purolator, FedEx, UPS) are automatically processed separately.",
+    "Hicbir pakete baglanmayan, dogrudan net kardan dusulecek giderler (orn. depo kirasi, personel maasi, internet faturasi).":
+        "Expenses not tied to any package, deducted directly from net profit (e.g. warehouse rent, staff salary, internet bill).",
+    "Belirli bir kargo firmasinin, gideri ZATEN eslesmis olan HER paketine ayni tutari ekler (orn. UniUni icin paket basina $2). Tutar otomatik olarak eslesen paket sayisiyla carpilir ve her paketin kar/zarar hesabina islenir - tum tablolarda (ulke, firma, musteri) otomatik yansir. Gideri eslesmemis paketlere bu tutar uygulanmaz.":
+        "Adds the same amount to EVERY package of a given carrier that already has a matched expense (e.g. $2 per package for UniUni). The amount is automatically multiplied by the number of matched packages and applied to each package's profit/loss - it's automatically reflected in all tables (country, carrier, customer). This amount is not applied to packages without a matched expense.",
+    "Manuel gelir kalemleri:": "Manual income items:",
+    "Manuel gider kalemleri:": "Manual expense items:",
+    "⚠️ Pakete baglanamayan vergi/komisyon - otomatik tespit edilen (Net Kar'a dahil):":
+        "⚠️ Tax/commission not tied to a package - automatically detected (included in Net Profit):",
+    "Kargo firmasi (gelir dosyasindaki Carrier Name) bazinda paket sayisi, gelir, gider ve kar/zarar dagilimi.":
+        "Package count, income, expense and profit/loss breakdown by carrier (Carrier Name in the income file).",
+    "Asagidaki tablo her dosyada hangi kategori/sutunun Kargo, hangisinin Vergi, hangisinin (takip numarasi olmadigi icin) Genel Gider sayildigini ve ne kadar tutar tasidigini gosterir.":
+        "The table below shows, for each file, which category/column was counted as Shipping, which as Tax, and which as General Expense (because it has no tracking number), and how much amount each carries.",
+    "Toplam gelir ve gonderi sayisi tum gonderileri kapsar. Kargo/Vergi/Kar sutunlari sadece gider dosyasinda eslesen gonderilerden gelir.":
+        "Total income and shipment count cover all shipments. The Shipping/Tax/Profit columns come only from shipments matched in the expense file.",
+    "Gelir dosyasindaki User No / User Name'e gore musteri bazinda paket sayisi, bize odedigi tutar, firmaya odedigimiz tutar, kar/zarar ve gonderdigi ulkeler. Eslesen Sayisi/Firmaya Odenen/Kar sutunlari sadece ESLESEN gonderilerden gelir.":
+        "Package count, amount paid to us, amount we paid the carrier, profit/loss and destination countries by customer, based on User No / User Name in the income file. The Matched Count/Paid to Carrier/Profit columns come only from MATCHED shipments.",
+    "Her musterinin HER ULKEDE ayri ayri kar mi zarar mi ettirdigini gosterir (en zararli kombinasyonlar basta). Genel toplamda kar gibi gorunen bir musteri, bazi ulkelerde zarar ettiriyor olabilir.":
+        "Shows whether each customer makes a profit or a loss separately IN EACH COUNTRY (most loss-making combinations first). A customer that looks profitable overall may be causing losses in some countries.",
+    "Bir veya birden fazla takip numarasi gir (her satira bir tane, veya virgulle ayirarak da yazabilirsin) - gelir ve giderini yan yana, her biri alt alta gorursun.":
+        "Enter one or more tracking numbers (one per line, or comma-separated) - you'll see each one's income and expense side by side, stacked one below another.",
+    "Kargo firmasina odedigimiz vergi/gumruk (Gider_Tax) ile musteriden gelir dosyasindaki 'Customs Duty Fee' sutunundan tahsil ettigimiz tutari karsilastirir. Odedigimizden AZ tahsil ettigimiz (veya hic tahsil etmedigimiz) gonderileri listeler.":
+        "Compares the tax/duty we paid the carrier (Gider_Tax) with the amount we collected from the customer via the 'Customs Duty Fee' column in the income file. Lists shipments where we collected LESS than we paid (or collected nothing at all).",
+    "Bu gonderiler icin takip numarasi var ama yuklenen gider dosyalarinda karsiligi bulunamadi. Henuz faturalanmamis olabilir, veya ait oldugu kargo firmasinin dosyasi yuklenmemis olabilir.":
+        "These shipments have a tracking number, but no matching entry was found in the uploaded expense files. They may not have been invoiced yet, or the relevant carrier's file may not have been uploaded.",
+    "Bu takip numaralari kargo firmasinin fatura listesinde var ama gelir dosyasinda eslesen bir gonderi bulunamadi. Farkli ay/musteri donemine ait olabilir, kontrol etmekte fayda var.":
+        "These tracking numbers exist in the carrier's invoice list, but no matching shipment was found in the income file. They may belong to a different month/customer period - worth checking.",
+    "Musteriye beyan ettigimiz (gelir dosyasindaki) ile kargo firmasinin faturasindaki olcumleri **hacim** (uzunluk x genislik x yukseklik) ve **agirlik** olarak karsilastirir - tek tek kenar (uzunluk/genislik/yukseklik) karsilastirilmaz, cunku firmalar hangi kenara 'uzunluk' hangisine 'genislik' dedigini bizden farkli siralayabiliyor; hacim carpimda sira onemli olmadigi icin bu sorunu ortadan kaldirir.\n\nSadece **hem bizim hem firmanin olcusu birlikte mevcut olan** ve ZARAR ettigimiz (Kar/Zarar < 0) gonderileri gosterir.\n\n⚠️ Not 1: Su an sadece **FedEx, Asendia ve UniUni** fatura dosyalarinda boyut/agirlik bilgisi bulunuyor. UPS ve ByeLabel grubu firmalarinin fatura formatlarinda bu bilgi yok, bu yuzden o gonderiler bu listede gorunmez.\n\n⚠️ Not 2: Bizim olcum birimimiz (inc/lb) ile bazi firmalarin kendi birimi (orn. cm/kg) farkli olabilir - 'Hacim Orani' sutunu TUM satirlarda benzer, tutarli bir kat gosteriyorsa (orn. hep ~16x gibi) bu bir birim farkindan kaynaklaniyor olabilir, gercek bir uyusmazliktan degil. Soyle bir durumda bana haber ver, birim cevrimini ekleyelim.":
+        "Compares what we declared to the customer (in the income file) with the carrier's invoice measurements by **volume** (length x width x height) and **weight** - individual sides (length/width/height) are not compared one by one, because carriers may order which side is 'length' vs 'width' differently than we do; since order doesn't matter in a volume product, this removes that problem.\n\nOnly shows shipments where **both our measurement and the carrier's measurement are available together** and we made a LOSS (Profit/Loss < 0).\n\n⚠️ Note 1: Currently only **FedEx, Asendia and UniUni** invoice files contain dimension/weight information. UPS and the ByeLabel group of carriers don't have this in their invoice formats, so those shipments won't appear in this list.\n\n⚠️ Note 2: Our unit of measurement (in/lb) may differ from some carriers' own units (e.g. cm/kg) - if the 'Volume Ratio' column shows a similar, consistent multiple across ALL rows (e.g. always ~16x), this may be caused by a unit difference rather than a real mismatch. If you notice this, let me know and we'll add unit conversion.",
+}
+
+
+def tc(metin):
+    """Serbest (uzun) aciklama metinlerini cevirir - sadece dil='en' iken
+    _CAPTION_EN sozlugunde arar, bulamazsa metni oldugu gibi dondurur."""
+    if st.session_state["dil"] == "en":
+        return _CAPTION_EN.get(metin, metin)
+    return metin
 
 # "Sellivox" tarzi acik panel temasi: koyu genis sidebar + beyaz ana alan +
 # renkli sol-kenarlikli KPI kartlari.
@@ -606,16 +676,12 @@ if not st.session_state.get("authentication_status"):
             """,
             unsafe_allow_html=True,
         )
-        _giris_dil_kolonlari = st.columns([1, 1, 1, 6])
+        _giris_dil_kolonlari = st.columns([1, 1, 6])
         with _giris_dil_kolonlari[0]:
-            if st.button("🇺🇸", key="giris_dil_en_us", help="English"):
-                st.session_state["dil"] = "en"
-                st.rerun()
-        with _giris_dil_kolonlari[1]:
             if st.button("🇬🇧", key="giris_dil_en_gb", help="English"):
                 st.session_state["dil"] = "en"
                 st.rerun()
-        with _giris_dil_kolonlari[2]:
+        with _giris_dil_kolonlari[1]:
             if st.button("🇹🇷", key="giris_dil_tr", help="Turkce"):
                 st.session_state["dil"] = "tr"
                 st.rerun()
@@ -843,16 +909,12 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
-_dil_kolonlari = st.columns([1, 1, 1, 12])
+_dil_kolonlari = st.columns([1, 1, 12])
 with _dil_kolonlari[0]:
-    if st.button("🇺🇸", key="dil_en_us", help="English"):
-        st.session_state["dil"] = "en"
-        st.rerun()
-with _dil_kolonlari[1]:
     if st.button("🇬🇧", key="dil_en_gb", help="English"):
         st.session_state["dil"] = "en"
         st.rerun()
-with _dil_kolonlari[2]:
+with _dil_kolonlari[1]:
     if st.button("🇹🇷", key="dil_tr", help="Turkce"):
         st.session_state["dil"] = "tr"
         st.rerun()
@@ -1097,12 +1159,12 @@ analiz_secimi = st.session_state.get("analiz_secimi")
 # ---------------------------------------------- kargo firmasina gore yukle ---
 if analiz_secimi == "Kargo Firmasina Gore Dosya Yukle":
     st.subheader(t("kargo_yukle_baslik"))
-    st.caption(
+    st.caption(tc(
         "Bir kargo firmasindan fatura geldikce, tum formu doldurmadan sadece "
         "o dosyayi secip GitHub'a kaydet. Ayni doneme, ayni firmadan tekrar "
         "dosya yuklersen otomatik birlestirilir (tekrarlar elenir, yeni "
         "satirlar eklenir)."
-    )
+    ))
     _tekli_donem = st.text_input(
         "Donem etiketi (orn. 2026-07)",
         value="",
@@ -1148,10 +1210,10 @@ if analiz_secimi == "Kargo Firmasina Gore Dosya Yukle":
 # ------------------------------------------------------- github arsivi ---
 elif analiz_secimi == "GitHub Arsivinden Dosya Sec ve Hesapla":
     st.subheader(t("github_arsiv_baslik"))
-    st.caption(
+    st.caption(tc(
         "Bilgisayarindan dosya yuklemek yerine, daha once GitHub'a arsivledigin "
         "gelir/gider dosyalarindan istedigini sec ve Hesapla'ya bas."
-    )
+    ))
     try:
         with st.spinner("🔄 GitHub'daki donemler yukleniyor..."):
             _kayitli_donemler = list_periods()
@@ -1238,7 +1300,7 @@ else:
 
     with col1:
         st.subheader(t("gelir"))
-        st.caption("WH_CUSTOMER_SHIPMENT_LIST formatinda, musteriden alinan tutarlari iceren dosya.")
+        st.caption(tc("WH_CUSTOMER_SHIPMENT_LIST formatinda, musteriden alinan tutarlari iceren dosya."))
 
         if "gelir_dosyalari" not in st.session_state:
             st.session_state["gelir_dosyalari"] = []
@@ -1278,10 +1340,10 @@ else:
         )
 
         st.markdown("**Manuel gelir (opsiyonel)**")
-        st.caption(
+        st.caption(tc(
             "Hicbir pakete baglanmayan, dogrudan net kara eklenecek gelirler "
             "(orn. depo kirasi geliri, danismanlik geliri)."
-        )
+        ))
         _gelir_default = pd.DataFrame(_params.get("manuel_gelir", [])) if _params else pd.DataFrame({"Aciklama": pd.Series(dtype="str"), "Tutar": pd.Series(dtype="float")})
         if _gelir_default.empty or list(_gelir_default.columns) != ["Aciklama", "Tutar"]:
             _gelir_default = pd.DataFrame({"Aciklama": pd.Series(dtype="str"), "Tutar": pd.Series(dtype="float")})
@@ -1298,7 +1360,7 @@ else:
 
     with col2:
         st.subheader(t("gider"))
-        st.caption("Kargo firmasindan gelen fatura dosyalari. Birden fazla dosya secebilirsiniz.")
+        st.caption(tc("Kargo firmasindan gelen fatura dosyalari. Birden fazla dosya secebilirsiniz."))
 
         if "gider_dosyalari" not in st.session_state:
             st.session_state["gider_dosyalari"] = []
@@ -1341,20 +1403,20 @@ else:
             st.rerun()
 
         if _gider_listesi:
-            st.caption(
+            st.caption(tc(
                 "Su an Asendia, UniUni, UPS ve Asendia'nin ayri Vergi/Gumruk dosyasi "
                 "dogrudan destekleniyor. ByeLabel dosyasini (shipments-...xlsx) sectiginde "
                 "icindeki tum firmalar (ePost Global, DHL, intelcom, APC, USPS, Evri, "
                 "Purolator, FedEx, UPS) otomatik ayri ayri islenir."
-            )
+            ))
 
         dahil_et_genel_gider = True  # Pakete baglanamayan giderler bilgi amacli gosterilir, otomatik eklenmez
 
         st.markdown("**Manuel gider (opsiyonel)**")
-        st.caption(
+        st.caption(tc(
             "Hicbir pakete baglanmayan, dogrudan net kardan dusulecek giderler "
             "(orn. depo kirasi, personel maasi, internet faturasi)."
-        )
+        ))
         _gider_default = pd.DataFrame(_params.get("manuel_gider", [])) if _params else pd.DataFrame({"Aciklama": pd.Series(dtype="str"), "Tutar": pd.Series(dtype="float")})
         if _gider_default.empty or list(_gider_default.columns) != ["Aciklama", "Tutar"]:
             _gider_default = pd.DataFrame({"Aciklama": pd.Series(dtype="str"), "Tutar": pd.Series(dtype="float")})
@@ -1371,13 +1433,13 @@ else:
         )
 
         st.markdown("**Paket basina ek gider - firma bazinda (opsiyonel)**")
-        st.caption(
+        st.caption(tc(
             "Belirli bir kargo firmasinin, gideri ZATEN eslesmis olan HER paketine "
             "ayni tutari ekler (orn. UniUni icin paket basina $2). Tutar otomatik "
             "olarak eslesen paket sayisiyla carpilir ve her paketin kar/zarar "
             "hesabina islenir - tum tablolarda (ulke, firma, musteri) otomatik "
             "yansir. Gideri eslesmemis paketlere bu tutar uygulanmaz."
-        )
+        ))
         _paket_cols = {"Kargo Firmasi": pd.Series(dtype="str"), "Aciklama": pd.Series(dtype="str"), "Paket Basi Tutar": pd.Series(dtype="float")}
         _paket_default = pd.DataFrame(_params.get("paket_basi_gider", [])) if _params else pd.DataFrame(_paket_cols)
         if _paket_default.empty or list(_paket_default.columns) != list(_paket_cols.keys()):
@@ -1558,7 +1620,7 @@ else:
             col_mg, col_mgid = st.columns(2)
             with col_mg:
                 if not gecerli_manuel_gelir.empty:
-                    st.caption("Manuel gelir kalemleri:")
+                    st.caption(tc("Manuel gelir kalemleri:"))
                     st.dataframe(
                         gecerli_manuel_gelir.style.format({"Tutar": "${:,.2f}"}),
                         width="stretch",
@@ -1566,7 +1628,7 @@ else:
                     )
             with col_mgid:
                 if not gecerli_manuel_gider_gosterim.empty or otomatik_satirlar:
-                    st.caption("Manuel gider kalemleri:")
+                    st.caption(tc("Manuel gider kalemleri:"))
                     _goster_df = gecerli_manuel_gider_gosterim.copy()
                     if otomatik_satirlar:
                         _goster_df = pd.concat(
@@ -1588,11 +1650,11 @@ else:
             renkli_kart("Net Kar Yuzdesi (%)", f"%{summary['net_kar_yuzde']:,.1f}", net_kar_renk, net_kar_icon)
 
         if not genel_gider_kategori_detay.empty:
-            st.caption("⚠️ Pakete baglanamayan vergi/komisyon - otomatik tespit edilen (Net Kar'a dahil):")
+            st.caption(tc("⚠️ Pakete baglanamayan vergi/komisyon - otomatik tespit edilen (Net Kar'a dahil):"))
 
             kaynaklar = genel_gider_kategori_detay[["Kargo Firmasi", "Kaynak Sutun"]].drop_duplicates()
             for _, kr in kaynaklar.iterrows():
-                st.caption(f"📂 {kr['Kargo Firmasi']} icin kaynak kolon: *{kr['Kaynak Sutun']}*")
+                st.caption(t("kaynak_kolon_metni").format(firma=kr['Kargo Firmasi'], sutun=kr['Kaynak Sutun']))
 
             st.dataframe(
                 genel_gider_kategori_detay.drop(columns=["Kaynak Sutun"]).style.format({"Genel Gider": "${:,.2f}"}),
@@ -1622,13 +1684,15 @@ else:
             indirme_butonlari(genel_gider_kategori_detay, "genel_gider_detayi", "genel_gider_detay")
 
         eslesme_orani = summary["eslesen_sayisi"] / summary["toplam_gonderi"] * 100 if summary["toplam_gonderi"] else 0
-        st.caption(f"Eslesme orani: %{eslesme_orani:.1f}")
+        st.caption(t("eslesme_orani_metni").format(oran=eslesme_orani))
 
         st.caption(
-            f"Toplam {summary['toplam_gonderi']} gonderi  |  "
-            f"{summary['eslesen_sayisi']} eslesti  |  "
-            f"{summary['gider_bulunamadi_sayisi']} gider bulunamadi  |  "
-            f"{summary['takip_no_yok_sayisi']} takip no yok"
+            t("toplam_gonderi_ozet").format(
+                toplam=summary["toplam_gonderi"],
+                eslesen=summary["eslesen_sayisi"],
+                bulunamadi=summary["gider_bulunamadi_sayisi"],
+                takipsiz=summary["takip_no_yok_sayisi"],
+            )
         )
 
         # Rapor sekmelerinden biri secili degilse (orn. hesaplama az once bitti),
@@ -1642,10 +1706,10 @@ else:
 
         if analiz_secimi == "Kargo Firmalarina Gore":
             st.subheader(t("kargo_analiz_baslik"))
-            st.caption(
+            st.caption(tc(
                 "Kargo firmasi (gelir dosyasindaki Carrier Name) bazinda paket sayisi, "
                 "gelir, gider ve kar/zarar dagilimi."
-            )
+            ))
             carrier_table = carrier_breakdown(merged)
             st.dataframe(
                 carrier_table.style.format(
@@ -1689,11 +1753,11 @@ else:
                 st.altair_chart(_carrier_chart, width="stretch")
 
             if not full_breakdown.empty:
-                st.caption(
+                st.caption(tc(
                     "Asagidaki tablo her dosyada hangi kategori/sutunun Kargo, hangisinin "
                     "Vergi, hangisinin (takip numarasi olmadigi icin) Genel Gider sayildigini "
                     "ve ne kadar tutar tasidigini gosterir."
-                )
+                ))
                 st.dataframe(
                     full_breakdown.style.format({"Tutar": "${:,.2f}"}),
                     width="stretch",
@@ -1703,10 +1767,10 @@ else:
 
         elif analiz_secimi == "Ulkelere Gore":
             st.subheader(t("ulke_analiz_baslik"))
-            st.caption(
+            st.caption(tc(
                 "Toplam gelir ve gonderi sayisi tum gonderileri kapsar. Kargo/Vergi/Kar "
                 "sutunlari sadece gider dosyasinda eslesen gonderilerden gelir."
-            )
+            ))
             cb = country_breakdown(merged)
             st.dataframe(
                 cb.style.format(
@@ -1745,10 +1809,7 @@ else:
             eu = europe_summary(merged)
             if eu:
                 st.subheader(t("avrupa_toplam_ozeti"))
-                st.caption(
-                    "UK, Turkiye, Kibris, Israel dahil tum Avrupa ulkelerine ait gonderilerin toplu ozeti. "
-                    "Dahil edilen ulkeler: " + " · ".join(eu["ulkeler"])
-                )
+                st.caption(t("avrupa_ozet_metni").format(ulkeler=" · ".join(eu["ulkeler"])))
                 eu_col1, eu_col2, eu_col3 = st.columns(3)
                 with eu_col1:
                     renkli_kart("Gonderi Sayisi (Tum)", f"{eu['gonderi_sayisi']:,}", _tema["accent"], "📦")
@@ -1772,12 +1833,12 @@ else:
 
         elif analiz_secimi == "Musterilere Gore":
             st.subheader(t("musteri_analiz_baslik"))
-            st.caption(
+            st.caption(tc(
                 "Gelir dosyasindaki User No / User Name'e gore musteri bazinda paket "
                 "sayisi, bize odedigi tutar, firmaya odedigimiz tutar, kar/zarar ve "
                 "gonderdigi ulkeler. Eslesen Sayisi/Firmaya Odenen/Kar sutunlari sadece "
                 "ESLESEN gonderilerden gelir."
-            )
+            ))
             cust_table = customer_breakdown(merged)
             st.dataframe(
                 cust_table.style.format(
@@ -1817,11 +1878,11 @@ else:
 
         elif analiz_secimi == "Musteri x Ulke":
             st.subheader(t("musteri_ulke_analiz_baslik"))
-            st.caption(
+            st.caption(tc(
                 "Her musterinin HER ULKEDE ayri ayri kar mi zarar mi ettirdigini gosterir "
                 "(en zararli kombinasyonlar basta). Genel toplamda kar gibi gorunen bir "
                 "musteri, bazi ulkelerde zarar ettiriyor olabilir."
-            )
+            ))
             cust_country_table = customer_country_breakdown(merged)
             st.dataframe(
                 cust_country_table.style.format(
@@ -1860,11 +1921,11 @@ else:
 
         elif analiz_secimi == "Takip No Sorgula":
             st.subheader(t("takip_sorgula_baslik"))
-            st.caption(
+            st.caption(tc(
                 "Bir veya birden fazla takip numarasi gir (her satira bir tane, "
                 "veya virgulle ayirarak da yazabilirsin) - gelir ve giderini "
                 "yan yana, her biri alt alta gorursun."
-            )
+            ))
             _takip_girdi = st.text_area(
                 "Takip numaralari",
                 placeholder="orn.\n1Z999AA10123456784\n1Z999AA10123456785\n... (10'a kadar veya daha fazla)",
@@ -1914,7 +1975,7 @@ else:
 
                     _sonuc_df = pd.DataFrame(_sonuc_satirlari)
                     _bulunan_sayisi = (_sonuc_df["Durum"] != "Bulunamadi").sum()
-                    st.caption(f"{len(_takip_listesi)} takip numarasi sorgulandi, {_bulunan_sayisi} tanesi bulundu.")
+                    st.caption(t("takip_sorgu_ozet").format(toplam=len(_takip_listesi), bulunan=_bulunan_sayisi))
 
                     st.dataframe(
                         _sonuc_df.style.format(
@@ -1928,12 +1989,12 @@ else:
 
         elif analiz_secimi == "Tahsil Edilmeyen Vergi/Gumruk":
             st.subheader(t("tahsil_edilmeyen_baslik"))
-            st.caption(
+            st.caption(tc(
                 "Kargo firmasina odedigimiz vergi/gumruk (Gider_Tax) ile musteriden "
                 "gelir dosyasindaki 'Customs Duty Fee' sutunundan tahsil ettigimiz "
                 "tutari karsilastirir. Odedigimizden AZ tahsil ettigimiz (veya hic "
                 "tahsil etmedigimiz) gonderileri listeler."
-            )
+            ))
 
             _vergi_df = merged[merged["Durum"] == "Eslesti"].copy()
             _vergi_df["Musteriden_Alinan_Vergi"] = _vergi_df["Musteriden_Alinan_Vergi"].fillna(0.0)
@@ -1963,7 +2024,7 @@ else:
                 renkli_kart(
                     "Toplam Eksik Tahsilat", f"${_toplam_eksik:,.2f}", "#dc2626", "⚠️"
                 )
-                st.caption(f"{len(_eksik_tahsilat)} gonderide musteriden eksik vergi/gumruk tahsil edilmis.")
+                st.caption(t("eksik_tahsilat_ozet").format(sayi=len(_eksik_tahsilat)))
                 st.dataframe(
                     _eksik_tahsilat.style.format(
                         {
@@ -1982,7 +2043,7 @@ else:
 
         elif analiz_secimi == "Boyut/Agirlik Uyusmazligi":
             st.subheader(t("boyut_agirlik_baslik"))
-            st.caption(
+            st.caption(tc(
                 "Musteriye beyan ettigimiz (gelir dosyasindaki) ile kargo firmasinin "
                 "faturasindaki olcumleri **hacim** (uzunluk x genislik x yukseklik) ve "
                 "**agirlik** olarak karsilastirir - tek tek kenar (uzunluk/genislik/"
@@ -2000,7 +2061,7 @@ else:
                 "satirlarda benzer, tutarli bir kat gosteriyorsa (orn. hep ~16x gibi) "
                 "bu bir birim farkindan kaynaklaniyor olabilir, gercek bir uyusmazliktan "
                 "degil. Soyle bir durumda bana haber ver, birim cevrimini ekleyelim."
-            )
+            ))
 
             _gerekli_kolonlar = [
                 "Musteri_Length", "Musteri_Width", "Musteri_Height", "Musteri_Weight",
@@ -2051,8 +2112,9 @@ else:
                     "Zarar Eden Boyut Uyusmazlikli Paket Sayisi", f"{len(_boyut_tablo)}", "#dc2626", "📦"
                 )
                 st.caption(
-                    f"Toplam zarar: ${_boyut_tablo['Kar/Zarar'].sum():,.2f} "
-                    f"({len(_boyut_tablo)} gonderi)"
+                    t("toplam_zarar_metni").format(
+                        tutar=_boyut_tablo['Kar/Zarar'].sum(), sayi=len(_boyut_tablo)
+                    )
                 )
 
                 st.dataframe(
@@ -2076,22 +2138,22 @@ else:
         elif analiz_secimi == "Gider Bulunamayanlar":
             st.subheader(t("gider_bulunamayan_baslik"))
             not_found = merged[merged["Durum"] == "Gider bulunamadi"]
-            st.caption(
+            st.caption(tc(
                 "Bu gonderiler icin takip numarasi var ama yuklenen gider dosyalarinda "
                 "karsiligi bulunamadi. Henuz faturalanmamis olabilir, veya ait oldugu "
                 "kargo firmasinin dosyasi yuklenmemis olabilir."
-            )
+            ))
             not_found_display = not_found[["Shipment No", "Track Number", "Carrier Name", "Status", "Invoice Amount"]]
             st.dataframe(not_found_display, width="stretch", hide_index=True)
             indirme_butonlari(not_found_display, "gider_bulunamayanlar", "tab2")
 
         elif analiz_secimi == "Eslesmeyen Gider":
             st.subheader(t("eslesmeyen_gider_baslik"))
-            st.caption(
+            st.caption(tc(
                 "Bu takip numaralari kargo firmasinin fatura listesinde var ama gelir "
                 "dosyasinda eslesen bir gonderi bulunamadi. Farkli ay/musteri donemine "
                 "ait olabilir, kontrol etmekte fayda var."
-            )
+            ))
             st.dataframe(unmatched_cost, width="stretch", hide_index=True)
             indirme_butonlari(unmatched_cost, "eslesmeyen_gider", "tab3")
 
