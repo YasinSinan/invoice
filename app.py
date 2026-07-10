@@ -103,6 +103,139 @@ _accent_rgb = _hex_to_rgb(_tema["accent"])
 _ACCENT_RGBA_16 = f"rgba({_accent_rgb[0]}, {_accent_rgb[1]}, {_accent_rgb[2]}, 0.16)"
 _ACCENT_RGBA_08 = f"rgba({_accent_rgb[0]}, {_accent_rgb[1]}, {_accent_rgb[2]}, 0.08)"
 
+# --------------------------------------------------------------- dil (i18n) ---
+if "dil" not in st.session_state:
+    st.session_state["dil"] = "tr"
+
+CEVIRI = {
+    "tr": {
+        "app_baslik": "Depo Paneli",
+        "app_altbaslik": "Kargo faturalari ile musteri odemelerini otomatik eslestir",
+        "giris_yapildi": "Giris yapildi",
+        "cikis_yap": "🚪 Cikis Yap",
+        "ana_sayfa": "Ana Sayfa",
+        "kargo_dosya_yukle": "Kargo Firmasina Gore Dosya Yukle",
+        "github_arsiv_sec": "GitHub Arsivinden Dosya Sec ve Hesapla",
+        "ana_menu": "Ana Menu",
+        "dosya_islemleri": "Dosya Islemleri",
+        "raporlar": "Raporlar",
+        "kargo_firmalarina_gore": "Kargo Firmalarina Gore",
+        "ulkelere_gore": "Ulkelere Gore",
+        "avrupa_ozeti": "Avrupa Ozeti",
+        "musterilere_gore": "Musterilere Gore",
+        "musteri_x_ulke": "Musteri x Ulke",
+        "detayli_rapor": "Detayli Rapor",
+        "takip_no_sorgula": "Takip No Sorgula",
+        "tahsil_edilmeyen_vergi": "Tahsil Edilmeyen Vergi/Gumruk",
+        "boyut_agirlik": "Boyut/Agirlik Uyusmazligi",
+        "gider_bulunamayanlar": "Gider Bulunamayanlar",
+        "eslesmeyen_gider": "Eslesmeyen Gider",
+        "hesap": "Hesap",
+        "email": "Email",
+        "sifre": "Sifre",
+        "sifreyi_goster": "👁️ Sifreyi goster",
+        "giris_yap": "Giris Yap",
+        "giris_devam": "Devam etmek icin giris yap",
+        "email_sifre_hatali": "Email veya sifre hatali.",
+        "gelir": "Gelir",
+        "gider": "Gider",
+        "hesapla": "Hesapla",
+        "yukleniyor": "⏳ Dosyalar okunuyor ve hesaplaniyor...",
+        "indir_excel": "Excel olarak indir",
+        "indir_csv": "CSV olarak indir",
+        "toplam": "Toplam",
+        "musteri": "Musteri",
+        "ulke": "Ulke",
+        "kargo_firmasi": "Kargo Firmasi",
+        "takip_no": "Takip No",
+        "kar_zarar": "Kar/Zarar",
+        "toplam_gelir": "Toplam Gelir",
+        "toplam_gider": "Toplam Gider",
+        "net_kar": "Net Kar",
+        "toplam_paket_sayisi": "Toplam Paket Sayisi",
+        "ozet": "📊 Ozet",
+        "kargo_analiz_baslik": "🚚 Kargo Firmalarina Gore Analiz",
+        "ulke_analiz_baslik": "🌍 Ulkeye gore analiz",
+        "avrupa_toplam_ozeti": "🌍 Avrupa Toplam Ozeti",
+        "musteri_analiz_baslik": "👥 Musteriye gore analiz",
+        "musteri_ulke_analiz_baslik": "👥 Musteri x Ulke Analizi",
+        "kargo_yukle_baslik": "📤 Kargo Firmasina Gore Dosya Yukle",
+        "github_arsiv_baslik": "🗄️ GitHub Arsivinden Dosya Sec ve Hesapla",
+        "detayli_rapor_baslik": "📋 Detayli Rapor",
+        "takip_sorgula_baslik": "🔎 Takip No Sorgula",
+        "tahsil_edilmeyen_baslik": "💰 Tahsil Edilmeyen Vergi/Gumruk",
+        "boyut_agirlik_baslik": "📦 Boyut/Agirlik Uyusmazligi (Zarar Eden Paketler)",
+        "gider_bulunamayan_baslik": "🔍 Gider Bulunamayanlar",
+        "eslesmeyen_gider_baslik": "⚖️ Eslesmeyen Gider",
+    },
+    "en": {
+        "app_baslik": "Warehouse Panel",
+        "app_altbaslik": "Automatically match carrier invoices with customer payments",
+        "giris_yapildi": "Logged in",
+        "cikis_yap": "🚪 Log Out",
+        "ana_sayfa": "Home",
+        "kargo_dosya_yukle": "Upload File by Carrier",
+        "github_arsiv_sec": "Select from GitHub Archive & Calculate",
+        "ana_menu": "Main Menu",
+        "dosya_islemleri": "File Operations",
+        "raporlar": "Reports",
+        "kargo_firmalarina_gore": "By Carrier",
+        "ulkelere_gore": "By Country",
+        "avrupa_ozeti": "Europe Summary",
+        "musterilere_gore": "By Customer",
+        "musteri_x_ulke": "Customer x Country",
+        "detayli_rapor": "Detailed Report",
+        "takip_no_sorgula": "Track Number Lookup",
+        "tahsil_edilmeyen_vergi": "Uncollected Tax/Duty",
+        "boyut_agirlik": "Dimension/Weight Mismatch",
+        "gider_bulunamayanlar": "Missing Expenses",
+        "eslesmeyen_gider": "Unmatched Expenses",
+        "hesap": "Account",
+        "email": "Email",
+        "sifre": "Password",
+        "sifreyi_goster": "👁️ Show password",
+        "giris_yap": "Log In",
+        "giris_devam": "Log in to continue",
+        "email_sifre_hatali": "Incorrect email or password.",
+        "gelir": "Income",
+        "gider": "Expense",
+        "hesapla": "Calculate",
+        "yukleniyor": "⏳ Reading files and calculating...",
+        "indir_excel": "Download as Excel",
+        "indir_csv": "Download as CSV",
+        "toplam": "Total",
+        "musteri": "Customer",
+        "ulke": "Country",
+        "kargo_firmasi": "Carrier",
+        "takip_no": "Tracking No",
+        "kar_zarar": "Profit/Loss",
+        "toplam_gelir": "Total Income",
+        "toplam_gider": "Total Expense",
+        "net_kar": "Net Profit",
+        "toplam_paket_sayisi": "Total Package Count",
+        "ozet": "📊 Summary",
+        "kargo_analiz_baslik": "🚚 Analysis by Carrier",
+        "ulke_analiz_baslik": "🌍 Analysis by Country",
+        "avrupa_toplam_ozeti": "🌍 Europe Total Summary",
+        "musteri_analiz_baslik": "👥 Analysis by Customer",
+        "musteri_ulke_analiz_baslik": "👥 Customer x Country Analysis",
+        "kargo_yukle_baslik": "📤 Upload File by Carrier",
+        "github_arsiv_baslik": "🗄️ Select from GitHub Archive & Calculate",
+        "detayli_rapor_baslik": "📋 Detailed Report",
+        "takip_sorgula_baslik": "🔎 Track Number Lookup",
+        "tahsil_edilmeyen_baslik": "💰 Uncollected Tax/Duty",
+        "boyut_agirlik_baslik": "📦 Dimension/Weight Mismatch (Loss-Making Packages)",
+        "gider_bulunamayan_baslik": "🔍 Missing Expenses",
+        "eslesmeyen_gider_baslik": "⚖️ Unmatched Expenses",
+    },
+}
+
+
+def t(anahtar):
+    """Secili dile gore ceviri metnini dondurur. Anahtar bulunamazsa
+    anahtarin kendisini dondurur (cevrilmemis oldugunu belli eder)."""
+    return CEVIRI.get(st.session_state["dil"], CEVIRI["tr"]).get(anahtar, anahtar)
+
 # "Sellivox" tarzi acik panel temasi: koyu genis sidebar + beyaz ana alan +
 # renkli sol-kenarlikli KPI kartlari.
 _ana_css = """
@@ -459,26 +592,56 @@ if not st.session_state.get("authentication_status"):
     with _form_orta:
         st.markdown(
             """
-            <div style="text-align:center; margin-bottom: 18px; margin-top: 6vh;">
+            <style>
+            div[data-testid="stHorizontalBlock"]:has(#giris-dil-satiri) [data-testid="stButton"] button {
+                width: 30px !important;
+                height: 24px !important;
+                min-width: 30px !important;
+                padding: 0 !important;
+                border-radius: 4px !important;
+                font-size: 15px !important;
+            }
+            </style>
+            <span id="giris-dil-satiri"></span>
+            """,
+            unsafe_allow_html=True,
+        )
+        _giris_dil_kolonlari = st.columns([1, 1, 1, 6])
+        with _giris_dil_kolonlari[0]:
+            if st.button("🇺🇸", key="giris_dil_en_us", help="English"):
+                st.session_state["dil"] = "en"
+                st.rerun()
+        with _giris_dil_kolonlari[1]:
+            if st.button("🇬🇧", key="giris_dil_en_gb", help="English"):
+                st.session_state["dil"] = "en"
+                st.rerun()
+        with _giris_dil_kolonlari[2]:
+            if st.button("🇹🇷", key="giris_dil_tr", help="Turkce"):
+                st.session_state["dil"] = "tr"
+                st.rerun()
+
+        st.markdown(
+            f"""
+            <div style="text-align:center; margin-bottom: 18px; margin-top: 2vh;">
                 <div style="font-size: 40px;">📦</div>
-                <div style="font-size: 22px; font-weight: 800; color: #1f2430;">Depo Paneli</div>
-                <div style="font-size: 13px; color: #5f6779; margin-top: 2px;">Devam etmek icin giris yap</div>
+                <div style="font-size: 22px; font-weight: 800; color: #1f2430;">{t('app_baslik')}</div>
+                <div style="font-size: 13px; color: #5f6779; margin-top: 2px;">{t('giris_devam')}</div>
             </div>
             """,
             unsafe_allow_html=True,
         )
 
-        _sifre_goster = st.checkbox("👁️ Sifreyi goster", key="sifre_goster_toggle")
+        _sifre_goster = st.checkbox(t("sifreyi_goster"), key="sifre_goster_toggle")
 
         with st.form("giris_formu", clear_on_submit=False, border=False):
-            _email = st.text_input("Email", autocomplete="off", key="giris_email")
+            _email = st.text_input(t("email"), autocomplete="off", key="giris_email")
             _sifre = st.text_input(
-                "Sifre",
+                t("sifre"),
                 type="default" if _sifre_goster else "password",
                 autocomplete="off",
                 key="giris_sifre",
             )
-            _gonderildi = st.form_submit_button("Giris Yap", type="primary", width="stretch")
+            _gonderildi = st.form_submit_button(t("giris_yap"), type="primary", width="stretch")
 
         if _gonderildi:
             _kullanici = _kullanicilar.get(_email)
@@ -491,7 +654,7 @@ if not st.session_state.get("authentication_status"):
                 )
                 st.rerun()
             else:
-                st.error("Email veya sifre hatali.")
+                st.error(t("email_sifre_hatali"))
 
     st.stop()
 
@@ -599,7 +762,7 @@ def indirme_butonlari(df, dosya_adi, key_prefix):
     with col_csv:
         csv_data = df.to_csv(index=False).encode("utf-8-sig")
         st.download_button(
-            "CSV olarak indir",
+            t("indir_csv"),
             data=csv_data,
             file_name=f"{dosya_adi}.csv",
             mime="text/csv",
@@ -610,7 +773,7 @@ def indirme_butonlari(df, dosya_adi, key_prefix):
         with pd.ExcelWriter(buf, engine="xlsxwriter") as writer:
             df.to_excel(writer, index=False)
         st.download_button(
-            "Excel olarak indir",
+            t("indir_excel"),
             data=buf.getvalue(),
             file_name=f"{dosya_adi}.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -659,6 +822,41 @@ _tema_buton_css += f"""
 """
 st.markdown(_tema_buton_css, unsafe_allow_html=True)
 
+# --------------------------------------------------------- dil secici ---
+st.markdown(
+    """
+    <style>
+    [data-testid="stHorizontalBlock"]:has(#dil-secici-satiri) {
+        gap: 4px !important;
+    }
+    div[data-testid="stHorizontalBlock"]:has(#dil-secici-satiri) [data-testid="stButton"] button {
+        width: 30px !important;
+        height: 24px !important;
+        min-width: 30px !important;
+        padding: 0 !important;
+        border-radius: 4px !important;
+        font-size: 15px !important;
+        box-shadow: 0 0 0 1px var(--border-light) !important;
+    }
+    </style>
+    <span id="dil-secici-satiri"></span>
+    """,
+    unsafe_allow_html=True,
+)
+_dil_kolonlari = st.columns([1, 1, 1, 12])
+with _dil_kolonlari[0]:
+    if st.button("🇺🇸", key="dil_en_us", help="English"):
+        st.session_state["dil"] = "en"
+        st.rerun()
+with _dil_kolonlari[1]:
+    if st.button("🇬🇧", key="dil_en_gb", help="English"):
+        st.session_state["dil"] = "en"
+        st.rerun()
+with _dil_kolonlari[2]:
+    if st.button("🇹🇷", key="dil_tr", help="Turkce"):
+        st.session_state["dil"] = "tr"
+        st.rerun()
+
 # --------------------------------------------------------- tema secici ---
 st.markdown('<span id="tema-secici-satiri"></span>', unsafe_allow_html=True)
 _tema_kolonlari = st.columns([1] * len(_TEMA_SIRASI) + [1, 10])
@@ -675,14 +873,14 @@ with _tema_kolonlari[len(_TEMA_SIRASI)]:
 _col_baslik, _col_info, _col_btn = st.columns([3.2, 1.2, 0.6])
 with _col_baslik:
     st.markdown(
-        """
+        f"""
         <span id="baslik-satiri"></span>
         <div style="padding: 2px 0;">
             <div style="font-size: 24px; font-weight: 800; color: #1f2430; line-height: 1.2;">
-                📦 Depo Paneli
+                📦 {t('app_baslik')}
             </div>
             <div style="font-size: 13px; color: #5f6779; margin-top: 2px;">
-                Kargo faturalari ile musteri odemelerini otomatik eslestir
+                {t('app_altbaslik')}
             </div>
         </div>
         """,
@@ -702,13 +900,13 @@ with _col_info:
                 border: 1.5px solid {_tema['accent']};
             ">👤</div>
             <span style="font-size: 13px; font-weight: 700; color: #1f2430;">{st.session_state.get('name', '')}</span>
-            <span style="font-size: 11px; color: #8a90a0;">· Giris yapildi</span>
+            <span style="font-size: 11px; color: #8a90a0;">· {t('giris_yapildi')}</span>
         </div>
         """,
         unsafe_allow_html=True,
     )
 with _col_btn:
-    if st.button("🚪 Cikis Yap", key="cikis_butonu"):
+    if st.button(t("cikis_yap"), key="cikis_butonu"):
         for _k in ["authentication_status", "name", "username"]:
             st.session_state.pop(_k, None)
         st.rerun()
@@ -737,6 +935,30 @@ REPORT_MENU_ITEMS = [
     ("⚖️", "Eslesmeyen Gider"),
 ]
 MENU_ITEMS = BASE_MENU_ITEMS + REPORT_MENU_ITEMS
+
+# Menu etiketleri (internal key - yonlendirme icin degismez) ile ceviri
+# anahtarlarini eslestirir. Boylece analiz_secimi karsilastirmalari (kodun
+# her yerinde kullanilan) hic degismeden kalir, sadece GORUNEN metin cevrilir.
+_MENU_CEVIRI = {
+    "Ana Sayfa": "ana_sayfa",
+    "Kargo Firmasina Gore Dosya Yukle": "kargo_dosya_yukle",
+    "GitHub Arsivinden Dosya Sec ve Hesapla": "github_arsiv_sec",
+    "Kargo Firmalarina Gore": "kargo_firmalarina_gore",
+    "Ulkelere Gore": "ulkelere_gore",
+    "Avrupa Ozeti": "avrupa_ozeti",
+    "Musterilere Gore": "musterilere_gore",
+    "Musteri x Ulke": "musteri_x_ulke",
+    "Detayli Rapor": "detayli_rapor",
+    "Takip No Sorgula": "takip_no_sorgula",
+    "Tahsil Edilmeyen Vergi/Gumruk": "tahsil_edilmeyen_vergi",
+    "Boyut/Agirlik Uyusmazligi": "boyut_agirlik",
+    "Gider Bulunamayanlar": "gider_bulunamayanlar",
+    "Eslesmeyen Gider": "eslesmeyen_gider",
+}
+
+
+def _menu_metni(label):
+    return t(_MENU_CEVIRI.get(label, label))
 
 if "analiz_secimi" not in st.session_state:
     st.session_state["analiz_secimi"] = None  # None = Ana Sayfa
@@ -851,22 +1073,22 @@ with st.sidebar:
             unsafe_allow_html=True,
         )
 
-    st.markdown('<div class="sidebar-section">Ana Menu</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="sidebar-section">{t("ana_menu")}</div>', unsafe_allow_html=True)
     icon, label = BASE_MENU_ITEMS[0]
-    if st.button(f"{icon}  {label}", key=f"nav_{label}", width="stretch"):
+    if st.button(f"{icon}  {_menu_metni(label)}", key=f"nav_{label}", width="stretch"):
         _her_seyi_sifirla()
         st.session_state["analiz_secimi"] = None
         st.rerun()
 
-    st.markdown('<div class="sidebar-section">Dosya Islemleri</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="sidebar-section">{t("dosya_islemleri")}</div>', unsafe_allow_html=True)
     for icon, label in BASE_MENU_ITEMS[1:]:
-        if st.button(f"{icon}  {label}", key=f"nav_{label}", width="stretch"):
+        if st.button(f"{icon}  {_menu_metni(label)}", key=f"nav_{label}", width="stretch"):
             st.session_state["analiz_secimi"] = label
             st.rerun()
 
-    st.markdown('<div class="sidebar-section">Raporlar</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="sidebar-section">{t("raporlar")}</div>', unsafe_allow_html=True)
     for icon, label in REPORT_MENU_ITEMS:
-        if st.button(f"{icon}  {label}", key=f"nav_{label}", width="stretch"):
+        if st.button(f"{icon}  {_menu_metni(label)}", key=f"nav_{label}", width="stretch"):
             st.session_state["analiz_secimi"] = label
             st.rerun()
 
@@ -874,7 +1096,7 @@ analiz_secimi = st.session_state.get("analiz_secimi")
 
 # ---------------------------------------------- kargo firmasina gore yukle ---
 if analiz_secimi == "Kargo Firmasina Gore Dosya Yukle":
-    st.subheader("📤 Kargo Firmasina Gore Dosya Yukle")
+    st.subheader(t("kargo_yukle_baslik"))
     st.caption(
         "Bir kargo firmasindan fatura geldikce, tum formu doldurmadan sadece "
         "o dosyayi secip GitHub'a kaydet. Ayni doneme, ayni firmadan tekrar "
@@ -925,7 +1147,7 @@ if analiz_secimi == "Kargo Firmasina Gore Dosya Yukle":
 
 # ------------------------------------------------------- github arsivi ---
 elif analiz_secimi == "GitHub Arsivinden Dosya Sec ve Hesapla":
-    st.subheader("🗄️ GitHub Arsivinden Dosya Sec ve Hesapla")
+    st.subheader(t("github_arsiv_baslik"))
     st.caption(
         "Bilgisayarindan dosya yuklemek yerine, daha once GitHub'a arsivledigin "
         "gelir/gider dosyalarindan istedigini sec ve Hesapla'ya bas."
@@ -1015,7 +1237,7 @@ else:
     col1, col2 = st.columns(2)
 
     with col1:
-        st.subheader("Gelir")
+        st.subheader(t("gelir"))
         st.caption("WH_CUSTOMER_SHIPMENT_LIST formatinda, musteriden alinan tutarlari iceren dosya.")
 
         if "gelir_dosyalari" not in st.session_state:
@@ -1075,7 +1297,7 @@ else:
         )
 
     with col2:
-        st.subheader("Gider")
+        st.subheader(t("gider"))
         st.caption("Kargo firmasindan gelen fatura dosyalari. Birden fazla dosya secebilirsiniz.")
 
         if "gider_dosyalari" not in st.session_state:
@@ -1175,12 +1397,12 @@ else:
     _bos_sol, _hesapla_orta, _bos_sag = st.columns([1, 1, 1])
     with _hesapla_orta:
         if st.button(
-            "Hesapla",
+            t("hesapla"),
             type="primary",
             disabled=not st.session_state.get("gelir_dosyalari"),
             width="stretch",
         ):
-            with st.spinner("⏳ Dosyalar okunuyor ve hesaplaniyor..."):
+            with st.spinner(t("yukleniyor")):
                 # Dosyalari oku ve session_state'e kaydet
                 try:
                     _gelir_dfs = []
@@ -1289,7 +1511,7 @@ else:
         summary = summarize(merged, genel_gider=toplam_genel_gider, manuel_gelir=manuel_gelir_toplam)
 
         st.divider()
-        st.subheader("📊 Ozet")
+        st.subheader(t("ozet"))
 
         renkli_kart("Toplam Paket Sayisi", f"{summary['toplam_gonderi']:,}", _tema["accent"], "📦")
 
@@ -1419,7 +1641,7 @@ else:
         st.divider()
 
         if analiz_secimi == "Kargo Firmalarina Gore":
-            st.subheader("🚚 Kargo Firmalarina Gore Analiz")
+            st.subheader(t("kargo_analiz_baslik"))
             st.caption(
                 "Kargo firmasi (gelir dosyasindaki Carrier Name) bazinda paket sayisi, "
                 "gelir, gider ve kar/zarar dagilimi."
@@ -1480,7 +1702,7 @@ else:
                 indirme_butonlari(full_breakdown, "kargo_vergi_siniflandirma", "full_breakdown")
 
         elif analiz_secimi == "Ulkelere Gore":
-            st.subheader("🌍 Ulkeye gore analiz")
+            st.subheader(t("ulke_analiz_baslik"))
             st.caption(
                 "Toplam gelir ve gonderi sayisi tum gonderileri kapsar. Kargo/Vergi/Kar "
                 "sutunlari sadece gider dosyasinda eslesen gonderilerden gelir."
@@ -1522,7 +1744,7 @@ else:
         elif analiz_secimi == "Avrupa Ozeti":
             eu = europe_summary(merged)
             if eu:
-                st.subheader("🌍 Avrupa Toplam Ozeti")
+                st.subheader(t("avrupa_toplam_ozeti"))
                 st.caption(
                     "UK, Turkiye, Kibris, Israel dahil tum Avrupa ulkelerine ait gonderilerin toplu ozeti. "
                     "Dahil edilen ulkeler: " + " · ".join(eu["ulkeler"])
@@ -1549,7 +1771,7 @@ else:
                 st.info("Avrupa ulkelerine ait gonderi bulunamadi.")
 
         elif analiz_secimi == "Musterilere Gore":
-            st.subheader("👥 Musteriye gore analiz")
+            st.subheader(t("musteri_analiz_baslik"))
             st.caption(
                 "Gelir dosyasindaki User No / User Name'e gore musteri bazinda paket "
                 "sayisi, bize odedigi tutar, firmaya odedigimiz tutar, kar/zarar ve "
@@ -1594,7 +1816,7 @@ else:
                 st.altair_chart(_cust_chart, width="stretch")
 
         elif analiz_secimi == "Musteri x Ulke":
-            st.subheader("👥 Musteri x Ulke Analizi")
+            st.subheader(t("musteri_ulke_analiz_baslik"))
             st.caption(
                 "Her musterinin HER ULKEDE ayri ayri kar mi zarar mi ettirdigini gosterir "
                 "(en zararli kombinasyonlar basta). Genel toplamda kar gibi gorunen bir "
@@ -1616,7 +1838,7 @@ else:
             indirme_butonlari(cust_country_table, "musteri_x_ulke_analizi", "cust_country_table")
 
         elif analiz_secimi == "Detayli Rapor":
-            st.subheader("📋 Detayli Rapor")
+            st.subheader(t("detayli_rapor_baslik"))
             detayli_rapor_df = merged.sort_values("Added Date")[
                 [
                     "Shipment No", "Track Number", "Carrier Name", "Invoice Amount",
@@ -1637,7 +1859,7 @@ else:
             indirme_butonlari(detayli_rapor_df, "detayli_rapor", "tab1")
 
         elif analiz_secimi == "Takip No Sorgula":
-            st.subheader("🔎 Takip No Sorgula")
+            st.subheader(t("takip_sorgula_baslik"))
             st.caption(
                 "Bir veya birden fazla takip numarasi gir (her satira bir tane, "
                 "veya virgulle ayirarak da yazabilirsin) - gelir ve giderini "
@@ -1705,7 +1927,7 @@ else:
                     indirme_butonlari(_sonuc_df, "takip_no_sorgu_sonuclari", "takip_sorgu")
 
         elif analiz_secimi == "Tahsil Edilmeyen Vergi/Gumruk":
-            st.subheader("💰 Tahsil Edilmeyen Vergi/Gumruk")
+            st.subheader(t("tahsil_edilmeyen_baslik"))
             st.caption(
                 "Kargo firmasina odedigimiz vergi/gumruk (Gider_Tax) ile musteriden "
                 "gelir dosyasindaki 'Customs Duty Fee' sutunundan tahsil ettigimiz "
@@ -1759,7 +1981,7 @@ else:
                 indirme_butonlari(_eksik_tahsilat, "tahsil_edilmeyen_vergi", "vergi_farki")
 
         elif analiz_secimi == "Boyut/Agirlik Uyusmazligi":
-            st.subheader("📦 Boyut/Agirlik Uyusmazligi (Zarar Eden Paketler)")
+            st.subheader(t("boyut_agirlik_baslik"))
             st.caption(
                 "Musteriye beyan ettigimiz (gelir dosyasindaki) ile kargo firmasinin "
                 "faturasindaki olcumleri **hacim** (uzunluk x genislik x yukseklik) ve "
@@ -1852,7 +2074,7 @@ else:
                 indirme_butonlari(_boyut_tablo, "boyut_agirlik_uyusmazligi", "boyut_uyusmazlik")
 
         elif analiz_secimi == "Gider Bulunamayanlar":
-            st.subheader("🔍 Gider Bulunamayanlar")
+            st.subheader(t("gider_bulunamayan_baslik"))
             not_found = merged[merged["Durum"] == "Gider bulunamadi"]
             st.caption(
                 "Bu gonderiler icin takip numarasi var ama yuklenen gider dosyalarinda "
@@ -1864,7 +2086,7 @@ else:
             indirme_butonlari(not_found_display, "gider_bulunamayanlar", "tab2")
 
         elif analiz_secimi == "Eslesmeyen Gider":
-            st.subheader("⚖️ Eslesmeyen Gider")
+            st.subheader(t("eslesmeyen_gider_baslik"))
             st.caption(
                 "Bu takip numaralari kargo firmasinin fatura listesinde var ama gelir "
                 "dosyasinda eslesen bir gonderi bulunamadi. Farkli ay/musteri donemine "
