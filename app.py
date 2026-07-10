@@ -733,32 +733,6 @@ if not st.session_state.get("authentication_status"):
     _bos_sol, _form_orta, _bos_sag = st.columns([1, 1.1, 1])
     with _form_orta:
         st.markdown(
-            """
-            <style>
-            div[data-testid="stHorizontalBlock"]:has(#giris-dil-satiri) [data-testid="stButton"] button {
-                width: 30px !important;
-                height: 24px !important;
-                min-width: 30px !important;
-                padding: 0 !important;
-                border-radius: 4px !important;
-                font-size: 15px !important;
-            }
-            </style>
-            <span id="giris-dil-satiri"></span>
-            """,
-            unsafe_allow_html=True,
-        )
-        _giris_dil_kolonlari = st.columns([1, 1, 6])
-        with _giris_dil_kolonlari[0]:
-            if st.button("🇬🇧", key="giris_dil_en_gb", help="English"):
-                st.session_state["dil"] = "en"
-                st.rerun()
-        with _giris_dil_kolonlari[1]:
-            if st.button("🇹🇷", key="giris_dil_tr", help="Turkce"):
-                st.session_state["dil"] = "tr"
-                st.rerun()
-
-        st.markdown(
             f"""
             <div style="text-align:center; margin-bottom: 18px; margin-top: 2vh;">
                 <div style="font-size: 40px;">📦</div>
@@ -770,6 +744,41 @@ if not st.session_state.get("authentication_status"):
         )
 
         _sifre_goster = st.checkbox(t("sifreyi_goster"), key="sifre_goster_toggle")
+
+        st.markdown(
+            """
+            <style>
+            div[data-testid="stHorizontalBlock"]:has(#giris-dil-satiri) [data-testid="stButton"] button {
+                width: 100% !important;
+                height: 28px !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                border-radius: 4px !important;
+                font-size: 20px !important;
+                line-height: 1 !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+            }
+            div[data-testid="stHorizontalBlock"]:has(#giris-dil-satiri) [data-testid="stButton"] button p {
+                font-size: 20px !important;
+                line-height: 1 !important;
+                margin: 0 !important;
+            }
+            </style>
+            <span id="giris-dil-satiri"></span>
+            """,
+            unsafe_allow_html=True,
+        )
+        _giris_dil_kolonlari = st.columns([5, 1, 1])
+        with _giris_dil_kolonlari[1]:
+            if st.button("🇬🇧", key="giris_dil_en_gb", help="English"):
+                st.session_state["dil"] = "en"
+                st.rerun()
+        with _giris_dil_kolonlari[2]:
+            if st.button("🇹🇷", key="giris_dil_tr", help="Turkce"):
+                st.session_state["dil"] = "tr"
+                st.rerun()
 
         with st.form("giris_formu", clear_on_submit=False, border=False):
             _email = st.text_input(t("email"), autocomplete="off", key="giris_email")
@@ -928,9 +937,9 @@ _tema_buton_css = """
         gap: 4px !important;
     }
     div[data-testid="stHorizontalBlock"]:has(#tema-secici-satiri) [data-testid="stButton"] button {
-        width: 22px !important;
-        height: 22px !important;
-        min-width: 22px !important;
+        width: 32px !important;
+        height: 32px !important;
+        min-width: 32px !important;
         padding: 0 !important;
         border-radius: 50% !important;
         font-size: 0 !important;
@@ -942,7 +951,7 @@ for _i, _tema_adi in enumerate(_TEMA_SIRASI):
     _renkler = TEMALAR[_tema_adi]
     _tema_buton_css += f"""
     div[data-testid="stHorizontalBlock"]:has(#tema-secici-satiri) [data-testid="stButton"]:nth-of-type({_i + 1}) button {{
-        background: linear-gradient(135deg, {_renkler['accent']} 50%, {_renkler['koyu']} 50%) !important;
+        background: linear-gradient(90deg, {_renkler['accent']} 50%, {_renkler['koyu']} 50%) !important;
         border: none !important;
     }}
     """
@@ -968,25 +977,34 @@ st.markdown(
         gap: 4px !important;
     }
     div[data-testid="stHorizontalBlock"]:has(#dil-secici-satiri) [data-testid="stButton"] button {
-        width: 30px !important;
-        height: 24px !important;
-        min-width: 30px !important;
+        width: 100% !important;
+        height: 28px !important;
         padding: 0 !important;
+        margin: 0 !important;
         border-radius: 4px !important;
-        font-size: 15px !important;
+        font-size: 18px !important;
+        line-height: 1 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
         box-shadow: 0 0 0 1px var(--border-light) !important;
+    }
+    div[data-testid="stHorizontalBlock"]:has(#dil-secici-satiri) [data-testid="stButton"] button p {
+        font-size: 18px !important;
+        line-height: 1 !important;
+        margin: 0 !important;
     }
     </style>
     <span id="dil-secici-satiri"></span>
     """,
     unsafe_allow_html=True,
 )
-_dil_kolonlari = st.columns([1, 1, 12])
-with _dil_kolonlari[0]:
+_dil_kolonlari = st.columns([10, 1, 1])
+with _dil_kolonlari[1]:
     if st.button("🇬🇧", key="dil_en_gb", help="English"):
         st.session_state["dil"] = "en"
         st.rerun()
-with _dil_kolonlari[1]:
+with _dil_kolonlari[2]:
     if st.button("🇹🇷", key="dil_tr", help="Turkce"):
         st.session_state["dil"] = "tr"
         st.rerun()
