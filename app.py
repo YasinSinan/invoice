@@ -182,6 +182,34 @@ CEVIRI = {
         "kargo_kar_zarar_grafik": "**📊 Kargo firmasina gore Kar/Zarar**",
         "en_cok_gelir_ulke": "**📊 En cok gelir getiren 10 ulke**",
         "en_cok_gelir_musteri": "**📊 En cok gelir getiren 10 musteri**",
+        "kargo_dosya_turu": "Kargo firmasi / dosya turu",
+        "henuz_arsiv_yok": "Henuz arsivlenmis bir donem yok. 'Kargo Firmasina Gore Dosya Yukle' bolumunden dosyalarini arsivleyebilirsin.",
+        "donem_sec": "Donem sec",
+        "once_hesapla_uyari": "⚠️ Once dosyalarini yukleyip 'Hesapla'ya basmalisin. Asagida dosyalarini yukleyebilirsin.",
+        "avrupa_gonderi_yok": "Avrupa ulkelerine ait gonderi bulunamadi.",
+        "sorgula_buton": "🔎 Sorgula",
+        "takip_no_gir_uyari": "Once en az bir takip numarasi gir.",
+        "vergi_tam_tahsil": "Butun eslesen gonderilerde vergi/gumruk tam tahsil edilmis gorunuyor. 🎉",
+        "baslamak_icin_yukle": "Baslamak icin once gelir dosyasini yukleyin ve 'Hesapla' butonuna basin.",
+        "renkleri_ters_cevir": "Renkleri ters cevir",
+        "dosyalari_yukle_help": "Dosyalari Ana Sayfa'daki yukleme alanlarina ekler ve yonlendirir - orada dosya ekleyip/cikarabilir, sonra Hesapla'ya basabilirsin.",
+        "listeden_cikar": "Listeden cikar",
+        "only_paid_label": "Sadece odenmis gonderileri dahil et (Status = Paid)",
+        "only_paid_help": "Isaretliyse User Cancelled, New Shipment, Payment Waiting gibi durumlar disarida tutulur.",
+        "exclude_carrier_label": "Kargo firmasi atanmamis gonderileri haric tut",
+        "exclude_carrier_help": "Isaretliyse Carrier Name (kargo firmasi) bos olan gonderiler analize hic dahil edilmez.",
+        "donem_placeholder": "orn. 2026-07",
+        "donem_etiketi_label": "Donem etiketi (orn. 2026-07)",
+        "dosyayi_sec": "Dosyayi sec",
+        "takip_numaralari_label": "Takip numaralari",
+        "takip_numaralari_placeholder": "orn.\n1Z999AA10123456784\n1Z999AA10123456785\n... (10'a kadar veya daha fazla)",
+        "gelir_dosyasi_ekle": "Gelir Excel dosyasi ekle",
+        "gelir_dosyasi_sec": "Gelir Excel dosyasini secin",
+        "gider_dosyasi_ekle": "Gider Excel dosyasi ekle",
+        "gider_dosyasi_sec": "Gider Excel dosyasini/dosyalarini secin",
+        "bu_dosyayi_arsivle": "📤 Bu Dosyayi Arsivle",
+        "dosyalari_yukle_buton": "📥 Dosyalari Yukle",
+        "firma_label": "Firma",
     },
     "en": {
         "app_baslik": "Warehouse Panel",
@@ -257,6 +285,34 @@ CEVIRI = {
         "kargo_kar_zarar_grafik": "**📊 Profit/Loss by carrier**",
         "en_cok_gelir_ulke": "**📊 Top 10 countries by income**",
         "en_cok_gelir_musteri": "**📊 Top 10 customers by income**",
+        "kargo_dosya_turu": "Carrier / file type",
+        "henuz_arsiv_yok": "No archived period yet. You can archive your files from the 'Upload File by Carrier' section.",
+        "donem_sec": "Select period",
+        "once_hesapla_uyari": "⚠️ You need to upload your files and click 'Calculate' first. You can upload your files below.",
+        "avrupa_gonderi_yok": "No shipments found for European countries.",
+        "sorgula_buton": "🔎 Look Up",
+        "takip_no_gir_uyari": "Enter at least one tracking number first.",
+        "vergi_tam_tahsil": "Tax/duty appears to be fully collected on all matched shipments. 🎉",
+        "baslamak_icin_yukle": "To get started, upload your income file and click the 'Calculate' button.",
+        "renkleri_ters_cevir": "Invert colors",
+        "dosyalari_yukle_help": "Adds the files to the upload areas on the Home page and redirects you there - you can add/remove files, then click Calculate.",
+        "listeden_cikar": "Remove from list",
+        "only_paid_label": "Include only paid shipments (Status = Paid)",
+        "only_paid_help": "When checked, statuses like User Cancelled, New Shipment, Payment Waiting are excluded.",
+        "exclude_carrier_label": "Exclude shipments with no assigned carrier",
+        "exclude_carrier_help": "When checked, shipments with an empty Carrier Name are excluded from the analysis entirely.",
+        "donem_placeholder": "e.g. 2026-07",
+        "donem_etiketi_label": "Period label (e.g. 2026-07)",
+        "dosyayi_sec": "Select file",
+        "takip_numaralari_label": "Tracking numbers",
+        "takip_numaralari_placeholder": "e.g.\n1Z999AA10123456784\n1Z999AA10123456785\n... (up to 10 or more)",
+        "gelir_dosyasi_ekle": "Add income Excel file",
+        "gelir_dosyasi_sec": "Select income Excel file",
+        "gider_dosyasi_ekle": "Add expense Excel file",
+        "gider_dosyasi_sec": "Select expense Excel file(s)",
+        "bu_dosyayi_arsivle": "📤 Archive This File",
+        "dosyalari_yukle_buton": "📥 Upload Files",
+        "firma_label": "Carrier",
     },
 }
 
@@ -944,7 +1000,7 @@ for _i, _tema_adi in enumerate(_TEMA_SIRASI):
             st.session_state["secili_tema"] = _tema_adi
             st.rerun()
 with _tema_kolonlari[len(_TEMA_SIRASI)]:
-    if st.button("⇄", key="tema_ters_cevir", help="Renkleri ters cevir"):
+    if st.button("⇄", key="tema_ters_cevir", help=t("renkleri_ters_cevir")):
         st.session_state["tema_ters"] = not st.session_state["tema_ters"]
         st.rerun()
 
@@ -1182,18 +1238,18 @@ if analiz_secimi == "Kargo Firmasina Gore Dosya Yukle":
         "satirlar eklenir)."
     ))
     _tekli_donem = st.text_input(
-        "Donem etiketi (orn. 2026-07)",
+        t("donem_etiketi_label"),
         value="",
         key="tekli_arsiv_donem",
-        placeholder="orn. 2026-07",
+        placeholder=t("donem_placeholder"),
     )
     _tekli_secenekler = ["Gelir (WH_CUSTOMER_SHIPMENT_LIST)"] + list(CARRIER_PROFILES.keys()) + [BYELABEL_GROUP_LABEL]
-    _tekli_secim = st.selectbox("Kargo firmasi / dosya turu", options=_tekli_secenekler, key="tekli_arsiv_secim")
+    _tekli_secim = st.selectbox(t("kargo_dosya_turu"), options=_tekli_secenekler, key="tekli_arsiv_secim")
     _tekli_dosya = st.file_uploader(
-        "Dosyayi sec", type=["xlsx"], key="tekli_arsiv_dosya"
+        t("dosyayi_sec"), type=["xlsx"], key="tekli_arsiv_dosya"
     )
     if st.button(
-        "📤 Bu Dosyayi Arsivle",
+        t("bu_dosyayi_arsivle"),
         key="tekli_arsivle_btn",
         disabled=_tekli_dosya is None or not _tekli_donem.strip(),
     ):
@@ -1238,9 +1294,9 @@ elif analiz_secimi == "GitHub Arsivinden Dosya Sec ve Hesapla":
         st.warning(str(e))
 
     if not _kayitli_donemler:
-        st.info("Henuz arsivlenmis bir donem yok. 'Kargo Firmasina Gore Dosya Yukle' bolumunden dosyalarini arsivleyebilirsin.")
+        st.info(t("henuz_arsiv_yok"))
     else:
-        _secilen_arsiv_donemi = st.selectbox("Donem sec", options=_kayitli_donemler, key="arsiv_donem_sec")
+        _secilen_arsiv_donemi = st.selectbox(t("donem_sec"), options=_kayitli_donemler, key="arsiv_donem_sec")
 
         try:
             with st.spinner(f"🔄 '{_secilen_arsiv_donemi}' donemine ait dosya listesi yukleniyor..."):
@@ -1269,11 +1325,11 @@ elif analiz_secimi == "GitHub Arsivinden Dosya Sec ve Hesapla":
         _secili_gider_dosyalari = [_gider_etiketli[e] for e in _secili_gider_etiketleri]
 
         if st.button(
-            "📥 Dosyalari Yukle",
+            t("dosyalari_yukle_buton"),
             type="primary",
             key="arsiv_hesapla_btn",
             disabled=not _secili_gelir_dosyalari,
-            help="Dosyalari Ana Sayfa'daki yukleme alanlarina ekler ve yonlendirir - orada dosya ekleyip/cikarabilir, sonra Hesapla'ya basabilirsin.",
+            help=t("dosyalari_yukle_help"),
         ):
             try:
                 with st.spinner(
@@ -1306,7 +1362,7 @@ else:
 
     _rapor_etiketleri_tumu = [label for _, label in REPORT_MENU_ITEMS]
     if analiz_secimi in _rapor_etiketleri_tumu and not _hesapla_var:
-        st.warning("⚠️ Once dosyalarini yukleyip 'Hesapla'ya basmalisin. Asagida dosyalarini yukleyebilirsin.")
+        st.warning(t("once_hesapla_uyari"))
 
     # Yuklu parametreler varsa widget varsayilan degerlerine uygula
     _params = st.session_state.get("yuklu_parametreler", {})
@@ -1328,12 +1384,12 @@ else:
             for _d in list(_gelir_listesi):
                 _c1, _c2 = st.columns([6, 1])
                 _c1.markdown(f"📄 {_d['ad']}")
-                if _c2.button("🗑️", key=f"gelir_sil_{_d['ad']}", help="Listeden cikar"):
+                if _c2.button("🗑️", key=f"gelir_sil_{_d['ad']}", help=t("listeden_cikar")):
                     _dosya_listesinden_cikar("gelir_dosyalari", _d["ad"])
                     st.rerun()
 
         _yeni_gelir_dosyalari = st.file_uploader(
-            "Gelir Excel dosyasi ekle" if _gelir_listesi else "Gelir Excel dosyasini secin",
+            t("gelir_dosyasi_ekle") if _gelir_listesi else t("gelir_dosyasi_sec"),
             type=["xlsx"],
             accept_multiple_files=True,
             key=f"income_uploader_{st.session_state['gelir_uploader_versiyon']}",
@@ -1345,14 +1401,14 @@ else:
             st.rerun()
 
         only_paid = st.checkbox(
-            "Sadece odenmis gonderileri dahil et (Status = Paid)",
+            t("only_paid_label"),
             value=_params.get("only_paid", True),
-            help="Isaretliyse User Cancelled, New Shipment, Payment Waiting gibi durumlar disarida tutulur.",
+            help=t("only_paid_help"),
         )
         exclude_unassigned_carrier = st.checkbox(
-            "Kargo firmasi atanmamis gonderileri haric tut",
+            t("exclude_carrier_label"),
             value=_params.get("exclude_unassigned_carrier", True),
-            help="Isaretliyse Carrier Name (kargo firmasi) bos olan gonderiler analize hic dahil edilmez.",
+            help=t("exclude_carrier_help"),
         )
 
         st.markdown(t("manuel_gelir_baslik"))
@@ -1391,7 +1447,7 @@ else:
                 _c1.markdown(f"📄 {_d['ad']}")
                 _mevcut_firma = _d.get("firma", BYELABEL_GROUP_LABEL)
                 _yeni_firma = _c2.selectbox(
-                    "Firma",
+                    t("firma_label"),
                     options=_tum_firma_secenekleri,
                     index=_tum_firma_secenekleri.index(_mevcut_firma) if _mevcut_firma in _tum_firma_secenekleri else 0,
                     key=f"gider_firma_{_d['ad']}",
@@ -1400,12 +1456,12 @@ else:
                 if _yeni_firma != _mevcut_firma:
                     _d["firma"] = _yeni_firma
                     st.session_state["gider_dosyalari"] = _gider_listesi
-                if _c3.button("🗑️", key=f"gider_sil_{_d['ad']}", help="Listeden cikar"):
+                if _c3.button("🗑️", key=f"gider_sil_{_d['ad']}", help=t("listeden_cikar")):
                     _dosya_listesinden_cikar("gider_dosyalari", _d["ad"])
                     st.rerun()
 
         _yeni_gider_dosyalari = st.file_uploader(
-            "Gider Excel dosyasi ekle" if _gider_listesi else "Gider Excel dosyasini/dosyalarini secin",
+            t("gider_dosyasi_ekle") if _gider_listesi else t("gider_dosyasi_sec"),
             type=["xlsx"],
             accept_multiple_files=True,
             key=f"cost_uploader_{st.session_state['gider_uploader_versiyon']}",
@@ -1845,7 +1901,7 @@ else:
                     renkli_kart("Kar/Zarar", f"${eu['kar_zarar']:,.2f}", eu_renk, eu_icon)
                     renkli_kart("Kar Yuzdesi (%)", f"%{eu['kar_yuzde']:,.1f}", eu_renk, eu_icon)
             else:
-                st.info("Avrupa ulkelerine ait gonderi bulunamadi.")
+                st.info(t("avrupa_gonderi_yok"))
 
         elif analiz_secimi == "Musterilere Gore":
             st.subheader(t("musteri_analiz_baslik"))
@@ -1943,13 +1999,13 @@ else:
                 "yan yana, her biri alt alta gorursun."
             ))
             _takip_girdi = st.text_area(
-                "Takip numaralari",
-                placeholder="orn.\n1Z999AA10123456784\n1Z999AA10123456785\n... (10'a kadar veya daha fazla)",
+                t("takip_numaralari_label"),
+                placeholder=t("takip_numaralari_placeholder"),
                 height=140,
                 key="takip_no_sorgu_girdi",
             )
 
-            if st.button("🔎 Sorgula", type="primary", key="takip_no_sorgula_btn"):
+            if st.button(t("sorgula_buton"), type="primary", key="takip_no_sorgula_btn"):
                 _ham_liste = [
                     p.strip()
                     for parca in _takip_girdi.splitlines()
@@ -1958,7 +2014,7 @@ else:
                 _takip_listesi = [t for t in _ham_liste if t]
 
                 if not _takip_listesi:
-                    st.warning("Once en az bir takip numarasi gir.")
+                    st.warning(t("takip_no_gir_uyari"))
                 else:
                     _sonuc_satirlari = []
                     for _tn in _takip_listesi:
@@ -2034,7 +2090,7 @@ else:
             }).sort_values("Eksik Tahsilat", ascending=False)
 
             if _eksik_tahsilat.empty:
-                st.success("Butun eslesen gonderilerde vergi/gumruk tam tahsil edilmis gorunuyor. 🎉")
+                st.success(t("vergi_tam_tahsil"))
             else:
                 _toplam_eksik = _eksik_tahsilat["Eksik Tahsilat"].sum()
                 renkli_kart(
@@ -2211,4 +2267,4 @@ else:
         )
 
     elif "income_df_cache" not in st.session_state:
-        st.info("Baslamak icin once gelir dosyasini yukleyin ve 'Hesapla' butonuna basin.")
+        st.info(t("baslamak_icin_yukle"))
