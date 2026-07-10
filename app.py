@@ -748,43 +748,25 @@ if not st.session_state.get("authentication_status"):
         st.markdown(
             """
             <style>
-            div[data-testid="stHorizontalBlock"]:has(#giris-dil-satiri) [data-testid="column"] {
-                padding: 0 !important;
+            .st-key-giris_dil_en_gb, .st-key-giris_dil_tr {
+                width: 44px !important;
+                min-width: 44px !important;
+                max-width: 44px !important;
             }
-            div[data-testid="stHorizontalBlock"]:has(#giris-dil-satiri) [data-testid="stButton"] {
-                width: 100% !important;
-                padding: 0 !important;
-                margin: 0 !important;
-            }
-            div[data-testid="stHorizontalBlock"]:has(#giris-dil-satiri) [data-testid="stButton"] button {
-                width: 100% !important;
+            .st-key-giris_dil_en_gb button, .st-key-giris_dil_tr button {
+                width: 44px !important;
                 height: 34px !important;
                 min-height: 34px !important;
                 padding: 0 !important;
                 margin: 0 !important;
                 border-radius: 4px !important;
                 border: none !important;
-                display: flex !important;
-                align-items: center !important;
-                justify-content: center !important;
             }
-            div[data-testid="stHorizontalBlock"]:has(#giris-dil-satiri) [data-testid="stButton"] button div {
-                width: 100% !important;
-                height: 100% !important;
-                display: flex !important;
-                align-items: center !important;
-                justify-content: center !important;
-                padding: 0 !important;
-                margin: 0 !important;
-            }
-            div[data-testid="stHorizontalBlock"]:has(#giris-dil-satiri) [data-testid="stButton"] button p {
+            .st-key-giris_dil_en_gb button p, .st-key-giris_dil_tr button p {
                 font-size: 26px !important;
                 line-height: 1 !important;
-                margin: 0 !important;
-                padding: 0 !important;
             }
             </style>
-            <span id="giris-dil-satiri"></span>
             """,
             unsafe_allow_html=True,
         )
@@ -991,47 +973,26 @@ st.markdown(_tema_buton_css, unsafe_allow_html=True)
 st.markdown(
     """
     <style>
-    [data-testid="stHorizontalBlock"]:has(#dil-secici-satiri) {
-        gap: 4px !important;
+    .st-key-dil_en_gb, .st-key-dil_tr {
+        width: 40px !important;
+        min-width: 40px !important;
+        max-width: 40px !important;
     }
-    div[data-testid="stHorizontalBlock"]:has(#dil-secici-satiri) [data-testid="column"] {
-        padding: 0 !important;
-    }
-    div[data-testid="stHorizontalBlock"]:has(#dil-secici-satiri) [data-testid="stButton"] {
-        width: 100% !important;
-        padding: 0 !important;
-        margin: 0 !important;
-    }
-    div[data-testid="stHorizontalBlock"]:has(#dil-secici-satiri) [data-testid="stButton"] button {
-        width: 100% !important;
+    .st-key-dil_en_gb button, .st-key-dil_tr button {
+        width: 40px !important;
         height: 32px !important;
         min-height: 32px !important;
         padding: 0 !important;
         margin: 0 !important;
         border-radius: 4px !important;
         border: none !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
         box-shadow: 0 0 0 1px var(--border-light) !important;
     }
-    div[data-testid="stHorizontalBlock"]:has(#dil-secici-satiri) [data-testid="stButton"] button div {
-        width: 100% !important;
-        height: 100% !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        padding: 0 !important;
-        margin: 0 !important;
-    }
-    div[data-testid="stHorizontalBlock"]:has(#dil-secici-satiri) [data-testid="stButton"] button p {
+    .st-key-dil_en_gb button p, .st-key-dil_tr button p {
         font-size: 24px !important;
         line-height: 1 !important;
-        margin: 0 !important;
-        padding: 0 !important;
     }
     </style>
-    <span id="dil-secici-satiri"></span>
     """,
     unsafe_allow_html=True,
 )
