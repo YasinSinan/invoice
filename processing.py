@@ -264,7 +264,105 @@ def load_income_file(file_obj, only_paid=True, exclude_unassigned_carrier=True):
         out = out[~bos].reset_index(drop=True)
     out["Carrier Name"] = out["Carrier Name"].apply(_normalize_carrier_name)
     out["TrackingKey"] = out["Track Number"].astype(str).str.strip()
-    out["Takip_Var_Mi"] = ~out["TrackingKey"].isin(NO_TRACKING_VALUES)
+    # Not: bazi pandas surumlerinde (orn. Arrow tabanli string dtype) NaN
+    # degerler astype(str) sonrasi literal "nan" metnine degil, null/NA
+    # olarak kalabiliyor - bu yuzden orijinal kolonun notna() kontrolu de
+    # ayrica yapiliyor, aksi halde takip numarasi olmayan gonderiler
+    # yanlislikla "takip numarasi var" sayilabiliyordu.
+    out["Takip_Var_Mi"] = out["Track Number"].notna() & ~out["TrackingKey"].isin(NO_TRACKING_VALUES)
+    return out
+
+
+# "Carriers" sutununda gecmesi muhtemel bilinen kargo firmasi anahtar
+# kelimeleri (FBA formatinda bu sutun "FedEx FedEx International Ground®"
+# gibi hem kisa adi hem servis aciklamasini birlikte iceriyor).
+_FBA_CARRIER_ANAHTAR_KELIMELER = [
+    "FedEx", "UPS", "DHL", "Asendia", "UniUni", "USPS",
+    "Purolator", "Intelcom", "APC", "Evri", "ePost",
+]
+
+
+def _fba_carrier_adi_cikar(ham_metin):
+    """FBA dosyasindaki 'Carriers' sutunundan (orn. 'FedEx FedEx International
+    Ground®' veya birden fazla firma varsa 'X, Y') temiz bir kargo firmasi
+    adi cikarir. Bilinen bir firma bulunamazsa (orn. 'Comfy Logistic' -
+    sirketin kendi ic teslimat servisi), ilk iki kelimeyi etiket olarak kullanir."""
+    if pd.isna(ham_metin) or not str(ham_metin).strip():
+        return None
+    ilk_parca = str(ham_metin).split(",")[0].strip()
+    for anahtar in _FBA_CARRIER_ANAHTAR_KELIMELER:
+        if anahtar.lower() in ilk_parca.lower():
+            return _normalize_carrier_name(anahtar)
+    kelimeler = ilk_parca.split()
+    return " ".join(kelimeler[:2]) if kelimeler else ilk_parca
+
+
+def load_income_file_fba(file_obj, only_paid=True, exclude_unassigned_carrier=True):
+    """FBA_PLUS formatindaki gelir dosyasini okur (comfylifeusa@gmail.com
+    kullanicisina ozel gelir dosyasi yapisi). Sonuc, load_income_file() ile
+    AYNI kolon yapisini (Shipment No, Track Number, Carrier Name, Invoice
+    Amount, Status, Added Date, Receiver Country, User No, User Name,
+    TrackingKey, Takip_Var_Mi, Musteriden_Alinan_Vergi, Musteri_* boyut
+    kolonlari) dondurur - boylece build_report ve sonraki tum analiz kodu
+    hicbir degisiklik gerektirmeden calisir.
+
+    Bu formatta (WH_CUSTOMER_SHIPMENT_LIST'ten farkli olarak):
+    - 'FBA No' -> Shipment No, 'Amount' -> Invoice Amount, 'Payment Status' ->
+      odeme durumu icin kullanilir (Status yerine).
+    - 'Carriers' sutunu firma adini servis aciklamasiyla birlikte icerir,
+      buradan temiz firma adi cikarilir (_fba_carrier_adi_cikar).
+    - Musteriden tahsil edilen vergi/gumruk ve boyut/agirlik bilgisi bu
+      formatta yok, ilgili kolonlar otomatik 0/NaN olarak doldurulur.
+    """
+    df = pd.read_excel(file_obj)
+
+    required = [
+        "FBA No",
+        "Track Number",
+        "Carriers",
+        "Amount",
+        "Payment Status",
+        "Added Date",
+        "Receiver Country",
+        "User No",
+        "User Name",
+    ]
+    missing = [c for c in required if c not in df.columns]
+    if missing:
+        raise ValueError(f"FBA gelir dosyasinda eksik kolon(lar): {', '.join(missing)}")
+
+    out = pd.DataFrame({
+        "Shipment No": df["FBA No"],
+        "Track Number": df["Track Number"],
+        "Carrier Name": df["Carriers"].apply(_fba_carrier_adi_cikar),
+        "Invoice Amount": pd.to_numeric(df["Amount"], errors="coerce").fillna(0.0),
+        "Status": df["Payment Status"],
+        "Added Date": df["Added Date"],
+        "Receiver Country": df["Receiver Country"],
+        "User No": df["User No"],
+        "User Name": df["User Name"],
+    })
+
+    # Bu formatta musteriden ayrica tahsil edilen vergi/gumruk ve boyut/agirlik
+    # bilgisi yok - ilgili kolonlar diger formatla ayni sekilde doldurulur ki
+    # build_report ve sonraki analizler hata vermeden calissin.
+    out["Musteriden_Alinan_Vergi"] = 0.0
+    for hedef in ["Musteri_Weight", "Musteri_Length", "Musteri_Width", "Musteri_Height", "Musteri_Chargeable_Weight"]:
+        out[hedef] = pd.NA
+
+    if only_paid:
+        out = out[out["Status"] == "Paid"].reset_index(drop=True)
+    if exclude_unassigned_carrier:
+        bos = out["Carrier Name"].isna() | (out["Carrier Name"].astype(str).str.strip() == "")
+        out = out[~bos].reset_index(drop=True)
+    out["Carrier Name"] = out["Carrier Name"].apply(_normalize_carrier_name)
+    out["TrackingKey"] = out["Track Number"].astype(str).str.strip()
+    # Not: bazi pandas surumlerinde (orn. Arrow tabanli string dtype) NaN
+    # degerler astype(str) sonrasi literal "nan" metnine degil, null/NA
+    # olarak kalabiliyor - bu yuzden orijinal kolonun notna() kontrolu de
+    # ayrica yapiliyor, aksi halde takip numarasi olmayan gonderiler
+    # yanlislikla "takip numarasi var" sayilabiliyordu.
+    out["Takip_Var_Mi"] = out["Track Number"].notna() & ~out["TrackingKey"].isin(NO_TRACKING_VALUES)
     return out
 
 
