@@ -748,22 +748,40 @@ if not st.session_state.get("authentication_status"):
         st.markdown(
             """
             <style>
+            div[data-testid="stHorizontalBlock"]:has(#giris-dil-satiri) [data-testid="column"] {
+                padding: 0 !important;
+            }
+            div[data-testid="stHorizontalBlock"]:has(#giris-dil-satiri) [data-testid="stButton"] {
+                width: 100% !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
             div[data-testid="stHorizontalBlock"]:has(#giris-dil-satiri) [data-testid="stButton"] button {
                 width: 100% !important;
-                height: 28px !important;
+                height: 34px !important;
+                min-height: 34px !important;
                 padding: 0 !important;
                 margin: 0 !important;
                 border-radius: 4px !important;
-                font-size: 20px !important;
-                line-height: 1 !important;
+                border: none !important;
                 display: flex !important;
                 align-items: center !important;
                 justify-content: center !important;
             }
+            div[data-testid="stHorizontalBlock"]:has(#giris-dil-satiri) [data-testid="stButton"] button div {
+                width: 100% !important;
+                height: 100% !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
             div[data-testid="stHorizontalBlock"]:has(#giris-dil-satiri) [data-testid="stButton"] button p {
-                font-size: 20px !important;
+                font-size: 26px !important;
                 line-height: 1 !important;
                 margin: 0 !important;
+                padding: 0 !important;
             }
             </style>
             <span id="giris-dil-satiri"></span>
@@ -976,23 +994,41 @@ st.markdown(
     [data-testid="stHorizontalBlock"]:has(#dil-secici-satiri) {
         gap: 4px !important;
     }
+    div[data-testid="stHorizontalBlock"]:has(#dil-secici-satiri) [data-testid="column"] {
+        padding: 0 !important;
+    }
+    div[data-testid="stHorizontalBlock"]:has(#dil-secici-satiri) [data-testid="stButton"] {
+        width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
     div[data-testid="stHorizontalBlock"]:has(#dil-secici-satiri) [data-testid="stButton"] button {
         width: 100% !important;
-        height: 28px !important;
+        height: 32px !important;
+        min-height: 32px !important;
         padding: 0 !important;
         margin: 0 !important;
         border-radius: 4px !important;
-        font-size: 18px !important;
-        line-height: 1 !important;
+        border: none !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
         box-shadow: 0 0 0 1px var(--border-light) !important;
     }
+    div[data-testid="stHorizontalBlock"]:has(#dil-secici-satiri) [data-testid="stButton"] button div {
+        width: 100% !important;
+        height: 100% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
     div[data-testid="stHorizontalBlock"]:has(#dil-secici-satiri) [data-testid="stButton"] button p {
-        font-size: 18px !important;
+        font-size: 24px !important;
         line-height: 1 !important;
         margin: 0 !important;
+        padding: 0 !important;
     }
     </style>
     <span id="dil-secici-satiri"></span>
