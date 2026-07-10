@@ -28,6 +28,7 @@ CARRIER_PROFILES = {
         "currency_col": ["CurrencyType", "Currency Type"],
         "date_col": ["JobDate", "Job Date"],
         "invoice_col": "Invoice Number",
+        "dim_cols": {"length": "Length", "width": "Width", "height": "Height", "weight": "ChargeableWeight"},
     },
     "UniUni": {
         "tracking_col": "Parcel Tracking No.",
@@ -35,6 +36,7 @@ CARRIER_PROFILES = {
         "currency_col": "Charge Currency",
         "date_col": "Invoice Date",
         "invoice_col": "Invoice Number",
+        "dim_cols": {"weight": "Dimensional WT"},
     },
     "UPS": {
         "tracking_col": "Tracking Number",
@@ -82,6 +84,10 @@ CARRIER_PROFILES = {
             "Broker Document Transfer Fee",
             "Additional Entry Line Items Fee",
         ],
+        "dim_cols": {
+            "length": "Dim Length", "width": "Dim Width", "height": "Dim Height",
+            "weight": "Rated Weight Amount",
+        },
     },
 }
 
@@ -235,6 +241,22 @@ def load_income_file(file_obj, only_paid=True, exclude_unassigned_carrier=True):
     else:
         out["Musteriden_Alinan_Vergi"] = 0.0
 
+    # Bizim musteriye beyan ettigimiz boyut/agirlik bilgileri (opsiyonel -
+    # dosyada yoksa NaN kalir, kargo firmasinin degerleriyle karsilastirma
+    # yapilamaz ama uygulama hata vermez).
+    _boyut_kolonlari = {
+        "Weight": "Musteri_Weight",
+        "Length": "Musteri_Length",
+        "Width": "Musteri_Width",
+        "Height": "Musteri_Height",
+        "Chargeable Weight": "Musteri_Chargeable_Weight",
+    }
+    for kaynak, hedef in _boyut_kolonlari.items():
+        if kaynak in df.columns:
+            out[hedef] = pd.to_numeric(df[kaynak], errors="coerce")
+        else:
+            out[hedef] = pd.NA
+
     if only_paid:
         out = out[out["Status"] == "Paid"].reset_index(drop=True)
     if exclude_unassigned_carrier:
@@ -269,7 +291,10 @@ def load_cost_file(file_obj, carrier_name):
     if carrier_name not in _ALL_PROFILES:
         raise ValueError(f"Taninmayan kargo firmasi: {carrier_name}")
 
-    empty_cols = ["TrackingKey", "Gider_Kargo", "Gider_Tax", "Gider_Kalemleri", "Gider", "Kargo Firmasi", "Satir Sayisi"]
+    empty_cols = [
+        "TrackingKey", "Gider_Kargo", "Gider_Tax", "Gider_Kalemleri", "Gider", "Kargo Firmasi", "Satir Sayisi",
+        "Firma_Length", "Firma_Width", "Firma_Height", "Firma_Weight",
+    ]
     empty_breakdown = pd.DataFrame(columns=["Kargo Firmasi", "Kategori/Sutun", "Kaynak Sutun", "Siniflandirma", "Tutar"])
 
     profile = _ALL_PROFILES[carrier_name]
@@ -289,6 +314,15 @@ def load_cost_file(file_obj, carrier_name):
     date_col = _resolve_col(df, profile["date_col"], carrier_name, required=False) if profile.get("date_col") else None
     tax_category_col = profile.get("tax_category_col")
     tax_category_values = profile.get("tax_category_values")
+
+    # Kargo firmasinin olcup fatura dosyasina yazdigi boyut/agirlik bilgileri
+    # (varsa) - musterimize beyan ettigimiz degerlerle karsilastirmak icin.
+    dim_cols_cfg = profile.get("dim_cols", {})
+    dim_col_map = {}
+    for boyut_adi, kolon_adi in dim_cols_cfg.items():
+        if kolon_adi in df.columns:
+            dim_col_map[boyut_adi] = kolon_adi
+            df[kolon_adi] = pd.to_numeric(df[kolon_adi], errors="coerce")
 
     filter_col = profile.get("service_filter_col")
     filter_contains = profile.get("service_filter_contains")
@@ -491,6 +525,24 @@ def load_cost_file(file_obj, carrier_name):
     grouped["Kargo Firmasi"] = display_name
     grouped["Satir Sayisi"] = df.groupby("TrackingKey").size().values
 
+    # Boyut/agirlik bilgileri (varsa) - ilk gecerli (bos/sifir olmayan) deger alinir.
+    # groupby().apply() yerine sort+drop_duplicates kullanilir - buyuk dosyalarda
+    # (onbinlerce satir) cok daha hizlidir, apply() ile zaman asimina yol acabiliyordu.
+    for boyut_adi in ["length", "width", "height", "weight"]:
+        hedef_kolon = f"Firma_{boyut_adi.capitalize()}"
+        if boyut_adi in dim_col_map:
+            kaynak_kolon = dim_col_map[boyut_adi]
+            gecici = df[["TrackingKey", kaynak_kolon]].copy()
+            gecici["_gecerli"] = gecici[kaynak_kolon].notna() & (gecici[kaynak_kolon] != 0)
+            gecici = gecici.sort_values("_gecerli", ascending=False)
+            ilk_degerler = (
+                gecici.drop_duplicates(subset="TrackingKey", keep="first")
+                .set_index("TrackingKey")[kaynak_kolon]
+            )
+            grouped[hedef_kolon] = grouped["TrackingKey"].map(ilk_degerler)
+        else:
+            grouped[hedef_kolon] = None
+
     return grouped, currency_warning, genel_gider, breakdown_df
 
 
@@ -528,19 +580,26 @@ def build_report(income_df, cost_dfs):
     """Gelir ve (bir veya daha fazla kargo firmasindan) gider verisini birlestirir."""
     if cost_dfs:
         cost_all = pd.concat(cost_dfs, ignore_index=True)
-        cost_summary = (
-            cost_all.groupby("TrackingKey", as_index=False)
-            .agg(
-                Gider_Kargo=("Gider_Kargo", "sum"),
-                Gider_Tax=("Gider_Tax", "sum"),
-                Gider=("Gider", "sum"),
-                Gider_Kalemleri=("Gider_Kalemleri", lambda x: "; ".join(v for v in x if v)),
-                Kargo_Firmalari=("Kargo Firmasi", lambda x: ", ".join(sorted(set(x)))),
-            )
+        _boyut_kolonlari = [c for c in ["Firma_Length", "Firma_Width", "Firma_Height", "Firma_Weight"] if c in cost_all.columns]
+        cost_summary = cost_all.groupby("TrackingKey", as_index=False).agg(
+            Gider_Kargo=("Gider_Kargo", "sum"),
+            Gider_Tax=("Gider_Tax", "sum"),
+            Gider=("Gider", "sum"),
+            Gider_Kalemleri=("Gider_Kalemleri", lambda x: "; ".join(v for v in x if v)),
+            Kargo_Firmalari=("Kargo Firmasi", lambda x: ", ".join(sorted(set(x)))),
         )
+        # Boyut/agirlik kolonlari icin ayni takip numarasinin ilk gecerli
+        # degeri alinir (sort+drop_duplicates ile, buyuk veride hizli).
+        for kolon in _boyut_kolonlari:
+            gecici = cost_all[["TrackingKey", kolon]].dropna(subset=[kolon])
+            ilk_degerler = gecici.drop_duplicates(subset="TrackingKey", keep="first").set_index("TrackingKey")[kolon]
+            cost_summary[kolon] = cost_summary["TrackingKey"].map(ilk_degerler)
     else:
         cost_summary = pd.DataFrame(
-            columns=["TrackingKey", "Gider_Kargo", "Gider_Tax", "Gider", "Gider_Kalemleri", "Kargo_Firmalari"]
+            columns=[
+                "TrackingKey", "Gider_Kargo", "Gider_Tax", "Gider", "Gider_Kalemleri", "Kargo_Firmalari",
+                "Firma_Length", "Firma_Width", "Firma_Height", "Firma_Weight",
+            ]
         )
 
     merged = income_df.merge(cost_summary, on="TrackingKey", how="left")
