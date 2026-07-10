@@ -1761,45 +1761,66 @@ else:
         elif analiz_secimi == "Boyut/Agirlik Uyusmazligi":
             st.subheader("📦 Boyut/Agirlik Uyusmazligi (Zarar Eden Paketler)")
             st.caption(
-                "Musteriye beyan ettigimiz (gelir dosyasindaki) boyut/agirlik ile "
-                "kargo firmasinin faturasindaki olculen boyut/agirligi karsilastirir. "
-                "Sadece ZARAR ettigimiz (Kar/Zarar < 0) ve firmanin boyut verisi olan "
-                "gonderileri gosterir - genelde firma bizim beyan ettigimizden daha "
-                "buyuk/agir olcup daha fazla ucret yansittiginda zarar olusur.\n\n"
-                "⚠️ Not: Su an sadece **FedEx, Asendia ve UniUni** fatura dosyalarinda "
+                "Musteriye beyan ettigimiz (gelir dosyasindaki) ile kargo firmasinin "
+                "faturasindaki olcumleri **hacim** (uzunluk x genislik x yukseklik) ve "
+                "**agirlik** olarak karsilastirir - tek tek kenar (uzunluk/genislik/"
+                "yukseklik) karsilastirilmaz, cunku firmalar hangi kenara 'uzunluk' "
+                "hangisine 'genislik' dedigini bizden farkli siralayabiliyor; hacim "
+                "carpimda sira onemli olmadigi icin bu sorunu ortadan kaldirir.\n\n"
+                "Sadece **hem bizim hem firmanin olcusu birlikte mevcut olan** ve "
+                "ZARAR ettigimiz (Kar/Zarar < 0) gonderileri gosterir.\n\n"
+                "⚠️ Not 1: Su an sadece **FedEx, Asendia ve UniUni** fatura dosyalarinda "
                 "boyut/agirlik bilgisi bulunuyor. UPS ve ByeLabel grubu firmalarinin "
                 "fatura formatlarinda bu bilgi yok, bu yuzden o gonderiler bu listede "
-                "gorunmez."
+                "gorunmez.\n\n"
+                "⚠️ Not 2: Bizim olcum birimimiz (inc/lb) ile bazi firmalarin kendi "
+                "birimi (orn. cm/kg) farkli olabilir - 'Hacim Orani' sutunu TUM "
+                "satirlarda benzer, tutarli bir kat gosteriyorsa (orn. hep ~16x gibi) "
+                "bu bir birim farkindan kaynaklaniyor olabilir, gercek bir uyusmazliktan "
+                "degil. Soyle bir durumda bana haber ver, birim cevrimini ekleyelim."
             )
 
+            _gerekli_kolonlar = [
+                "Musteri_Length", "Musteri_Width", "Musteri_Height", "Musteri_Weight",
+                "Firma_Length", "Firma_Width", "Firma_Height", "Firma_Weight",
+            ]
             _boyut_df = merged[
                 (merged["Durum"] == "Eslesti")
                 & (merged["Kar"] < 0)
-                & (merged["Firma_Weight"].notna())
+                & (merged[_gerekli_kolonlar].notna().all(axis=1))
             ].copy()
 
             if _boyut_df.empty:
-                st.success("Zarar eden ve firma boyut verisi olan bir gonderi bulunamadi. 🎉")
+                st.success(
+                    "Zarar eden ve hem bizim hem firmanin tam olcu bilgisi (uzunluk, "
+                    "genislik, yukseklik, agirlik) birlikte mevcut oldugu bir gonderi "
+                    "bulunamadi. 🎉"
+                )
             else:
+                _boyut_df["Bizim_Hacim"] = (
+                    _boyut_df["Musteri_Length"] * _boyut_df["Musteri_Width"] * _boyut_df["Musteri_Height"]
+                )
+                _boyut_df["Firma_Hacim"] = (
+                    _boyut_df["Firma_Length"] * _boyut_df["Firma_Width"] * _boyut_df["Firma_Height"]
+                )
+                _boyut_df["Hacim_Orani"] = _boyut_df["Firma_Hacim"] / _boyut_df["Bizim_Hacim"].replace(0, pd.NA)
+                _boyut_df["Agirlik_Farki"] = _boyut_df["Firma_Weight"] - _boyut_df["Musteri_Weight"]
+
                 _boyut_tablo = _boyut_df[[
                     "Track Number", "Carrier Name", "User Name",
-                    "Musteri_Weight", "Firma_Weight",
-                    "Musteri_Length", "Firma_Length",
-                    "Musteri_Width", "Firma_Width",
-                    "Musteri_Height", "Firma_Height",
+                    "Bizim_Hacim", "Firma_Hacim", "Hacim_Orani",
+                    "Musteri_Weight", "Firma_Weight", "Agirlik_Farki",
                     "Kar",
                 ]].rename(columns={
                     "Track Number": "Takip No",
                     "Carrier Name": "Kargo Firmasi",
                     "User Name": "Musteri",
+                    "Bizim_Hacim": "Bizim Hacim",
+                    "Firma_Hacim": "Firma Hacim",
+                    "Hacim_Orani": "Hacim Orani (x)",
                     "Musteri_Weight": "Bizim Agirlik",
                     "Firma_Weight": "Firma Agirlik",
-                    "Musteri_Length": "Bizim Uzunluk",
-                    "Firma_Length": "Firma Uzunluk",
-                    "Musteri_Width": "Bizim Genislik",
-                    "Firma_Width": "Firma Genislik",
-                    "Musteri_Height": "Bizim Yukseklik",
-                    "Firma_Height": "Firma Yukseklik",
+                    "Agirlik_Farki": "Agirlik Farki",
                     "Kar": "Kar/Zarar",
                 }).sort_values("Kar/Zarar")
                 _boyut_tablo["Takip No"] = _boyut_tablo["Takip No"].astype(str)
@@ -1815,14 +1836,12 @@ else:
                 st.dataframe(
                     _boyut_tablo.style.format(
                         {
+                            "Bizim Hacim": "{:,.1f}",
+                            "Firma Hacim": "{:,.1f}",
+                            "Hacim Orani (x)": "{:,.2f}x",
                             "Bizim Agirlik": "{:,.2f}",
                             "Firma Agirlik": "{:,.2f}",
-                            "Bizim Uzunluk": "{:,.1f}",
-                            "Firma Uzunluk": "{:,.1f}",
-                            "Bizim Genislik": "{:,.1f}",
-                            "Firma Genislik": "{:,.1f}",
-                            "Bizim Yukseklik": "{:,.1f}",
-                            "Firma Yukseklik": "{:,.1f}",
+                            "Agirlik Farki": "{:,.2f}",
                             "Kar/Zarar": "${:,.2f}",
                         },
                         na_rep="-",
