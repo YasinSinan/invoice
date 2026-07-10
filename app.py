@@ -174,6 +174,14 @@ CEVIRI = {
         "takip_sorgu_ozet": "{toplam} takip numarasi sorgulandi, {bulunan} tanesi bulundu.",
         "eksik_tahsilat_ozet": "{sayi} gonderide musteriden eksik vergi/gumruk tahsil edilmis.",
         "toplam_zarar_metni": "Toplam zarar: ${tutar:,.2f} ({sayi} gonderi)",
+        "manuel_gelir_baslik": "**Manuel gelir (opsiyonel)**",
+        "manuel_gider_baslik": "**Manuel gider (opsiyonel)**",
+        "paket_basi_gider_baslik": "**Paket basina ek gider - firma bazinda (opsiyonel)**",
+        "gelir_kalin": "**💰 Gelir**",
+        "gider_kalin": "**💸 Gider**",
+        "kargo_kar_zarar_grafik": "**📊 Kargo firmasina gore Kar/Zarar**",
+        "en_cok_gelir_ulke": "**📊 En cok gelir getiren 10 ulke**",
+        "en_cok_gelir_musteri": "**📊 En cok gelir getiren 10 musteri**",
     },
     "en": {
         "app_baslik": "Warehouse Panel",
@@ -241,6 +249,14 @@ CEVIRI = {
         "takip_sorgu_ozet": "{toplam} tracking numbers looked up, {bulunan} found.",
         "eksik_tahsilat_ozet": "{sayi} shipments have under-collected tax/duty from the customer.",
         "toplam_zarar_metni": "Total loss: ${tutar:,.2f} ({sayi} shipments)",
+        "manuel_gelir_baslik": "**Manual income (optional)**",
+        "manuel_gider_baslik": "**Manual expense (optional)**",
+        "paket_basi_gider_baslik": "**Per-package extra expense - by carrier (optional)**",
+        "gelir_kalin": "**💰 Income**",
+        "gider_kalin": "**💸 Expense**",
+        "kargo_kar_zarar_grafik": "**📊 Profit/Loss by carrier**",
+        "en_cok_gelir_ulke": "**📊 Top 10 countries by income**",
+        "en_cok_gelir_musteri": "**📊 Top 10 customers by income**",
     },
 }
 
@@ -1339,7 +1355,7 @@ else:
             help="Isaretliyse Carrier Name (kargo firmasi) bos olan gonderiler analize hic dahil edilmez.",
         )
 
-        st.markdown("**Manuel gelir (opsiyonel)**")
+        st.markdown(t("manuel_gelir_baslik"))
         st.caption(tc(
             "Hicbir pakete baglanmayan, dogrudan net kara eklenecek gelirler "
             "(orn. depo kirasi geliri, danismanlik geliri)."
@@ -1412,7 +1428,7 @@ else:
 
         dahil_et_genel_gider = True  # Pakete baglanamayan giderler bilgi amacli gosterilir, otomatik eklenmez
 
-        st.markdown("**Manuel gider (opsiyonel)**")
+        st.markdown(t("manuel_gider_baslik"))
         st.caption(tc(
             "Hicbir pakete baglanmayan, dogrudan net kardan dusulecek giderler "
             "(orn. depo kirasi, personel maasi, internet faturasi)."
@@ -1432,7 +1448,7 @@ else:
             key="manual_expenses_editor",
         )
 
-        st.markdown("**Paket basina ek gider - firma bazinda (opsiyonel)**")
+        st.markdown(t("paket_basi_gider_baslik"))
         st.caption(tc(
             "Belirli bir kargo firmasinin, gideri ZATEN eslesmis olan HER paketine "
             "ayni tutari ekler (orn. UniUni icin paket basina $2). Tutar otomatik "
@@ -1580,11 +1596,11 @@ else:
         st.markdown("")
         col_gelir, col_gider = st.columns(2)
         with col_gelir:
-            st.markdown("**💰 Gelir**")
+            st.markdown(t("gelir_kalin"))
             renkli_kart("Toplam Gelir", f"${summary['toplam_gelir']:,.2f}", "#10b981", "💵")
 
         with col_gider:
-            st.markdown("**💸 Gider**")
+            st.markdown(t("gider_kalin"))
             renkli_kart("Kargo Gideri", f"${summary['toplam_gider_kargo']:,.2f}", "#f59e0b", "🚚")
             renkli_kart("Vergi/Gumruk Gideri", f"${summary['toplam_gider_tax']:,.2f}", "#f97316", "🛂")
             renkli_kart("Toplam Gider", f"${summary['toplam_gider_eslesen']:,.2f}", "#ef4444", "🧾")
@@ -1730,7 +1746,7 @@ else:
             indirme_butonlari(carrier_table, "kargo_firmasi_analizi", "carrier_table")
 
             if not carrier_table.empty:
-                st.markdown("**📊 Kargo firmasina gore Kar/Zarar**")
+                st.markdown(t("kargo_kar_zarar_grafik"))
                 _carrier_chart_df = carrier_table[["Kargo Firmasi", "Kar/Zarar"]].copy()
                 _carrier_chart_df["Renk"] = _carrier_chart_df["Kar/Zarar"].apply(
                     lambda v: "Kar" if v >= 0 else "Zarar"
@@ -1791,7 +1807,7 @@ else:
             indirme_butonlari(cb, "ulkeye_gore_analiz", "country_table")
 
             if not cb.empty:
-                st.markdown("**📊 En cok gelir getiren 10 ulke**")
+                st.markdown(t("en_cok_gelir_ulke"))
                 _cb_top = cb.nlargest(10, "Toplam_Gelir")[["Ulke", "Toplam_Gelir", "Kar"]]
                 _cb_chart = (
                     alt.Chart(_cb_top)
@@ -1856,7 +1872,7 @@ else:
             indirme_butonlari(cust_table, "musteriye_gore_analiz", "cust_table")
 
             if not cust_table.empty:
-                st.markdown("**📊 En cok gelir getiren 10 musteri**")
+                st.markdown(t("en_cok_gelir_musteri"))
                 _cust_top = cust_table.nlargest(10, "Bize Odenen (Gelir)")[
                     ["Musteri Adi", "Bize Odenen (Gelir)", "Kar/Zarar"]
                 ]
