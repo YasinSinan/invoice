@@ -26,6 +26,7 @@ from processing import (
     load_byelabel_group,
     load_cost_file,
     load_income_file,
+    load_income_file_fba,
     manual_expense_total,
     summarize,
 )
@@ -816,6 +817,25 @@ def _hex_to_rgba(hex_renk, alpha):
     return f"rgba({r},{g},{b},{alpha})"
 
 
+# comfylifeusa@gmail.com kullanicisinin gelir dosyasi farkli bir formatta
+# (FBA_PLUS listesi) geliyor - dropcomfyship@gmail.com ve diger tum
+# kullanicilar icin eskisi gibi WH_CUSTOMER_SHIPMENT_LIST formati kullanilir.
+# Boylece iki kullanicinin dosya yapisi asla birbirine karismaz.
+_FBA_FORMATI_KULLANAN_HESAPLAR = {"comfylifeusa@gmail.com"}
+
+
+def _gelir_dosyasi_oku(file_obj, only_paid, exclude_unassigned_carrier):
+    """Giris yapan kullaniciya gore doguru gelir dosyasi formatini secip okur."""
+    kullanici_adi = st.session_state.get("username", "")
+    if kullanici_adi in _FBA_FORMATI_KULLANAN_HESAPLAR:
+        return load_income_file_fba(
+            file_obj, only_paid=only_paid, exclude_unassigned_carrier=exclude_unassigned_carrier
+        )
+    return load_income_file(
+        file_obj, only_paid=only_paid, exclude_unassigned_carrier=exclude_unassigned_carrier
+    )
+
+
 def _dosya_listesine_ekle(liste_key, ad, veri_bytes, ekstra=None):
     """Ana Sayfa'daki gelir/gider dosya listesine (session_state) bir dosya
     ekler. Ayni isimde dosya varsa uzerine yazar (guncellenmis kabul edilir)."""
@@ -1570,10 +1590,10 @@ else:
                     _gelir_dfs = []
                     for _d in st.session_state["gelir_dosyalari"]:
                         _gelir_dfs.append(
-                            load_income_file(
+                            _gelir_dosyasi_oku(
                                 io.BytesIO(_d["bytes"]),
-                                only_paid=only_paid,
-                                exclude_unassigned_carrier=exclude_unassigned_carrier,
+                                only_paid,
+                                exclude_unassigned_carrier,
                             )
                         )
                     st.session_state["income_df_cache"] = pd.concat(_gelir_dfs, ignore_index=True)
@@ -1637,10 +1657,10 @@ else:
         if st.session_state.get("gelir_dosyalari"):
             try:
                 _gelir_dfs_yeniden = [
-                    load_income_file(
+                    _gelir_dosyasi_oku(
                         io.BytesIO(_d["bytes"]),
-                        only_paid=only_paid,
-                        exclude_unassigned_carrier=exclude_unassigned_carrier,
+                        only_paid,
+                        exclude_unassigned_carrier,
                     )
                     for _d in st.session_state["gelir_dosyalari"]
                 ]
