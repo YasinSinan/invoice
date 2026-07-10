@@ -933,37 +933,50 @@ _tema_buton_css = """
     [data-testid="stHorizontalBlock"]:has(#baslik-satiri) {
         align-items: center !important;
     }
-    [data-testid="stHorizontalBlock"]:has(#tema-secici-satiri) {
-        gap: 4px !important;
-    }
-    div[data-testid="stHorizontalBlock"]:has(#tema-secici-satiri) [data-testid="stButton"] button {
-        width: 32px !important;
-        height: 32px !important;
-        min-width: 32px !important;
-        padding: 0 !important;
-        border-radius: 50% !important;
-        font-size: 0 !important;
-        line-height: 0 !important;
-        box-shadow: 0 0 0 1px var(--border-light) !important;
-    }
 """
 for _i, _tema_adi in enumerate(_TEMA_SIRASI):
     _renkler = TEMALAR[_tema_adi]
     _tema_buton_css += f"""
-    div[data-testid="stHorizontalBlock"]:has(#tema-secici-satiri) [data-testid="stButton"]:nth-of-type({_i + 1}) button {{
-        background: linear-gradient(90deg, {_renkler['accent']} 50%, {_renkler['koyu']} 50%) !important;
+    .st-key-tema_sec_{_i} {{
+        width: 32px !important;
+        min-width: 32px !important;
+        max-width: 32px !important;
+    }}
+    .st-key-tema_sec_{_i} button {{
+        width: 32px !important;
+        height: 32px !important;
+        min-height: 32px !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        border-radius: 50% !important;
+        font-size: 0 !important;
+        line-height: 0 !important;
         border: none !important;
+        box-shadow: none !important;
+        background: linear-gradient(90deg, {_renkler['accent']} 50%, {_renkler['koyu']} 50%) !important;
     }}
     """
 _secili_index = _TEMA_SIRASI.index(st.session_state["secili_tema"])
 _tema_buton_css += f"""
-    div[data-testid="stHorizontalBlock"]:has(#tema-secici-satiri) [data-testid="stButton"]:nth-of-type({_secili_index + 1}) button {{
-        box-shadow: 0 0 0 2px var(--card-bg), 0 0 0 4px {_tema['accent']} !important;
+    .st-key-tema_sec_{_secili_index} button {{
+        transform: scale(1.25) !important;
     }}
-    div[data-testid="stHorizontalBlock"]:has(#tema-secici-satiri) [data-testid="stButton"]:last-of-type button {{
+    .st-key-tema_ters_cevir {{
+        width: 32px !important;
+        min-width: 32px !important;
+        max-width: 32px !important;
+    }}
+    .st-key-tema_ters_cevir button {{
+        width: 32px !important;
+        height: 32px !important;
+        min-height: 32px !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        border-radius: 50% !important;
+        border: none !important;
+        box-shadow: none !important;
         background: var(--card-bg) !important;
-        box-shadow: 0 0 0 1px var(--border-light) !important;
-        font-size: 12px !important;
+        color: var(--text-dark) !important;
     }}
     </style>
 """
@@ -1007,7 +1020,6 @@ with _dil_kolonlari[2]:
         st.rerun()
 
 # --------------------------------------------------------- tema secici ---
-st.markdown('<span id="tema-secici-satiri"></span>', unsafe_allow_html=True)
 _tema_kolonlari = st.columns([1] * len(_TEMA_SIRASI) + [1, 10])
 for _i, _tema_adi in enumerate(_TEMA_SIRASI):
     with _tema_kolonlari[_i]:
