@@ -48,19 +48,19 @@ st.set_page_config(
 
 # --------------------------------------------------------------- temalar ---
 TEMALAR = {
-    "Warmlime x Olive Ink": {"accent": "#a8c93a", "koyu": "#2b2f1e", "koyu2": "#363c26", "yazi": "#1f2430"},
-    "Burnt Orange x Vanilla": {"accent": "#cc6a2e", "koyu": "#2e2013", "koyu2": "#3a2a19", "yazi": "#ffffff"},
-    "Electric Orchid x Deep Plum": {"accent": "#d946c4", "koyu": "#2f0a38", "koyu2": "#3c1246", "yazi": "#ffffff"},
-    "Sky Mint x Graphite": {"accent": "#3ddc97", "koyu": "#24262a", "koyu2": "#2f3236", "yazi": "#ffffff"},
-    "Electric Indigo x Soft Lilac": {"accent": "#6f2dda", "koyu": "#241335", "koyu2": "#301a43", "yazi": "#ffffff"},
-    "Neon Lime x Violet Ink": {"accent": "#c6ff00", "koyu": "#221333", "koyu2": "#2c1a41", "yazi": "#1f2430"},
+    "Warmlime x Olive Ink": {"accent": "#a8c93a", "koyu": "#2b2f1e"},
+    "Burnt Orange x Vanilla": {"accent": "#cc6a2e", "koyu": "#2e2013"},
+    "Electric Orchid x Deep Plum": {"accent": "#d946c4", "koyu": "#2f0a38"},
+    "Sky Mint x Graphite": {"accent": "#3ddc97", "koyu": "#24262a"},
+    "Electric Indigo x Soft Lilac": {"accent": "#6f2dda", "koyu": "#241335"},
+    "Neon Lime x Violet Ink": {"accent": "#c6ff00", "koyu": "#221333"},
 }
 _TEMA_SIRASI = list(TEMALAR.keys())
 
 if "secili_tema" not in st.session_state:
     st.session_state["secili_tema"] = _TEMA_SIRASI[0]
-
-_tema = TEMALAR[st.session_state["secili_tema"]]
+if "tema_ters" not in st.session_state:
+    st.session_state["tema_ters"] = False
 
 
 def _hex_to_rgb(h):
@@ -68,23 +68,56 @@ def _hex_to_rgb(h):
     return tuple(int(h[i:i + 2], 16) for i in (0, 2, 4))
 
 
+def _rgb_to_hex(rgb):
+    return "#" + "".join(f"{max(0, min(255, int(v))):02x}" for v in rgb)
+
+
+def _renk_karistir(hex1, hex2, oran):
+    """hex1'i hex2 yonunde 'oran' (0-1) kadar karistirir."""
+    r1, r2 = _hex_to_rgb(hex1), _hex_to_rgb(hex2)
+    return _rgb_to_hex(tuple(a + (b - a) * oran for a, b in zip(r1, r2)))
+
+
+def _parlaklik(h):
+    r, g, b = _hex_to_rgb(h)
+    return 0.299 * r + 0.587 * g + 0.114 * b
+
+
+_ham_tema = TEMALAR[st.session_state["secili_tema"]]
+if st.session_state["tema_ters"]:
+    _accent, _koyu = _ham_tema["koyu"], _ham_tema["accent"]
+else:
+    _accent, _koyu = _ham_tema["accent"], _ham_tema["koyu"]
+
+_tema = {
+    "accent": _accent,
+    "koyu": _koyu,
+    "koyu2": _renk_karistir(_koyu, "#ffffff", 0.12),
+    "yazi": "#1f2430" if _parlaklik(_accent) > 150 else "#ffffff",
+    "sidebar_yazi": "#c3c9d4" if _parlaklik(_koyu) < 150 else "#2a2d33",
+    "panel_bg": _renk_karistir("#f4f5f8", _accent, 0.05),
+    "border_light": _renk_karistir("#c7cbd6", _accent, 0.22),
+    "kart_bg": _renk_karistir("#ffffff", _accent, 0.02),
+}
+
 _accent_rgb = _hex_to_rgb(_tema["accent"])
 _ACCENT_RGBA_16 = f"rgba({_accent_rgb[0]}, {_accent_rgb[1]}, {_accent_rgb[2]}, 0.16)"
+_ACCENT_RGBA_08 = f"rgba({_accent_rgb[0]}, {_accent_rgb[1]}, {_accent_rgb[2]}, 0.08)"
 
 # "Sellivox" tarzi acik panel temasi: koyu genis sidebar + beyaz ana alan +
 # renkli sol-kenarlikli KPI kartlari.
 _ana_css = """
     <style>
     :root {
-        --panel-bg: #f4f5f8;
-        --card-bg: #ffffff;
+        --panel-bg: %%PANEL_BG%%;
+        --card-bg: %%KART_BG%%;
         --text-dark: #1f2430;
         --text-muted: #5f6779;
-        --border-light: #c7cbd6;
+        --border-light: %%BORDER_LIGHT%%;
         --accent-blue: %%ACCENT%%;
         --sidebar-bg: %%KOYU%%;
         --sidebar-bg-2: %%KOYU2%%;
-        --sidebar-text: #c3c9d4;
+        --sidebar-text: %%SIDEBAR_YAZI%%;
     }
 
     /* Ana arka plan - acik gri */
@@ -237,53 +270,54 @@ _ana_css = """
         background-color: transparent !important;
     }
     [data-testid="stFileUploaderDropzone"] {
-        background-color: #16213e !important;
-        border: 1px dashed #2e3f66 !important;
+        background-color: var(--sidebar-bg) !important;
+        border: 1px dashed var(--sidebar-bg-2) !important;
         border-radius: 10px !important;
     }
     [data-testid="stFileUploaderDropzone"] *,
     [data-testid="stFileUploader"] * {
-        color: #e5e9f2 !important;
+        color: var(--sidebar-text) !important;
     }
     [data-testid="stFileUploaderDropzone"] svg,
     [data-testid="stFileUploader"] svg {
-        fill: #e5e9f2 !important;
+        fill: var(--sidebar-text) !important;
     }
     [data-testid="stFileUploaderDropzone"] small {
-        color: #a9b2c6 !important;
+        color: var(--sidebar-text) !important;
+        opacity: 0.75;
     }
     [data-testid="stFileUploaderDropzone"] button,
     [data-testid="stFileUploader"] button {
-        background-color: #223258 !important;
-        color: #ffffff !important;
-        border: 1px solid #3b4c7a !important;
+        background-color: var(--sidebar-bg-2) !important;
+        color: var(--sidebar-text) !important;
+        border: 1px solid var(--accent-blue) !important;
         border-radius: 6px !important;
     }
     [data-testid="stFileUploaderFile"],
     [data-testid="stFileUploaderFileName"] {
-        background-color: #16213e !important;
-        color: #e5e9f2 !important;
+        background-color: var(--sidebar-bg) !important;
+        color: var(--sidebar-text) !important;
         border-radius: 8px !important;
     }
     [data-testid="stFileUploaderFile"] *,
     [data-testid="stFileUploaderFileName"] * {
-        color: #e5e9f2 !important;
+        color: var(--sidebar-text) !important;
     }
 
-    /* Manuel giris tablolari (data_editor) - lacivert zemin, acik renk yazi */
+    /* Manuel giris tablolari (data_editor) - tema koyu rengi, acik renk yazi */
     [data-testid="stDataEditorGrid"],
     [data-testid="stDataFrameResizable"] canvas {
-        background-color: #16213e !important;
+        background-color: var(--sidebar-bg) !important;
     }
     .stDataEditor [data-testid="stElementToolbar"] {
-        background-color: #16213e !important;
+        background-color: var(--sidebar-bg) !important;
     }
     .stDataEditor {
-        background-color: #16213e !important;
-        border: 1px solid #2e3f66 !important;
+        background-color: var(--sidebar-bg) !important;
+        border: 1px solid var(--sidebar-bg-2) !important;
     }
     .stDataEditor * {
-        color: #e5e9f2 !important;
+        color: var(--sidebar-text) !important;
     }
 
     [data-testid="metric-container"] {
@@ -363,6 +397,11 @@ _ana_css = (
     .replace("%%ACCENT%%", _tema["accent"])
     .replace("%%KOYU%%", _tema["koyu"])
     .replace("%%KOYU2%%", _tema["koyu2"])
+    .replace("%%PANEL_BG%%", _tema["panel_bg"])
+    .replace("%%KART_BG%%", _tema["kart_bg"])
+    .replace("%%BORDER_LIGHT%%", _tema["border_light"])
+    .replace("%%SIDEBAR_YAZI%%", _tema["sidebar_yazi"])
+    .replace("%%ACCENT_RGBA_08%%", _ACCENT_RGBA_08)
 )
 st.markdown(_ana_css, unsafe_allow_html=True)
 
@@ -584,47 +623,59 @@ def indirme_butonlari(df, dosya_adi, key_prefix):
         )
 
 
-st.markdown(
-    """
+_tema_buton_css = """
     <style>
     [data-testid="stHorizontalBlock"]:has(#baslik-satiri) {
         align-items: center !important;
     }
-    .tema-yuvarlak {
-        width: 100%;
-        height: 34px;
-        border-radius: 8px;
-        margin-bottom: 4px;
-        border: 1.5px solid var(--border-light);
+    [data-testid="stHorizontalBlock"]:has(#tema-secici-satiri) {
+        gap: 4px !important;
     }
+    div[data-testid="stHorizontalBlock"]:has(#tema-secici-satiri) [data-testid="stButton"] button {
+        width: 22px !important;
+        height: 22px !important;
+        min-width: 22px !important;
+        padding: 0 !important;
+        border-radius: 50% !important;
+        font-size: 0 !important;
+        line-height: 0 !important;
+        box-shadow: 0 0 0 1px var(--border-light) !important;
+    }
+"""
+for _i, _tema_adi in enumerate(_TEMA_SIRASI):
+    _renkler = TEMALAR[_tema_adi]
+    _tema_buton_css += f"""
+    div[data-testid="stHorizontalBlock"]:has(#tema-secici-satiri) [data-testid="stButton"]:nth-of-type({_i + 1}) button {{
+        background: linear-gradient(135deg, {_renkler['accent']} 50%, {_renkler['koyu']} 50%) !important;
+        border: none !important;
+    }}
+    """
+_secili_index = _TEMA_SIRASI.index(st.session_state["secili_tema"])
+_tema_buton_css += f"""
+    div[data-testid="stHorizontalBlock"]:has(#tema-secici-satiri) [data-testid="stButton"]:nth-of-type({_secili_index + 1}) button {{
+        box-shadow: 0 0 0 2px var(--card-bg), 0 0 0 4px {_tema['accent']} !important;
+    }}
+    div[data-testid="stHorizontalBlock"]:has(#tema-secici-satiri) [data-testid="stButton"]:last-of-type button {{
+        background: var(--card-bg) !important;
+        box-shadow: 0 0 0 1px var(--border-light) !important;
+        font-size: 12px !important;
+    }}
     </style>
-    """,
-    unsafe_allow_html=True,
-)
+"""
+st.markdown(_tema_buton_css, unsafe_allow_html=True)
 
 # --------------------------------------------------------- tema secici ---
-with st.container():
-    _tema_kolonlari = st.columns(len(_TEMA_SIRASI))
-    for _i, _tema_adi in enumerate(_TEMA_SIRASI):
-        _renkler = TEMALAR[_tema_adi]
-        with _tema_kolonlari[_i]:
-            st.markdown(
-                f"""
-                <div class="tema-yuvarlak" style="
-                    background: linear-gradient(90deg, {_renkler['accent']} 50%, {_renkler['koyu']} 50%);
-                "></div>
-                """,
-                unsafe_allow_html=True,
-            )
-            _secili_mi = st.session_state["secili_tema"] == _tema_adi
-            if st.button(
-                ("✓ " if _secili_mi else "") + _tema_adi,
-                key=f"tema_sec_{_i}",
-                width="stretch",
-                help=_tema_adi,
-            ):
-                st.session_state["secili_tema"] = _tema_adi
-                st.rerun()
+st.markdown('<span id="tema-secici-satiri"></span>', unsafe_allow_html=True)
+_tema_kolonlari = st.columns([1] * len(_TEMA_SIRASI) + [1, 10])
+for _i, _tema_adi in enumerate(_TEMA_SIRASI):
+    with _tema_kolonlari[_i]:
+        if st.button(" ", key=f"tema_sec_{_i}", help=_tema_adi):
+            st.session_state["secili_tema"] = _tema_adi
+            st.rerun()
+with _tema_kolonlari[len(_TEMA_SIRASI)]:
+    if st.button("⇄", key="tema_ters_cevir", help="Renkleri ters cevir"):
+        st.session_state["tema_ters"] = not st.session_state["tema_ters"]
+        st.rerun()
 
 _col_baslik, _col_info, _col_btn = st.columns([3.2, 1.2, 0.6])
 with _col_baslik:
@@ -727,7 +778,7 @@ with st.sidebar:
             font-weight: 500 !important;
             background: transparent !important;
             border: none !important;
-            color: #c3c9d4 !important;
+            color: var(--sidebar-text) !important;
             box-shadow: none !important;
             transition: background 0.15s;
             text-align: left !important;
@@ -1244,7 +1295,7 @@ else:
         st.divider()
         st.subheader("📊 Ozet")
 
-        renkli_kart("Toplam Paket Sayisi", f"{summary['toplam_gonderi']:,}", "#6366f1", "📦")
+        renkli_kart("Toplam Paket Sayisi", f"{summary['toplam_gonderi']:,}", _tema["accent"], "📦")
 
         st.markdown("")
         col_gelir, col_gider = st.columns(2)
@@ -1462,7 +1513,7 @@ else:
                 _cb_top = cb.nlargest(10, "Toplam_Gelir")[["Ulke", "Toplam_Gelir", "Kar"]]
                 _cb_chart = (
                     alt.Chart(_cb_top)
-                    .mark_bar(color="#3b82f6")
+                    .mark_bar(color=_tema["accent"])
                     .encode(
                         x=alt.X("Toplam_Gelir:Q", title="Toplam Gelir ($)"),
                         y=alt.Y("Ulke:N", sort="-x", title=None),
@@ -1482,7 +1533,7 @@ else:
                 )
                 eu_col1, eu_col2, eu_col3 = st.columns(3)
                 with eu_col1:
-                    renkli_kart("Gonderi Sayisi (Tum)", f"{eu['gonderi_sayisi']:,}", "#6366f1", "📦")
+                    renkli_kart("Gonderi Sayisi (Tum)", f"{eu['gonderi_sayisi']:,}", _tema["accent"], "📦")
                     renkli_kart("Eslesen Sayisi", f"{eu['eslesen_sayisi']:,}", "#8b5cf6", "✅")
                 with eu_col2:
                     renkli_kart("Toplam Gelir (Tum)", f"${eu['toplam_gelir']:,.2f}", "#10b981", "💵")
@@ -1532,7 +1583,7 @@ else:
                 ]
                 _cust_chart = (
                     alt.Chart(_cust_top)
-                    .mark_bar(color="#8b5cf6")
+                    .mark_bar(color=_tema["accent"])
                     .encode(
                         x=alt.X("Bize Odenen (Gelir):Q", title="Bize Odenen ($)"),
                         y=alt.Y("Musteri Adi:N", sort="-x", title=None),
