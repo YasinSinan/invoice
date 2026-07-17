@@ -615,18 +615,11 @@ _ana_css = """
         border: 1.5px solid var(--border-light) !important;
     }
 
-    /* Sidebar - koyu, genis panel. Her zaman acik ve sabit genislikte kalir,
-       kapatilamaz - boylece kapatma okunun gorunmemesi gibi sorunlar bir
-       daha yasanmaz. */
+    /* Sidebar - koyu, genis panel. Genislik/pozisyon ayari asagidaki
+       sidebar-ozel CSS blogunda (hover ile daralma/genisleme) yapiliyor. */
     [data-testid="stSidebar"] {
         background-color: var(--sidebar-bg) !important;
         border-right: 1px solid #22252d !important;
-        min-width: 248px !important;
-        max-width: 248px !important;
-        width: 248px !important;
-        transform: none !important;
-        visibility: visible !important;
-        margin-left: 0 !important;
     }
     [data-testid="stSidebar"] * {
         color: var(--sidebar-text) !important;
