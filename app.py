@@ -1148,11 +1148,32 @@ if "analiz_secimi" not in st.session_state:
 with st.sidebar:
     _sidebar_css = """
         <style>
+        /* Normalde dar (sadece ikonlar gorunur), fare uzerine gelince
+           genisleyip yazilari da gosterir. Genisken ana icerigin ustune
+           biner (position: absolute) - ana icerigin boyutunu/konumunu
+           degistirmez, sadece gecici olarak ustunu orter. */
         [data-testid="stSidebar"] {
-            min-width: 248px !important;
-            max-width: 248px !important;
+            width: 64px !important;
+            min-width: 64px !important;
+            max-width: 64px !important;
             background-color: %%KOYU%%;
             border-right: 1px solid #22252d;
+            overflow: hidden !important;
+            position: relative !important;
+            z-index: 999 !important;
+            transition: width 0.18s ease, min-width 0.18s ease, max-width 0.18s ease;
+        }
+        [data-testid="stSidebar"]:hover {
+            width: 248px !important;
+            min-width: 248px !important;
+            max-width: 248px !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            height: 100vh !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            box-shadow: 6px 0 20px rgba(0,0,0,0.30) !important;
         }
         [data-testid="stSidebar"] > div:first-child {
             padding: 0 !important;
@@ -1182,6 +1203,8 @@ with st.sidebar:
             box-shadow: none !important;
             transition: background 0.15s;
             text-align: left !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
         }
         div[data-testid="stSidebarContent"] .stButton button div {
             justify-content: flex-start !important;
@@ -1195,6 +1218,7 @@ with st.sidebar:
             font-size: 14px !important;
             margin: 0 !important;
             text-align: left !important;
+            white-space: nowrap !important;
         }
         .sidebar-logo {
             display: flex;
@@ -1203,13 +1227,17 @@ with st.sidebar:
             padding: 8px 18px 14px 18px;
             border-bottom: 1px solid #22252d;
             margin-bottom: 10px;
+            white-space: nowrap;
+            overflow: hidden;
         }
         .sidebar-logo .box {
             width: 32px; height: 32px;
+            min-width: 32px;
             background: linear-gradient(135deg, %%ACCENT%%, %%KOYU2%%);
             border-radius: 8px;
             display: flex; align-items: center; justify-content: center;
             font-size: 16px;
+            flex-shrink: 0;
         }
         .sidebar-logo .name {
             color: #ffffff !important;
@@ -1223,6 +1251,8 @@ with st.sidebar:
             letter-spacing: 0.06em;
             padding: 14px 18px 6px 18px;
             text-transform: uppercase;
+            white-space: nowrap;
+            overflow: hidden;
         }
         </style>
         <div class="sidebar-logo">
