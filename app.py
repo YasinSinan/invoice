@@ -1154,6 +1154,9 @@ with st.sidebar:
             overflow: hidden !important;
             position: relative !important;
             z-index: 999 !important;
+            transform: none !important;
+            visibility: visible !important;
+            margin-left: 0 !important;
             transition: width 0.18s ease, min-width 0.18s ease, max-width 0.18s ease;
         }
         [data-testid="stSidebar"]:hover {
