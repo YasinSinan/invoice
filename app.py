@@ -1208,13 +1208,24 @@ with st.sidebar:
         }
         div[data-testid="stSidebarContent"] .stButton button:hover {
             background: rgba(255,255,255,0.06) !important;
-            color: #ffffff !important;
         }
         div[data-testid="stSidebarContent"] .stButton button p {
             font-size: 14px !important;
             margin: 0 !important;
             text-align: left !important;
             white-space: nowrap !important;
+            /* Daralmisken (fare sidebar uzerinde degilken) etiket yazisini
+               gorunmez yap - emoji ikon bundan etkilenmez (emoji kendi
+               renkleriyle cizilir, CSS color ozelligine uymaz), boylece
+               sadece ikon gorunur kalir. */
+            color: transparent !important;
+            transition: color 0.1s ease;
+        }
+        [data-testid="stSidebar"]:hover div[data-testid="stSidebarContent"] .stButton button p {
+            color: var(--sidebar-text) !important;
+        }
+        [data-testid="stSidebar"]:hover div[data-testid="stSidebarContent"] .stButton button:hover p {
+            color: #ffffff !important;
         }
         .sidebar-logo {
             display: flex;
@@ -1236,12 +1247,16 @@ with st.sidebar:
             flex-shrink: 0;
         }
         .sidebar-logo .name {
-            color: #ffffff !important;
+            color: transparent !important;
             font-size: 16px;
             font-weight: 800;
+            transition: color 0.1s ease;
+        }
+        [data-testid="stSidebar"]:hover .sidebar-logo .name {
+            color: #ffffff !important;
         }
         .sidebar-section {
-            color: #8891a1 !important;
+            color: transparent !important;
             font-size: 11px;
             font-weight: 700;
             letter-spacing: 0.06em;
@@ -1249,6 +1264,10 @@ with st.sidebar:
             text-transform: uppercase;
             white-space: nowrap;
             overflow: hidden;
+            transition: color 0.1s ease;
+        }
+        [data-testid="stSidebar"]:hover .sidebar-section {
+            color: #8891a1 !important;
         }
         </style>
         <div class="sidebar-logo">
