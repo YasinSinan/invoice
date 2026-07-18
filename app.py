@@ -1531,10 +1531,45 @@ else:
             st.session_state["gider_dosyalari"] = []
         if "gider_uploader_versiyon" not in st.session_state:
             st.session_state["gider_uploader_versiyon"] = 0
+        if "gider_secilen_firma" not in st.session_state:
+            st.session_state["gider_secilen_firma"] = None
 
         _tum_firma_secenekleri = list(CARRIER_PROFILES.keys()) + [BYELABEL_GROUP_LABEL]
         _gider_listesi = st.session_state["gider_dosyalari"]
+
+        st.caption(tc(
+            "Once dosyanin hangi kargo firmasina ait oldugunu sec, sonra o "
+            "firmaya ait fatura dosyasini/dosyalarini yukle."
+        ))
+        _secim_index = (
+            _tum_firma_secenekleri.index(st.session_state["gider_secilen_firma"])
+            if st.session_state["gider_secilen_firma"] in _tum_firma_secenekleri
+            else 0
+        )
+        _secilen_firma = st.selectbox(
+            t("firma_label"),
+            options=_tum_firma_secenekleri,
+            index=_secim_index,
+            key="gider_firma_onceden_secim",
+        )
+        st.session_state["gider_secilen_firma"] = _secilen_firma
+
+        _yeni_gider_dosyalari = st.file_uploader(
+            t("gider_dosyasi_ekle") if _gider_listesi else t("gider_dosyasi_sec"),
+            type=["xlsx"],
+            accept_multiple_files=True,
+            key=f"cost_uploader_{st.session_state['gider_uploader_versiyon']}",
+        )
+        if _yeni_gider_dosyalari:
+            for _f in _yeni_gider_dosyalari:
+                _dosya_listesine_ekle(
+                    "gider_dosyalari", _f.name, _f.getvalue(), {"firma": _secilen_firma}
+                )
+            st.session_state["gider_uploader_versiyon"] += 1
+            st.rerun()
+
         if _gider_listesi:
+            st.markdown(tc("**Yuklenen dosyalar:**"))
             for _d in list(_gider_listesi):
                 _c1, _c2, _c3 = st.columns([4, 3, 1])
                 _c1.markdown(f"📄 {_d['ad']}")
@@ -1552,20 +1587,6 @@ else:
                 if _c3.button("🗑️", key=f"gider_sil_{_d['ad']}", help=t("listeden_cikar")):
                     _dosya_listesinden_cikar("gider_dosyalari", _d["ad"])
                     st.rerun()
-
-        _yeni_gider_dosyalari = st.file_uploader(
-            t("gider_dosyasi_ekle") if _gider_listesi else t("gider_dosyasi_sec"),
-            type=["xlsx"],
-            accept_multiple_files=True,
-            key=f"cost_uploader_{st.session_state['gider_uploader_versiyon']}",
-        )
-        if _yeni_gider_dosyalari:
-            for _f in _yeni_gider_dosyalari:
-                _dosya_listesine_ekle(
-                    "gider_dosyalari", _f.name, _f.getvalue(), {"firma": BYELABEL_GROUP_LABEL}
-                )
-            st.session_state["gider_uploader_versiyon"] += 1
-            st.rerun()
 
         if _gider_listesi:
             st.caption(tc(
