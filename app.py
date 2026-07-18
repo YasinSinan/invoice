@@ -1185,8 +1185,8 @@ with st.sidebar:
         }
         div[data-testid="stSidebarContent"] .stButton button {
             width: 100% !important;
-            justify-content: center !important;
-            padding: 10px 14px !important;
+            justify-content: flex-start !important;
+            padding: 10px 10px !important;
             margin: 2px 0 !important;
             border-radius: 8px !important;
             display: flex;
@@ -1202,14 +1202,11 @@ with st.sidebar:
             overflow: hidden !important;
         }
         [data-testid="stSidebar"]:hover div[data-testid="stSidebarContent"] .stButton button {
-            justify-content: flex-start !important;
+            padding: 9px 14px !important;
         }
         div[data-testid="stSidebarContent"] .stButton button div {
-            justify-content: center !important;
-            width: 100% !important;
-        }
-        [data-testid="stSidebar"]:hover div[data-testid="stSidebarContent"] .stButton button div {
             justify-content: flex-start !important;
+            width: 100% !important;
         }
         div[data-testid="stSidebarContent"] .stButton button:hover {
             background: rgba(255,255,255,0.06) !important;
@@ -1217,11 +1214,14 @@ with st.sidebar:
         div[data-testid="stSidebarContent"] .stButton button p {
             /* Daralmisken (fare sidebar uzerinde degilken) ikon buyuk
                gorunur - font-size buyutulunce emoji de buyur, ama etiket
-               yazisi gorunmez oldugu icin (asagida) sadece buyuk ikon kalir. */
+               yazisi gorunmez oldugu icin (asagida) sadece buyuk ikon kalir.
+               text-align/justify-content HEP sola hizali kalir - ortalama
+               yapilirsa uzun (gorunmez) etiket metni yuzunden ikonun kendisi
+               kutunun disina tasip kirpilir. */
             font-size: 26px !important;
             line-height: 1.1 !important;
             margin: 0 !important;
-            text-align: center !important;
+            text-align: left !important;
             white-space: nowrap !important;
             /* Daralmisken (fare sidebar uzerinde degilken) etiket yazisini
                gorunmez yap - emoji ikon bundan etkilenmez (emoji kendi
