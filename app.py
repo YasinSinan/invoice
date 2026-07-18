@@ -1185,13 +1185,12 @@ with st.sidebar:
         }
         div[data-testid="stSidebarContent"] .stButton button {
             width: 100% !important;
-            justify-content: flex-start !important;
-            padding: 9px 14px !important;
+            justify-content: center !important;
+            padding: 10px 14px !important;
             margin: 2px 0 !important;
             border-radius: 8px !important;
             display: flex;
             align-items: center;
-            font-size: 14px !important;
             font-weight: 500 !important;
             background: transparent !important;
             border: none !important;
@@ -1202,26 +1201,38 @@ with st.sidebar:
             white-space: nowrap !important;
             overflow: hidden !important;
         }
-        div[data-testid="stSidebarContent"] .stButton button div {
+        [data-testid="stSidebar"]:hover div[data-testid="stSidebarContent"] .stButton button {
             justify-content: flex-start !important;
+        }
+        div[data-testid="stSidebarContent"] .stButton button div {
+            justify-content: center !important;
             width: 100% !important;
+        }
+        [data-testid="stSidebar"]:hover div[data-testid="stSidebarContent"] .stButton button div {
+            justify-content: flex-start !important;
         }
         div[data-testid="stSidebarContent"] .stButton button:hover {
             background: rgba(255,255,255,0.06) !important;
         }
         div[data-testid="stSidebarContent"] .stButton button p {
-            font-size: 14px !important;
+            /* Daralmisken (fare sidebar uzerinde degilken) ikon buyuk
+               gorunur - font-size buyutulunce emoji de buyur, ama etiket
+               yazisi gorunmez oldugu icin (asagida) sadece buyuk ikon kalir. */
+            font-size: 26px !important;
+            line-height: 1.1 !important;
             margin: 0 !important;
-            text-align: left !important;
+            text-align: center !important;
             white-space: nowrap !important;
             /* Daralmisken (fare sidebar uzerinde degilken) etiket yazisini
                gorunmez yap - emoji ikon bundan etkilenmez (emoji kendi
                renkleriyle cizilir, CSS color ozelligine uymaz), boylece
                sadece ikon gorunur kalir. */
             color: transparent !important;
-            transition: color 0.1s ease;
+            transition: color 0.1s ease, font-size 0.18s ease;
         }
         [data-testid="stSidebar"]:hover div[data-testid="stSidebarContent"] .stButton button p {
+            font-size: 14px !important;
+            text-align: left !important;
             color: var(--sidebar-text) !important;
         }
         [data-testid="stSidebar"]:hover div[data-testid="stSidebarContent"] .stButton button:hover p {
