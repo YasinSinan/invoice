@@ -883,16 +883,14 @@ def _her_seyi_sifirla():
     st.session_state["gider_uploader_versiyon"] = st.session_state.get("gider_uploader_versiyon", 0) + 1
 
 
-def renkli_kart(etiket, deger, renk, icon=""):
-    """Sellivox tarzi: beyaz kart, hafif golge, sol renkli kenarlik."""
-    st.markdown(
-        f"""
+def _kart_html(etiket, deger, renk, icon=""):
+    """Tek bir KPI kartinin HTML govdesini uretir (render etmez)."""
+    return f"""
         <div style="
             background: #ffffff;
             border-left: 5px solid {renk};
             border-radius: 10px;
             padding: 16px 20px;
-            margin-bottom: 6px;
             box-shadow: 0 1px 4px rgba(16, 24, 40, 0.10);
             border-top: 1.5px solid #c7cbd6;
             border-right: 1.5px solid #c7cbd6;
@@ -900,6 +898,32 @@ def renkli_kart(etiket, deger, renk, icon=""):
         ">
             <div style="font-size: 30px; font-weight: 800; color: #1f2430; line-height: 1.15; letter-spacing: -0.02em;">{icon} {deger}</div>
             <div style="font-size: 13px; font-weight: 500; color: #6b7280; margin-top: 4px;">{etiket}</div>
+        </div>
+        """
+
+
+def renkli_kart(etiket, deger, renk, icon=""):
+    """Sellivox tarzi: beyaz kart, hafif golge, sol renkli kenarlik. Tek basina render eder."""
+    st.markdown(
+        f'<div style="margin-bottom: 6px;">{_kart_html(etiket, deger, renk, icon)}</div>',
+        unsafe_allow_html=True,
+    )
+
+
+def kart_izgarasi(*kartlar, min_genislik=190):
+    """Birden fazla KPI kartini gercek bir CSS grid icinde (auto-fit,
+    ekrana gore otomatik dizilen/saran) tek seferde render eder.
+    kartlar: (etiket, deger, renk, icon) tuple'lari."""
+    hucreler = "".join(_kart_html(*k) for k in kartlar)
+    st.markdown(
+        f"""
+        <div style="
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax({min_genislik}px, 1fr));
+            gap: 12px;
+            margin-bottom: 12px;
+        ">
+            {hucreler}
         </div>
         """,
         unsafe_allow_html=True,
@@ -944,9 +968,6 @@ def indirme_butonlari(df, dosya_adi, key_prefix):
 
 _tema_buton_css = """
     <style>
-    [data-testid="stHorizontalBlock"]:has(#baslik-satiri) {
-        align-items: center !important;
-    }
 """
 for _i, _tema_adi in enumerate(_TEMA_SIRASI):
     _renkler = TEMALAR[_tema_adi]
@@ -995,8 +1016,6 @@ _tema_buton_css += f"""
     </style>
 """
 st.markdown(_tema_buton_css, unsafe_allow_html=True)
-
-# --------------------------------------------------------- dil secici ---
 st.markdown(
     """
     <style>
@@ -1023,29 +1042,23 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
-_dil_kolonlari = st.columns([10, 1, 1])
-with _dil_kolonlari[1]:
-    if st.button("🇬🇧", key="dil_en_gb", help="English"):
-        st.session_state["dil"] = "en"
-        st.rerun()
-with _dil_kolonlari[2]:
-    if st.button("🇹🇷", key="dil_tr", help="Turkce"):
-        st.session_state["dil"] = "tr"
-        st.rerun()
 
-# --------------------------------------------------------- tema secici ---
-_tema_kolonlari = st.columns([1] * len(_TEMA_SIRASI) + [1, 10])
-for _i, _tema_adi in enumerate(_TEMA_SIRASI):
-    with _tema_kolonlari[_i]:
-        if st.button(" ", key=f"tema_sec_{_i}", help=_tema_adi):
-            st.session_state["secili_tema"] = _tema_adi
-            st.rerun()
-with _tema_kolonlari[len(_TEMA_SIRASI)]:
-    if st.button("⇄", key="tema_ters_cevir", help=t("renkleri_ters_cevir")):
-        st.session_state["tema_ters"] = not st.session_state["tema_ters"]
-        st.rerun()
+# --------------------------------------------------------- ust satir (grid) ---
+# Baslik, tema secici, dil secici, kullanici bilgisi ve cikis butonu artik
+# TEK bir st.columns() satirinda - boylece hepsi ayni hizada, tek bir
+# grid/satir gibi hizalanir (ayri ayri satirlar yerine).
+st.markdown(
+    """
+    <style>
+    [data-testid="stHorizontalBlock"]:has(#baslik-satiri) {
+        align-items: center !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+_col_baslik, _col_tema, _col_dil, _col_info, _col_btn = st.columns([3.0, 2.3, 0.85, 1.4, 0.6])
 
-_col_baslik, _col_info, _col_btn = st.columns([3.2, 1.2, 0.6])
 with _col_baslik:
     st.markdown(
         f"""
@@ -1061,6 +1074,30 @@ with _col_baslik:
         """,
         unsafe_allow_html=True,
     )
+
+with _col_tema:
+    _tema_kolonlari = st.columns([1] * len(_TEMA_SIRASI) + [1])
+    for _i, _tema_adi in enumerate(_TEMA_SIRASI):
+        with _tema_kolonlari[_i]:
+            if st.button(" ", key=f"tema_sec_{_i}", help=_tema_adi):
+                st.session_state["secili_tema"] = _tema_adi
+                st.rerun()
+    with _tema_kolonlari[len(_TEMA_SIRASI)]:
+        if st.button("⇄", key="tema_ters_cevir", help=t("renkleri_ters_cevir")):
+            st.session_state["tema_ters"] = not st.session_state["tema_ters"]
+            st.rerun()
+
+with _col_dil:
+    _dil_kolonlari = st.columns(2)
+    with _dil_kolonlari[0]:
+        if st.button("🇬🇧", key="dil_en_gb", help="English"):
+            st.session_state["dil"] = "en"
+            st.rerun()
+    with _dil_kolonlari[1]:
+        if st.button("🇹🇷", key="dil_tr", help="Turkce"):
+            st.session_state["dil"] = "tr"
+            st.rerun()
+
 with _col_info:
     st.markdown(
         f"""
@@ -1139,37 +1176,33 @@ if "analiz_secimi" not in st.session_state:
     st.session_state["analiz_secimi"] = None  # None = Ana Sayfa
 
 with st.sidebar:
+    if "sidebar_daralt" not in st.session_state:
+        st.session_state["sidebar_daralt"] = False
+    _sb_daralt = st.session_state["sidebar_daralt"]
+    _sb_genislik = "64px" if _sb_daralt else "248px"
+
     _sidebar_css = """
         <style>
-        /* Normalde dar (sadece ikonlar gorunur), fare uzerine gelince
-           genisleyip yazilari da gosterir. Genisken ana icerigin ustune
-           biner (position: absolute) - ana icerigin boyutunu/konumunu
-           degistirmez, sadece gecici olarak ustunu orter. */
+        /* Sidebar genisligi tiklanabilir bir butonla (sidebar_daralt) kontrol
+           edilir - fare hover'i ile DEGIL. Streamlit'in kendi sidebar'i,
+           kullanicinin surukleyerek yeniden boyutlandirmasina izin vermek
+           icin genisligini kendi JS'iyle aktif yonetiyor; bu yuzden CSS
+           ':hover' tabanli otomatik genisleme/daralma guvenilmez sonuc
+           veriyordu (bazen hic gorunmeme, bazen kapanmama). Sabit (statik)
+           bir genislik zorlamasi - daha once basariyla kullandigimiz yontem -
+           JS ile catismadan guvenilir sekilde calisiyor. Etiket metinlerinin
+           gosterilip gizlenmesi de artik CSS numarasiyla degil, dogrudan
+           Python tarafinda (asagida) kontrol ediliyor. */
         [data-testid="stSidebar"] {
-            width: 64px !important;
-            min-width: 64px !important;
-            max-width: 64px !important;
+            width: %%GENISLIK%% !important;
+            min-width: %%GENISLIK%% !important;
+            max-width: %%GENISLIK%% !important;
             background-color: %%KOYU%%;
             border-right: 1px solid #22252d;
-            overflow: hidden !important;
-            position: relative !important;
-            z-index: 999 !important;
             transform: none !important;
             visibility: visible !important;
             margin-left: 0 !important;
-            transition: width 0.18s ease, min-width 0.18s ease, max-width 0.18s ease;
-        }
-        [data-testid="stSidebar"]:hover {
-            width: 248px !important;
-            min-width: 248px !important;
-            max-width: 248px !important;
-            position: absolute !important;
-            top: 0 !important;
-            left: 0 !important;
-            height: 100vh !important;
-            overflow-y: auto !important;
-            overflow-x: hidden !important;
-            box-shadow: 6px 0 20px rgba(0,0,0,0.30) !important;
+            transition: width 0.15s ease, min-width 0.15s ease, max-width 0.15s ease;
         }
         [data-testid="stSidebar"] > div:first-child {
             padding: 0 !important;
@@ -1186,11 +1219,12 @@ with st.sidebar:
         div[data-testid="stSidebarContent"] .stButton button {
             width: 100% !important;
             justify-content: flex-start !important;
-            padding: 10px 10px !important;
+            padding: 9px 14px !important;
             margin: 2px 0 !important;
             border-radius: 8px !important;
             display: flex;
             align-items: center;
+            font-size: %%FONT_BOYUTU%% !important;
             font-weight: 500 !important;
             background: transparent !important;
             border: none !important;
@@ -1201,42 +1235,19 @@ with st.sidebar:
             white-space: nowrap !important;
             overflow: hidden !important;
         }
-        [data-testid="stSidebar"]:hover div[data-testid="stSidebarContent"] .stButton button {
-            padding: 9px 14px !important;
-        }
         div[data-testid="stSidebarContent"] .stButton button div {
             justify-content: flex-start !important;
             width: 100% !important;
         }
         div[data-testid="stSidebarContent"] .stButton button:hover {
             background: rgba(255,255,255,0.06) !important;
+            color: #ffffff !important;
         }
         div[data-testid="stSidebarContent"] .stButton button p {
-            /* Daralmisken (fare sidebar uzerinde degilken) ikon buyuk
-               gorunur - font-size buyutulunce emoji de buyur, ama etiket
-               yazisi gorunmez oldugu icin (asagida) sadece buyuk ikon kalir.
-               text-align/justify-content HEP sola hizali kalir - ortalama
-               yapilirsa uzun (gorunmez) etiket metni yuzunden ikonun kendisi
-               kutunun disina tasip kirpilir. */
-            font-size: 26px !important;
-            line-height: 1.1 !important;
+            font-size: inherit !important;
             margin: 0 !important;
             text-align: left !important;
             white-space: nowrap !important;
-            /* Daralmisken (fare sidebar uzerinde degilken) etiket yazisini
-               gorunmez yap - emoji ikon bundan etkilenmez (emoji kendi
-               renkleriyle cizilir, CSS color ozelligine uymaz), boylece
-               sadece ikon gorunur kalir. */
-            color: transparent !important;
-            transition: color 0.1s ease, font-size 0.18s ease;
-        }
-        [data-testid="stSidebar"]:hover div[data-testid="stSidebarContent"] .stButton button p {
-            font-size: 14px !important;
-            text-align: left !important;
-            color: var(--sidebar-text) !important;
-        }
-        [data-testid="stSidebar"]:hover div[data-testid="stSidebarContent"] .stButton button:hover p {
-            color: #ffffff !important;
         }
         .sidebar-logo {
             display: flex;
@@ -1258,16 +1269,12 @@ with st.sidebar:
             flex-shrink: 0;
         }
         .sidebar-logo .name {
-            color: transparent !important;
+            color: #ffffff !important;
             font-size: 16px;
             font-weight: 800;
-            transition: color 0.1s ease;
-        }
-        [data-testid="stSidebar"]:hover .sidebar-logo .name {
-            color: #ffffff !important;
         }
         .sidebar-section {
-            color: transparent !important;
+            color: #8891a1 !important;
             font-size: 11px;
             font-weight: 700;
             letter-spacing: 0.06em;
@@ -1275,12 +1282,17 @@ with st.sidebar:
             text-transform: uppercase;
             white-space: nowrap;
             overflow: hidden;
-            transition: color 0.1s ease;
-        }
-        [data-testid="stSidebar"]:hover .sidebar-section {
-            color: #8891a1 !important;
         }
         </style>
+        """
+    if _sb_daralt:
+        _sidebar_css += """
+        <div class="sidebar-logo">
+            <div class="box">📦</div>
+        </div>
+        """
+    else:
+        _sidebar_css += """
         <div class="sidebar-logo">
             <div class="box">📦</div>
             <div class="name">ComfyShip</div>
@@ -1291,8 +1303,14 @@ with st.sidebar:
         .replace("%%ACCENT%%", _tema["accent"])
         .replace("%%KOYU%%", _tema["koyu"])
         .replace("%%KOYU2%%", _tema["koyu2"])
+        .replace("%%GENISLIK%%", _sb_genislik)
+        .replace("%%FONT_BOYUTU%%", "24px" if _sb_daralt else "14px")
     )
     st.markdown(_sidebar_css, unsafe_allow_html=True)
+
+    if st.button("☰" if _sb_daralt else "☰  Daralt", key="sidebar_toggle_btn"):
+        st.session_state["sidebar_daralt"] = not _sb_daralt
+        st.rerun()
 
     _aktif_etiket = st.session_state["analiz_secimi"] or "Ana Sayfa"
     _tum_etiketler = [label for _, label in MENU_ITEMS]
@@ -1311,22 +1329,28 @@ with st.sidebar:
             unsafe_allow_html=True,
         )
 
-    st.markdown(f'<div class="sidebar-section">{t("ana_menu")}</div>', unsafe_allow_html=True)
+    def _buton_metni(icon, label):
+        return icon if _sb_daralt else f"{icon}  {_menu_metni(label)}"
+
+    if not _sb_daralt:
+        st.markdown(f'<div class="sidebar-section">{t("ana_menu")}</div>', unsafe_allow_html=True)
     icon, label = BASE_MENU_ITEMS[0]
-    if st.button(f"{icon}  {_menu_metni(label)}", key=f"nav_{label}", width="stretch"):
+    if st.button(_buton_metni(icon, label), key=f"nav_{label}", width="stretch"):
         _her_seyi_sifirla()
         st.session_state["analiz_secimi"] = None
         st.rerun()
 
-    st.markdown(f'<div class="sidebar-section">{t("dosya_islemleri")}</div>', unsafe_allow_html=True)
+    if not _sb_daralt:
+        st.markdown(f'<div class="sidebar-section">{t("dosya_islemleri")}</div>', unsafe_allow_html=True)
     for icon, label in BASE_MENU_ITEMS[1:]:
-        if st.button(f"{icon}  {_menu_metni(label)}", key=f"nav_{label}", width="stretch"):
+        if st.button(_buton_metni(icon, label), key=f"nav_{label}", width="stretch"):
             st.session_state["analiz_secimi"] = label
             st.rerun()
 
-    st.markdown(f'<div class="sidebar-section">{t("raporlar")}</div>', unsafe_allow_html=True)
+    if not _sb_daralt:
+        st.markdown(f'<div class="sidebar-section">{t("raporlar")}</div>', unsafe_allow_html=True)
     for icon, label in REPORT_MENU_ITEMS:
-        if st.button(f"{icon}  {_menu_metni(label)}", key=f"nav_{label}", width="stretch"):
+        if st.button(_buton_metni(icon, label), key=f"nav_{label}", width="stretch"):
             st.session_state["analiz_secimi"] = label
             st.rerun()
 
@@ -1772,40 +1796,23 @@ else:
         st.divider()
         st.subheader(t("ozet"))
 
-        renkli_kart("Toplam Paket Sayisi", f"{summary['toplam_gonderi']:,}", _tema["accent"], "📦")
-
-        st.markdown("")
-        col_gelir, col_gider = st.columns(2)
-        with col_gelir:
-            st.markdown(t("gelir_kalin"))
-            renkli_kart("Toplam Gelir", f"${summary['toplam_gelir']:,.2f}", "#10b981", "💵")
-
-        with col_gider:
-            st.markdown(t("gider_kalin"))
-            renkli_kart("Kargo Gideri", f"${summary['toplam_gider_kargo']:,.2f}", "#f59e0b", "🚚")
-            renkli_kart("Vergi/Gumruk Gideri", f"${summary['toplam_gider_tax']:,.2f}", "#f97316", "🛂")
-            renkli_kart("Toplam Gider", f"${summary['toplam_gider_eslesen']:,.2f}", "#ef4444", "🧾")
+        _ozet_kartlari = [
+            (t("toplam_paket_sayisi"), f"{summary['toplam_gonderi']:,}", _tema["accent"], "📦"),
+            ("Toplam Gelir", f"${summary['toplam_gelir']:,.2f}", "#10b981", "💵"),
+            ("Kargo Gideri", f"${summary['toplam_gider_kargo']:,.2f}", "#f59e0b", "🚚"),
+            ("Vergi/Gumruk Gideri", f"${summary['toplam_gider_tax']:,.2f}", "#f97316", "🛂"),
+            ("Toplam Gider", f"${summary['toplam_gider_eslesen']:,.2f}", "#ef4444", "🧾"),
+        ]
 
         gecerli_paket_basi = manual_carrier_expenses_df.dropna(subset=["Kargo Firmasi", "Paket Basi Tutar"])
         gecerli_paket_basi = gecerli_paket_basi[gecerli_paket_basi["Kargo Firmasi"].astype(str).str.strip() != ""]
         has_per_package_fee = not gecerli_paket_basi.empty
 
         if toplam_genel_gider or manuel_gelir_toplam:
-            col_gelir2, col_gider2 = st.columns(2)
-            with col_gelir2:
-                renkli_kart(
-                    "Manuel Gelir",
-                    f"${summary['manuel_gelir']:,.2f}",
-                    "#14b8a6",
-                    "✍️",
-                )
-            with col_gider2:
-                renkli_kart(
-                    "Genel Gider",
-                    f"${summary['genel_gider']:,.2f}",
-                    "#dc2626",
-                    "⚠️",
-                )
+            _ozet_kartlari.append(("Manuel Gelir", f"${summary['manuel_gelir']:,.2f}", "#14b8a6", "✍️"))
+            _ozet_kartlari.append(("Genel Gider", f"${summary['genel_gider']:,.2f}", "#dc2626", "⚠️"))
+
+        kart_izgarasi(*_ozet_kartlari)
 
         gecerli_manuel_gelir = manual_income_df.dropna(subset=["Aciklama", "Tutar"])
         gecerli_manuel_gelir = gecerli_manuel_gelir[gecerli_manuel_gelir["Aciklama"].astype(str).str.strip() != ""]
@@ -1838,13 +1845,15 @@ else:
                     )
 
         st.markdown("")
-        _, kar_orta, kar_yuzde_orta, _ = st.columns([1, 1, 1, 1])
-        with kar_orta:
-            net_kar_renk = "#10b981" if summary["net_kar"] >= 0 else "#dc2626"
-            net_kar_icon = "📈" if summary["net_kar"] >= 0 else "📉"
-            renkli_kart("Net Kar", f"${summary['net_kar']:,.2f}", net_kar_renk, net_kar_icon)
-        with kar_yuzde_orta:
-            renkli_kart("Net Kar Yuzdesi (%)", f"%{summary['net_kar_yuzde']:,.1f}", net_kar_renk, net_kar_icon)
+        net_kar_renk = "#10b981" if summary["net_kar"] >= 0 else "#dc2626"
+        net_kar_icon = "📈" if summary["net_kar"] >= 0 else "📉"
+        _, _net_kar_orta, _ = st.columns([1, 2, 1])
+        with _net_kar_orta:
+            kart_izgarasi(
+                ("Net Kar", f"${summary['net_kar']:,.2f}", net_kar_renk, net_kar_icon),
+                ("Net Kar Yuzdesi (%)", f"%{summary['net_kar_yuzde']:,.1f}", net_kar_renk, net_kar_icon),
+                min_genislik=160,
+            )
 
         if not genel_gider_kategori_detay.empty:
             st.caption(tc("⚠️ Pakete baglanamayan vergi/komisyon - otomatik tespit edilen (Net Kar'a dahil):"))
