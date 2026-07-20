@@ -339,8 +339,8 @@ _CAPTION_EN = {
         "Income not tied to any package, added directly to net profit (e.g. warehouse rental income, consulting income).",
     "Kargo firmasindan gelen fatura dosyalari. Birden fazla dosya secebilirsiniz.":
         "Invoice files from the carrier. You can select multiple files.",
-    "Su an Asendia, UniUni, UPS ve Asendia'nin ayri Vergi/Gumruk dosyasi dogrudan destekleniyor. ByeLabel dosyasini (shipments-...xlsx) sectiginde icindeki tum firmalar (ePost Global, DHL, intelcom, APC, USPS, Evri, Purolator, FedEx, UPS) otomatik ayri ayri islenir.":
-        "Asendia, UniUni, UPS and Asendia's separate Tax/Duty file are currently supported directly. When you select a ByeLabel file (shipments-...xlsx), all carriers inside it (ePost Global, DHL, intelcom, APC, USPS, Evri, Purolator, FedEx, UPS) are automatically processed separately.",
+    "Su an Asendia, UniUni, UPS, FedEx ve Asendia'nin ayri Vergi/Gumruk dosyasi dogrudan destekleniyor. Bunlardan UPS, FedEx ve ByeLabel icindeki firmalar kendi fatura dosyalarinda vergi/gumruk kalemini otomatik ayirir. UniUni ve Asendia'nin normal dosyasinda ayri bir vergi satiri yoktur (Asendia'nin vergisi, ayrica yuklenen 'Asendia - Vergi/Gumruk' dosyasindan gelir). ByeLabel dosyasini (shipments-...xlsx) sectiginde icindeki tum firmalar (ePost Global, DHL, intelcom, APC, USPS, Evri, Purolator, FedEx, UPS) otomatik ayri ayri islenir - bu firmalarin da vergi/gumruk kalemi kendi dosyalarinda ayri satirdadir.":
+        "Asendia, UniUni, UPS, FedEx and Asendia's separate Tax/Duty file are currently supported directly. Of these, UPS, FedEx and the carriers inside ByeLabel automatically separate the tax/duty line within their own invoice files. UniUni and Asendia's regular file have no separate tax line (Asendia's tax comes from the separately uploaded 'Asendia - Tax/Duty' file). When you select a ByeLabel file (shipments-...xlsx), all carriers inside it (ePost Global, DHL, intelcom, APC, USPS, Evri, Purolator, FedEx, UPS) are automatically processed separately - their tax/duty line is also separated within their own files.",
     "Hicbir pakete baglanmayan, dogrudan net kardan dusulecek giderler (orn. depo kirasi, personel maasi, internet faturasi).":
         "Expenses not tied to any package, deducted directly from net profit (e.g. warehouse rent, staff salary, internet bill).",
     "Belirli bir kargo firmasinin, gideri ZATEN eslesmis olan HER paketine ayni tutari ekler (orn. UniUni icin paket basina $2). Tutar otomatik olarak eslesen paket sayisiyla carpilir ve her paketin kar/zarar hesabina islenir - tum tablolarda (ulke, firma, musteri) otomatik yansir. Gideri eslesmemis paketlere bu tutar uygulanmaz.":
@@ -1625,10 +1625,15 @@ else:
 
         if _gider_listesi:
             st.caption(tc(
-                "Su an Asendia, UniUni, UPS ve Asendia'nin ayri Vergi/Gumruk dosyasi "
-                "dogrudan destekleniyor. ByeLabel dosyasini (shipments-...xlsx) sectiginde "
-                "icindeki tum firmalar (ePost Global, DHL, intelcom, APC, USPS, Evri, "
-                "Purolator, FedEx, UPS) otomatik ayri ayri islenir."
+                "Su an Asendia, UniUni, UPS, FedEx ve Asendia'nin ayri Vergi/Gumruk "
+                "dosyasi dogrudan destekleniyor. Bunlardan UPS, FedEx ve ByeLabel "
+                "icindeki firmalar kendi fatura dosyalarinda vergi/gumruk kalemini "
+                "otomatik ayirir. UniUni ve Asendia'nin normal dosyasinda ayri bir "
+                "vergi satiri yoktur (Asendia'nin vergisi, ayrica yuklenen 'Asendia - "
+                "Vergi/Gumruk' dosyasindan gelir). ByeLabel dosyasini (shipments-...xlsx) "
+                "sectiginde icindeki tum firmalar (ePost Global, DHL, intelcom, APC, "
+                "USPS, Evri, Purolator, FedEx, UPS) otomatik ayri ayri islenir - bu "
+                "firmalarin da vergi/gumruk kalemi kendi dosyalarinda ayri satirdadir."
             ))
 
         dahil_et_genel_gider = True  # Pakete baglanamayan giderler bilgi amacli gosterilir, otomatik eklenmez
