@@ -1951,6 +1951,7 @@ else:
 
         _ozet_kartlari = [
             (t("toplam_paket_sayisi"), f"{summary['toplam_gonderi']:,}", _tema["accent"], "📦"),
+            ("Eslesen Paket Sayisi", f"{summary['eslesen_sayisi']:,}", "#0ea5e9", "✅"),
             ("Eslesen Gelir", f"${summary['toplam_gelir_eslesen']:,.2f}", "#10b981", "💵"),
             ("Kargo Gideri", f"${summary['toplam_gider_kargo']:,.2f}", "#f59e0b", "🚚"),
             ("Vergi/Gumruk Gideri", f"${summary['toplam_gider_tax']:,.2f}", "#f97316", "🛂"),
