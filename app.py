@@ -1948,107 +1948,114 @@ else:
         merged = apply_per_package_carrier_fee(merged, manual_carrier_expenses_df)
         summary = summarize(merged, genel_gider=toplam_genel_gider, manuel_gelir=manuel_gelir_toplam)
 
-        st.divider()
-        st.subheader(t("ozet"))
+        # KPI ozet karti bolumu (Ozet basligi, sayisal kartlar, manuel
+        # gelir/gider onizlemesi, Net Kar karti, genel gider detayi, eslesme
+        # orani mesajlari) SADECE hicbir rapor sekmesi secili degilken
+        # gosterilir. Bir rapor sekmesi (orn. Kargo Firmalarina Gore)
+        # seciliyken bu bolumun HICBIRI gosterilmez - sayfada sadece secilen
+        # analiz gorunur, KPI kartlari onu kalabalikligindirmaz.
+        _rapor_etiketleri = [label for _, label in REPORT_MENU_ITEMS]
 
-        _ozet_kartlari = [
-            (t("toplam_paket_sayisi"), f"{summary['toplam_gonderi']:,}", _tema["accent"], "📦"),
-            ("Eslesen Paket Sayisi", f"{summary['eslesen_sayisi']:,}", "#0ea5e9", "✅"),
-            ("Aktif User", f"{summary['aktif_user_sayisi']:,}", "#8b5cf6", "👤"),
-            ("Eslesen Gelir", f"${summary['toplam_gelir_eslesen']:,.2f}", "#10b981", "💵"),
-            ("Kargo Gideri", f"${summary['toplam_gider_kargo']:,.2f}", "#f59e0b", "🚚"),
-            ("Vergi/Gumruk Gideri", f"${summary['toplam_gider_tax']:,.2f}", "#f97316", "🛂"),
-            ("Toplam Gider", f"${summary['toplam_gider_eslesen']:,.2f}", "#ef4444", "🧾"),
-        ]
-
+        # has_per_package_fee, sayfanin daha sonraki bir yerinde (tam rapor
+        # Excel disa aktarimi) da kullanildigi icin KOSULSUZ hesaplanmasi
+        # gerekiyor - sadece Ozet bolumune ozel degil.
         gecerli_paket_basi = manual_carrier_expenses_df.dropna(subset=["Kargo Firmasi", "Paket Basi Tutar"])
         gecerli_paket_basi = gecerli_paket_basi[gecerli_paket_basi["Kargo Firmasi"].astype(str).str.strip() != ""]
         has_per_package_fee = not gecerli_paket_basi.empty
 
-        if toplam_genel_gider or manuel_gelir_toplam:
-            _ozet_kartlari.append(("Manuel Gelir", f"${summary['manuel_gelir']:,.2f}", "#14b8a6", "✍️"))
-            _ozet_kartlari.append(("Genel Gider", f"${summary['genel_gider']:,.2f}", "#dc2626", "⚠️"))
-
-        kart_izgarasi(*_ozet_kartlari)
-
-        gecerli_manuel_gelir = manual_income_df.dropna(subset=["Aciklama", "Tutar"])
-        gecerli_manuel_gelir = gecerli_manuel_gelir[gecerli_manuel_gelir["Aciklama"].astype(str).str.strip() != ""]
-        gecerli_manuel_gider = manual_expenses_df.dropna(subset=["Aciklama", "Tutar"])
-        gecerli_manuel_gider = gecerli_manuel_gider[gecerli_manuel_gider["Aciklama"].astype(str).str.strip() != ""]
-        gecerli_manuel_gider_gosterim = gecerli_manuel_gider
-
-        if not gecerli_manuel_gelir.empty or not gecerli_manuel_gider_gosterim.empty or has_per_package_fee:
-            col_mg, col_mgid = st.columns(2)
-            with col_mg:
-                if not gecerli_manuel_gelir.empty:
-                    st.caption(tc("Manuel gelir kalemleri:"))
-                    tablo_goster(gecerli_manuel_gelir, para_kolonlari=["Tutar"])
-            with col_mgid:
-                if not gecerli_manuel_gider_gosterim.empty:
-                    st.caption(tc("Manuel gider kalemleri:"))
-                    tablo_goster(gecerli_manuel_gider_gosterim, para_kolonlari=["Tutar"])
-
-        st.markdown("")
-        net_kar_renk = "#10b981" if summary["net_kar"] >= 0 else "#dc2626"
-        net_kar_icon = "📈" if summary["net_kar"] >= 0 else "📉"
-        _, _net_kar_orta, _ = st.columns([1, 2, 1])
-        with _net_kar_orta:
-            kart_izgarasi(
-                ("Net Kar", f"${summary['net_kar']:,.2f}", net_kar_renk, net_kar_icon),
-                ("Net Kar Yuzdesi (%)", f"%{summary['net_kar_yuzde']:,.1f}", net_kar_renk, net_kar_icon),
-                min_genislik=160,
-            )
-
-        if not genel_gider_kategori_detay.empty:
-            st.caption(tc("⚠️ Pakete baglanamayan vergi/komisyon - otomatik tespit edilen (Net Kar'a dahil):"))
-
-            kaynaklar = genel_gider_kategori_detay[["Kargo Firmasi", "Kaynak Sutun"]].drop_duplicates()
-            for _, kr in kaynaklar.iterrows():
-                st.caption(t("kaynak_kolon_metni").format(firma=kr['Kargo Firmasi'], sutun=kr['Kaynak Sutun']))
-
-            tablo_goster(
-                genel_gider_kategori_detay.drop(columns=["Kaynak Sutun"]),
-                para_kolonlari=["Genel Gider"],
-            )
-
-            _genel_gider_toplam = genel_gider_kategori_detay["Genel Gider"].sum()
-            st.markdown(
-                f"""
-                <div style="display: flex; justify-content: flex-end; margin-top: -6px;">
-                    <div style="
-                        background: #ffffff;
-                        border: 1.5px solid #c7cbd6;
-                        border-radius: 8px;
-                        padding: 8px 16px;
-                        font-size: 14px;
-                    ">
-                        <span style="color: #5f6779; font-weight: 600;">Toplam:</span>
-                        <span style="color: #1f2430; font-weight: 800; margin-left: 6px;">${_genel_gider_toplam:,.2f}</span>
-                    </div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-
-            indirme_butonlari(genel_gider_kategori_detay, "genel_gider_detayi", "genel_gider_detay")
-
-        eslesme_orani = summary["eslesen_sayisi"] / summary["toplam_gonderi"] * 100 if summary["toplam_gonderi"] else 0
-        st.caption(t("eslesme_orani_metni").format(oran=eslesme_orani))
-
-        st.caption(
-            t("toplam_gonderi_ozet").format(
-                toplam=summary["toplam_gonderi"],
-                eslesen=summary["eslesen_sayisi"],
-                bulunamadi=summary["gider_bulunamadi_sayisi"],
-                takipsiz=summary["takip_no_yok_sayisi"],
-            )
-        )
-
-        # Hesapla az once bitti ve henuz hicbir rapor sekmesi secilmediyse,
-        # OTOMATIK olarak bir sekme acilmaz - kullanici sol menuden kendisi
-        # bir rapor secene kadar bos/bilgilendirici bir mesaj gosterilir.
-        _rapor_etiketleri = [label for _, label in REPORT_MENU_ITEMS]
         if analiz_secimi not in _rapor_etiketleri:
+            st.divider()
+            st.subheader(t("ozet"))
+
+            _ozet_kartlari = [
+                (t("toplam_paket_sayisi"), f"{summary['toplam_gonderi']:,}", _tema["accent"], "📦"),
+                ("Eslesen Paket Sayisi", f"{summary['eslesen_sayisi']:,}", "#0ea5e9", "✅"),
+                ("Aktif User", f"{summary['aktif_user_sayisi']:,}", "#8b5cf6", "👤"),
+                ("Eslesen Gelir", f"${summary['toplam_gelir_eslesen']:,.2f}", "#10b981", "💵"),
+                ("Kargo Gideri", f"${summary['toplam_gider_kargo']:,.2f}", "#f59e0b", "🚚"),
+                ("Vergi/Gumruk Gideri", f"${summary['toplam_gider_tax']:,.2f}", "#f97316", "🛂"),
+                ("Toplam Gider", f"${summary['toplam_gider_eslesen']:,.2f}", "#ef4444", "🧾"),
+            ]
+
+            if toplam_genel_gider or manuel_gelir_toplam:
+                _ozet_kartlari.append(("Manuel Gelir", f"${summary['manuel_gelir']:,.2f}", "#14b8a6", "✍️"))
+                _ozet_kartlari.append(("Genel Gider", f"${summary['genel_gider']:,.2f}", "#dc2626", "⚠️"))
+
+            kart_izgarasi(*_ozet_kartlari)
+
+            gecerli_manuel_gelir = manual_income_df.dropna(subset=["Aciklama", "Tutar"])
+            gecerli_manuel_gelir = gecerli_manuel_gelir[gecerli_manuel_gelir["Aciklama"].astype(str).str.strip() != ""]
+            gecerli_manuel_gider = manual_expenses_df.dropna(subset=["Aciklama", "Tutar"])
+            gecerli_manuel_gider = gecerli_manuel_gider[gecerli_manuel_gider["Aciklama"].astype(str).str.strip() != ""]
+            gecerli_manuel_gider_gosterim = gecerli_manuel_gider
+
+            if not gecerli_manuel_gelir.empty or not gecerli_manuel_gider_gosterim.empty or has_per_package_fee:
+                col_mg, col_mgid = st.columns(2)
+                with col_mg:
+                    if not gecerli_manuel_gelir.empty:
+                        st.caption(tc("Manuel gelir kalemleri:"))
+                        tablo_goster(gecerli_manuel_gelir, para_kolonlari=["Tutar"])
+                with col_mgid:
+                    if not gecerli_manuel_gider_gosterim.empty:
+                        st.caption(tc("Manuel gider kalemleri:"))
+                        tablo_goster(gecerli_manuel_gider_gosterim, para_kolonlari=["Tutar"])
+
+            st.markdown("")
+            net_kar_renk = "#10b981" if summary["net_kar"] >= 0 else "#dc2626"
+            net_kar_icon = "📈" if summary["net_kar"] >= 0 else "📉"
+            _, _net_kar_orta, _ = st.columns([1, 2, 1])
+            with _net_kar_orta:
+                kart_izgarasi(
+                    ("Net Kar", f"${summary['net_kar']:,.2f}", net_kar_renk, net_kar_icon),
+                    ("Net Kar Yuzdesi (%)", f"%{summary['net_kar_yuzde']:,.1f}", net_kar_renk, net_kar_icon),
+                    min_genislik=160,
+                )
+
+            if not genel_gider_kategori_detay.empty:
+                st.caption(tc("⚠️ Pakete baglanamayan vergi/komisyon - otomatik tespit edilen (Net Kar'a dahil):"))
+
+                kaynaklar = genel_gider_kategori_detay[["Kargo Firmasi", "Kaynak Sutun"]].drop_duplicates()
+                for _, kr in kaynaklar.iterrows():
+                    st.caption(t("kaynak_kolon_metni").format(firma=kr['Kargo Firmasi'], sutun=kr['Kaynak Sutun']))
+
+                tablo_goster(
+                    genel_gider_kategori_detay.drop(columns=["Kaynak Sutun"]),
+                    para_kolonlari=["Genel Gider"],
+                )
+
+                _genel_gider_toplam = genel_gider_kategori_detay["Genel Gider"].sum()
+                st.markdown(
+                    f"""
+                    <div style="display: flex; justify-content: flex-end; margin-top: -6px;">
+                        <div style="
+                            background: #ffffff;
+                            border: 1.5px solid #c7cbd6;
+                            border-radius: 8px;
+                            padding: 8px 16px;
+                            font-size: 14px;
+                        ">
+                            <span style="color: #5f6779; font-weight: 600;">Toplam:</span>
+                            <span style="color: #1f2430; font-weight: 800; margin-left: 6px;">${_genel_gider_toplam:,.2f}</span>
+                        </div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+
+                indirme_butonlari(genel_gider_kategori_detay, "genel_gider_detayi", "genel_gider_detay")
+
+            eslesme_orani = summary["eslesen_sayisi"] / summary["toplam_gonderi"] * 100 if summary["toplam_gonderi"] else 0
+            st.caption(t("eslesme_orani_metni").format(oran=eslesme_orani))
+
+            st.caption(
+                t("toplam_gonderi_ozet").format(
+                    toplam=summary["toplam_gonderi"],
+                    eslesen=summary["eslesen_sayisi"],
+                    bulunamadi=summary["gider_bulunamadi_sayisi"],
+                    takipsiz=summary["takip_no_yok_sayisi"],
+                )
+            )
+
             st.divider()
             st.info(tc(
                 "Hesaplama tamamlandi. Bir raporu goruntulemek icin sol menuden "
