@@ -134,6 +134,7 @@ CEVIRI = {
         "boyut_agirlik": "Boyut/Agirlik Uyusmazligi",
         "gider_bulunamayanlar": "Gider Bulunamayanlar",
         "eslesmeyen_gider": "Eslesmeyen Gider",
+        "takip_no_baglanamayan_gider": "Takip No Baglanamayan Gider",
         "hesap": "Hesap",
         "email": "Email",
         "sifre": "Sifre",
@@ -238,6 +239,7 @@ CEVIRI = {
         "boyut_agirlik": "Dimension/Weight Mismatch",
         "gider_bulunamayanlar": "Missing Expenses",
         "eslesmeyen_gider": "Unmatched Expenses",
+        "takip_no_baglanamayan_gider": "Expenses Without Tracking No",
         "hesap": "Account",
         "email": "Email",
         "sifre": "Password",
@@ -1401,6 +1403,7 @@ REPORT_MENU_ITEMS = [
     ("📦", "Boyut/Agirlik Uyusmazligi"),
     ("🔍", "Gider Bulunamayanlar"),
     ("⚖️", "Eslesmeyen Gider"),
+    ("🏷️", "Takip No Baglanamayan Gider"),
 ]
 MENU_ITEMS = BASE_MENU_ITEMS + REPORT_MENU_ITEMS
 
@@ -1422,6 +1425,7 @@ _MENU_CEVIRI = {
     "Boyut/Agirlik Uyusmazligi": "boyut_agirlik",
     "Gider Bulunamayanlar": "gider_bulunamayanlar",
     "Eslesmeyen Gider": "eslesmeyen_gider",
+    "Takip No Baglanamayan Gider": "takip_no_baglanamayan_gider",
 }
 
 
@@ -2582,6 +2586,26 @@ else:
             ))
             tablo_goster(unmatched_cost, para_kolonlari=["Gider_Kargo", "Gider_Tax", "Gider"])
             indirme_butonlari(unmatched_cost, "eslesmeyen_gider", "tab3")
+
+        elif analiz_secimi == "Takip No Baglanamayan Gider":
+            st.subheader(t("takip_no_baglanamayan_gider"))
+            st.caption(tc(
+                "Kargo firmasinin fatura dosyasindaki, hicbir takip numarasina "
+                "baglanamayan (bu yuzden belirli bir pakete dagitilamayan) vergi/komisyon "
+                "kalemleri. Net Kar'dan dusulur, ama hangi paketin oldugu bilinmez."
+            ))
+            if genel_gider_kategori_detay.empty:
+                st.info(tc("Takip numarasina baglanamayan bir gider kalemi bulunamadi."))
+            else:
+                _kaynaklar = genel_gider_kategori_detay[["Kargo Firmasi", "Kaynak Sutun"]].drop_duplicates()
+                for _, _kr in _kaynaklar.iterrows():
+                    st.caption(t("kaynak_kolon_metni").format(firma=_kr["Kargo Firmasi"], sutun=_kr["Kaynak Sutun"]))
+
+                tablo_goster(
+                    genel_gider_kategori_detay.drop(columns=["Kaynak Sutun"]),
+                    para_kolonlari=["Genel Gider"],
+                )
+                indirme_butonlari(genel_gider_kategori_detay, "takip_no_baglanamayan_gider", "tab_genel_gider")
 
 
 
