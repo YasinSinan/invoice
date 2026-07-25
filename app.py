@@ -5,6 +5,8 @@ Calistirmak icin:
     streamlit run app.py
 """
 
+import hashlib
+import hmac
 import io
 from datetime import datetime, timezone
 
@@ -701,6 +703,73 @@ def _kullanicilari_yukle():
 
 _kullanicilar = _kullanicilari_yukle()
 
+_CEREZ_ADI = "comfyship_oturum"
+_CEREZ_SURESI_SN = 3 * 60 * 60  # 3 saat
+
+
+def _cerez_gizli_anahtar():
+    try:
+        return str(st.secrets["auth"].get("cookie_key", "comfyship_varsayilan_anahtar"))
+    except Exception:
+        return "comfyship_varsayilan_anahtar"
+
+
+def _cerez_imza_olustur(email):
+    return hmac.new(_cerez_gizli_anahtar().encode(), email.encode(), hashlib.sha256).hexdigest()
+
+
+def _cerez_deger_olustur(email):
+    return f"{email}|{_cerez_imza_olustur(email)}"
+
+
+def _cerez_dogrula(deger):
+    """Cerezdeki email|imza degerini dogrular, gecerliyse email'i dondurur."""
+    if not deger or "|" not in deger:
+        return None
+    email, imza = deger.rsplit("|", 1)
+    if imza != _cerez_imza_olustur(email) or email not in _kullanicilar:
+        return None
+    return email
+
+
+def _cerez_yaz(email):
+    """Tarayiciya dogrudan JS ile 3 saatlik bir cerez yazar. st.markdown
+    icine gomulen <script> etiketleri tarayicida CALISMAZ (innerHTML ile
+    eklenen script'ler DOM standardi geregi calistirilmiyor) - bu yuzden
+    gercekten JS calistiran st.html(unsafe_allow_javascript=True)
+    kullaniliyor. Onceki 'streamlit-authenticator' kutuphanesindeki gibi
+    ayri bir Python<->JS bilesen koprusune (ve onun neden oldugu 'bombos
+    sayfa' hatasina) ihtiyac duymaz - tek yonlu, basit bir JS calistirma
+    islemi."""
+    _deger = _cerez_deger_olustur(email)
+    st.html(
+        f"<script>document.cookie = \"{_CEREZ_ADI}={_deger}; max-age={_CEREZ_SURESI_SN}; path=/; SameSite=Lax\";</script>",
+        unsafe_allow_javascript=True,
+    )
+
+
+def _cerez_temizle():
+    st.html(
+        f"<script>document.cookie = \"{_CEREZ_ADI}=; max-age=0; path=/\";</script>",
+        unsafe_allow_javascript=True,
+    )
+
+
+# Sayfa her yuklendiginde (orn. tarayici sekmesi yeniden baglandiginda,
+# session_state sifirlandiginda) once cerezi kontrol et - gecerliyse 3 saat
+# boyunca tekrar giris yapmaya gerek kalmadan oturum devam eder.
+if not st.session_state.get("authentication_status"):
+    _cerez_degeri = st.context.cookies.get(_CEREZ_ADI)
+    _dogrulanan_email = _cerez_dogrula(_cerez_degeri)
+    if _dogrulanan_email:
+        _kullanici_bilgi = _kullanicilar[_dogrulanan_email]
+        st.session_state["authentication_status"] = True
+        st.session_state["username"] = _dogrulanan_email
+        st.session_state["name"] = (
+            f"{_kullanici_bilgi.get('first_name', '')} {_kullanici_bilgi.get('last_name', '')}".strip()
+            or _dogrulanan_email
+        )
+
 if not st.session_state.get("authentication_status"):
     st.markdown(
         """
@@ -796,6 +865,7 @@ if not st.session_state.get("authentication_status"):
                     f"{_kullanici.get('first_name', '')} {_kullanici.get('last_name', '')}".strip()
                     or _email
                 )
+                _cerez_yaz(_email)
                 st.rerun()
             else:
                 st.error(t("email_sifre_hatali"))
@@ -1303,6 +1373,7 @@ with _col_btn:
     if st.button(t("cikis_yap"), key="cikis_butonu"):
         for _k in ["authentication_status", "name", "username"]:
             st.session_state.pop(_k, None)
+        _cerez_temizle()
         st.rerun()
 
 st.divider()
