@@ -971,7 +971,7 @@ def _yuzde_str(deger, ondalik=1):
 def tablo_goster(
     df, para_kolonlari=(), yuzde_kolonlari=(), tamsayi_kolonlari=(),
     renkli_kolonlar=(), sabit_kirmizi_kolonlar=(), ozel_formatlar=None,
-    yuzde_ondalik=1, **kwargs
+    yuzde_ondalik=1, toplam_satiri=True, **kwargs
 ):
     """st.dataframe icin: para/yuzde sutunlarini GORUNEN haliyle AYNI
     virgullu/dolarli METNE cevirip gosterir - boylece hucreyi kopyalayip
@@ -983,7 +983,9 @@ def tablo_goster(
     sabit_kirmizi_kolonlar: isaretten bagimsiz, her zaman kirmizi vurgulanir
     (orn. 'eksik tahsilat' gibi hep negatif/sorunlu anlam tasiyan kolonlar).
     ozel_formatlar: {kolon_adi: bicim_fonksiyonu} - para/yuzde/tamsayi
-    disindaki (orn. hacim, agirlik) sayisal kolonlar icin serbest bicim."""
+    disindaki (orn. hacim, agirlik) sayisal kolonlar icin serbest bicim.
+    toplam_satiri: True ise, tum sayisal sutunlarin altina bir "TOPLAM"
+    satiri eklenir (yuzde sutunlari haric - toplamlarinin anlami yok)."""
     goster_df = df.copy()
     renk_df = pd.DataFrame("", index=df.index, columns=df.columns)
 
@@ -1006,6 +1008,24 @@ def tablo_goster(
         if kolon in df.columns:
             goster_df[kolon] = df[kolon].apply(lambda v, f=fonk: "-" if pd.isna(v) else f(v))
 
+    # Yukarida acikca belirtilmemis ama sayisal olan sutunlar da (orn.
+    # "Paket Sayisi" gibi tamsayi_kolonlari'na eklenmeyi unutulmus kolonlar)
+    # tutarli Turkce bicime cevrilir - hem gorunum hem de TOPLAM satirinda
+    # veri tipi karismasin diye (Arrow, ayni kolonda hem sayi hem metin
+    # oldugunda uyari veriyordu).
+    _islenmis_kolonlar = (
+        set(para_kolonlari) | set(yuzde_kolonlari) | set(tamsayi_kolonlari) | set((ozel_formatlar or {}).keys())
+    )
+    for kolon in df.columns:
+        if (
+            kolon not in _islenmis_kolonlar
+            and pd.api.types.is_numeric_dtype(df[kolon])
+            and not pd.api.types.is_bool_dtype(df[kolon])
+        ):
+            _tamsayi_mi = df[kolon].dropna().apply(lambda v: float(v).is_integer()).all()
+            _ondalik = 0 if _tamsayi_mi else 2
+            goster_df[kolon] = df[kolon].apply(lambda v, o=_ondalik: "-" if pd.isna(v) else _tr_sayi(v, o))
+
     # Para sutunlarinda hucrelerde tekrar tekrar "$" yazmak yerine, sadece
     # sutun basligina "($)" ekleniyor. goster_df ve renk_df'nin kolon
     # adlarinin BIREBIR ayni kalmasi gerekiyor (Styler.apply hizalamasi
@@ -1014,6 +1034,33 @@ def tablo_goster(
     if _yeniden_adlar:
         goster_df = goster_df.rename(columns=_yeniden_adlar)
         renk_df = renk_df.rename(columns=_yeniden_adlar)
+
+    if toplam_satiri and not df.empty:
+        _ters_adlar = {yeni: eski for eski, yeni in _yeniden_adlar.items()}
+        _toplam_deger = {}
+        _toplam_stil = {}
+        for _i, kolon in enumerate(goster_df.columns):
+            _orijinal_kolon = _ters_adlar.get(kolon, kolon)
+            if _i == 0:
+                _toplam_deger[kolon] = "TOPLAM"
+            elif _orijinal_kolon in yuzde_kolonlari:
+                _toplam_deger[kolon] = ""
+            elif _orijinal_kolon in df.columns and pd.api.types.is_numeric_dtype(df[_orijinal_kolon]):
+                _toplam = df[_orijinal_kolon].sum()
+                _toplam_deger[kolon] = _para_str(_toplam) if _orijinal_kolon in para_kolonlari else _tr_sayi(_toplam, 0)
+            else:
+                _toplam_deger[kolon] = ""
+            _toplam_stil[kolon] = (
+                "font-weight: 800; border-top: 2px solid #1f2430; background-color: rgba(0,0,0,0.035);"
+            )
+        goster_df.loc["___TOPLAM___"] = _toplam_deger
+        renk_df.loc["___TOPLAM___"] = _toplam_stil
+        # Index'i sifirla - "___TOPLAM___" etiketi eklenince index int64'ten
+        # object tipine karisiyor, bu da Arrow serilestirmede gereksiz bir
+        # ic uyariya yol aciyordu (hide_index=True oldugu icin kullaniciya
+        # hic gorunmuyor ama temiz olsun diye sifirliyoruz).
+        goster_df = goster_df.reset_index(drop=True)
+        renk_df = renk_df.reset_index(drop=True)
 
     kwargs.setdefault("width", "stretch")
     kwargs.setdefault("hide_index", True)
