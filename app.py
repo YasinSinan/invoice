@@ -941,21 +941,31 @@ def kar_zarar_stil(val):
     return ""
 
 
+def _tr_sayi(deger, ondalik=2):
+    """Sayiyi TURKCE sayi bicimine cevirir: binlik ayraci NOKTA, ondalik
+    ayraci VIRGUL (orn. 57480.75 -> '57.480,75'). Excel'in Turkce bolgesel
+    ayarlarinda (',' ondalik, '.' binlik bekler) bunu dogru SAYI olarak
+    tanimasi icin gerekli - Ingilizce bicimde ('57,480.75') yapistirilirsa
+    Turkce Excel bunu metin sanip toplama/cikarma yapilamiyordu."""
+    ham = f"{abs(deger):,.{ondalik}f}"  # once Ingilizce bicimde: '57,480.75'
+    tr = ham.replace(",", "TEMP").replace(".", ",").replace("TEMP", ".")
+    isaret = "-" if deger < 0 else ""
+    return f"{isaret}{tr}"
+
+
 def _para_str(deger):
-    """Sayiyi '1,234.56' seklinde metne cevirir ($ isareti yok - o artik
-    sutun basliginda gosteriliyor). Excel'e yapistirinca dogru sayi olarak
-    taninip virgullu bicimini korur."""
+    """Sayiyi '1.234,56' seklinde (Turkce sayi bicimi) metne cevirir ($
+    isareti yok - o artik sutun basliginda gosteriliyor)."""
     if pd.isna(deger):
         return "-"
-    isaret = "-" if deger < 0 else ""
-    return f"{isaret}{abs(deger):,.2f}"
+    return _tr_sayi(deger, 2)
 
 
 def _yuzde_str(deger, ondalik=1):
-    """Sayiyi 'Ok.k%' seklinde metne cevirir."""
+    """Sayiyi 'Ok,k%' seklinde (Turkce sayi bicimi) metne cevirir."""
     if pd.isna(deger):
         return "-"
-    return f"{deger:,.{ondalik}f}%"
+    return f"{_tr_sayi(deger, ondalik)}%"
 
 
 def tablo_goster(
@@ -991,7 +1001,7 @@ def tablo_goster(
             goster_df[kolon] = df[kolon].apply(lambda v: _yuzde_str(v, yuzde_ondalik))
     for kolon in tamsayi_kolonlari:
         if kolon in df.columns:
-            goster_df[kolon] = df[kolon].apply(lambda v: "-" if pd.isna(v) else f"{v:,.0f}")
+            goster_df[kolon] = df[kolon].apply(lambda v: "-" if pd.isna(v) else _tr_sayi(v, 0))
     for kolon, fonk in (ozel_formatlar or {}).items():
         if kolon in df.columns:
             goster_df[kolon] = df[kolon].apply(lambda v, f=fonk: "-" if pd.isna(v) else f(v))
@@ -2342,12 +2352,12 @@ else:
                     para_kolonlari=["Kar/Zarar"],
                     renkli_kolonlar=["Kar/Zarar"],
                     ozel_formatlar={
-                        "Bizim Hacim": lambda v: f"{v:,.1f}",
-                        "Firma Hacim": lambda v: f"{v:,.1f}",
-                        "Hacim Orani (x)": lambda v: f"{v:,.2f}x",
-                        "Bizim Agirlik": lambda v: f"{v:,.2f}",
-                        "Firma Agirlik": lambda v: f"{v:,.2f}",
-                        "Agirlik Farki": lambda v: f"{v:,.2f}",
+                        "Bizim Hacim": lambda v: _tr_sayi(v, 1),
+                        "Firma Hacim": lambda v: _tr_sayi(v, 1),
+                        "Hacim Orani (x)": lambda v: f"{_tr_sayi(v, 2)}x",
+                        "Bizim Agirlik": lambda v: _tr_sayi(v, 2),
+                        "Firma Agirlik": lambda v: _tr_sayi(v, 2),
+                        "Agirlik Farki": lambda v: _tr_sayi(v, 2),
                     },
                 )
                 indirme_butonlari(_boyut_tablo, "boyut_agirlik_uyusmazligi", "boyut_uyusmazlik")
