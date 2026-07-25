@@ -17,6 +17,7 @@ import streamlit as st
 from processing import (
     BYELABEL_GROUP_LABEL,
     CARRIER_PROFILES,
+    EUROPE_COUNTRIES,
     KNOWN_CARRIERS,
     apply_per_package_carrier_fee,
     build_report,
@@ -159,7 +160,7 @@ CEVIRI = {
         "ozet": "📊 Ozet",
         "kargo_analiz_baslik": "🚚 Kargo Firmalarina Gore Analiz",
         "ulke_analiz_baslik": "🌍 Ulkeye gore analiz",
-        "avrupa_toplam_ozeti": "🌍 Avrupa Toplam Ozeti",
+        "avrupa_toplam_ozeti": "🌍 Avrupa",
         "musteri_analiz_baslik": "👥 Musteriye gore analiz",
         "musteri_ulke_analiz_baslik": "👥 Musteri x Ulke Analizi",
         "kargo_yukle_baslik": "📤 Kargo Firmasina Gore Dosya Yukle",
@@ -190,6 +191,7 @@ CEVIRI = {
         "donem_sec": "Donem sec",
         "once_hesapla_uyari": "⚠️ Once dosyalarini yukleyip 'Hesapla'ya basmalisin. Asagida dosyalarini yukleyebilirsin.",
         "avrupa_gonderi_yok": "Avrupa ulkelerine ait gonderi bulunamadi.",
+        "avrupa_detay_baslik": "📋 Detayli Analiz (Ulke Bazinda)",
         "sorgula_buton": "🔎 Sorgula",
         "takip_no_gir_uyari": "Once en az bir takip numarasi gir.",
         "vergi_tam_tahsil": "Butun eslesen gonderilerde vergi/gumruk tam tahsil edilmis gorunuyor. 🎉",
@@ -262,7 +264,7 @@ CEVIRI = {
         "ozet": "📊 Summary",
         "kargo_analiz_baslik": "🚚 Analysis by Carrier",
         "ulke_analiz_baslik": "🌍 Analysis by Country",
-        "avrupa_toplam_ozeti": "🌍 Europe Total Summary",
+        "avrupa_toplam_ozeti": "🌍 Europe",
         "musteri_analiz_baslik": "👥 Analysis by Customer",
         "musteri_ulke_analiz_baslik": "👥 Customer x Country Analysis",
         "kargo_yukle_baslik": "📤 Upload File by Carrier",
@@ -293,6 +295,7 @@ CEVIRI = {
         "donem_sec": "Select period",
         "once_hesapla_uyari": "⚠️ You need to upload your files and click 'Calculate' first. You can upload your files below.",
         "avrupa_gonderi_yok": "No shipments found for European countries.",
+        "avrupa_detay_baslik": "📋 Detailed Analysis (By Country)",
         "sorgula_buton": "🔎 Look Up",
         "takip_no_gir_uyari": "Enter at least one tracking number first.",
         "vergi_tam_tahsil": "Tax/duty appears to be fully collected on all matched shipments. 🎉",
@@ -2264,6 +2267,24 @@ else:
                     eu_icon = "📈" if eu["kar_zarar"] >= 0 else "📉"
                     renkli_kart("Kar/Zarar", f"${eu['kar_zarar']:,.2f}", eu_renk, eu_icon)
                     renkli_kart("Kar Yuzdesi (%)", f"%{eu['kar_yuzde']:,.1f}", eu_renk, eu_icon)
+
+                st.markdown("")
+                st.subheader(t("avrupa_detay_baslik"))
+                _avrupa_mask = merged["Receiver Country"].apply(
+                    lambda c: str(c).strip().lower() in EUROPE_COUNTRIES if not pd.isna(c) else False
+                )
+                _avrupa_cb = country_breakdown(merged[_avrupa_mask])
+                tablo_goster(
+                    _avrupa_cb,
+                    para_kolonlari=[
+                        "Toplam_Gelir", "Eslesen_Gelir", "Kargo_Gideri",
+                        "Vergi_Gideri", "Toplam_Gider", "Kar", "Paket_Basi_Kar",
+                    ],
+                    yuzde_kolonlari=["Kar_Yuzde"],
+                    renkli_kolonlar=["Kar", "Paket_Basi_Kar", "Kar_Yuzde"],
+                    ortalama_kolonlari=["Paket_Basi_Kar", "Kar_Yuzde"],
+                )
+                indirme_butonlari(_avrupa_cb, "avrupa_detayli_analiz", "avrupa_detay")
             else:
                 st.info(t("avrupa_gonderi_yok"))
 
