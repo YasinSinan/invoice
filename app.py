@@ -941,6 +941,67 @@ def kar_zarar_stil(val):
     return ""
 
 
+def _para_str(deger):
+    """Sayiyi '$1,234.56' seklinde metne cevirir (Excel'e yapistirinca dogru
+    sayi olarak taninip virgullu/dolarli bicimini korur)."""
+    if pd.isna(deger):
+        return "-"
+    isaret = "-" if deger < 0 else ""
+    return f"{isaret}${abs(deger):,.2f}"
+
+
+def _yuzde_str(deger, ondalik=1):
+    """Sayiyi 'Ok.k%' seklinde metne cevirir."""
+    if pd.isna(deger):
+        return "-"
+    return f"{deger:,.{ondalik}f}%"
+
+
+def tablo_goster(
+    df, para_kolonlari=(), yuzde_kolonlari=(), tamsayi_kolonlari=(),
+    renkli_kolonlar=(), sabit_kirmizi_kolonlar=(), ozel_formatlar=None,
+    yuzde_ondalik=1, **kwargs
+):
+    """st.dataframe icin: para/yuzde sutunlarini GORUNEN haliyle AYNI
+    virgullu/dolarli METNE cevirip gosterir - boylece hucreyi kopyalayip
+    Excel'e yapistirinca da (Streamlit'in dataframe'i kopyalarken bicimi
+    degil HAM sayiyi kopyalamasi yuzunden olusan) uzun/bicimsiz sayi degil,
+    ekranda gorunenle ayni, Excel'in dogru sayi olarak tanidigi bicim
+    cikar. Kar/zarar gibi kolonlar icin yesil/kirmizi renklendirme,
+    donusumden ONCEKI sayisal degerlere gore hesaplanip korunur.
+    sabit_kirmizi_kolonlar: isaretten bagimsiz, her zaman kirmizi vurgulanir
+    (orn. 'eksik tahsilat' gibi hep negatif/sorunlu anlam tasiyan kolonlar).
+    ozel_formatlar: {kolon_adi: bicim_fonksiyonu} - para/yuzde/tamsayi
+    disindaki (orn. hacim, agirlik) sayisal kolonlar icin serbest bicim."""
+    goster_df = df.copy()
+    renk_df = pd.DataFrame("", index=df.index, columns=df.columns)
+
+    for kolon in renkli_kolonlar:
+        if kolon in df.columns:
+            renk_df[kolon] = df[kolon].apply(kar_zarar_stil)
+    for kolon in sabit_kirmizi_kolonlar:
+        if kolon in df.columns:
+            renk_df[kolon] = "background-color: rgba(220, 38, 38, 0.08); color: #b91c1c; font-weight: 700;"
+    for kolon in para_kolonlari:
+        if kolon in df.columns:
+            goster_df[kolon] = df[kolon].apply(_para_str)
+    for kolon in yuzde_kolonlari:
+        if kolon in df.columns:
+            goster_df[kolon] = df[kolon].apply(lambda v: _yuzde_str(v, yuzde_ondalik))
+    for kolon in tamsayi_kolonlari:
+        if kolon in df.columns:
+            goster_df[kolon] = df[kolon].apply(lambda v: "-" if pd.isna(v) else f"{v:,.0f}")
+    for kolon, fonk in (ozel_formatlar or {}).items():
+        if kolon in df.columns:
+            goster_df[kolon] = df[kolon].apply(lambda v, f=fonk: "-" if pd.isna(v) else f(v))
+
+    kwargs.setdefault("width", "stretch")
+    kwargs.setdefault("hide_index", True)
+    kwargs.setdefault("selection_mode", "multi-cell")
+    kwargs.setdefault("on_select", "rerun")
+    st.dataframe(goster_df.style.apply(lambda _: renk_df, axis=None), **kwargs)
+
+
 def indirme_butonlari(df, dosya_adi, key_prefix):
     """Bir tablo icin CSV ve Excel indirme butonlarini yan yana gosterir."""
     col_csv, col_excel = st.columns(2)
@@ -1828,24 +1889,11 @@ else:
             with col_mg:
                 if not gecerli_manuel_gelir.empty:
                     st.caption(tc("Manuel gelir kalemleri:"))
-                    st.dataframe(
-                        gecerli_manuel_gelir.style.format({"Tutar": "${:,.2f}"}),
-                        width="stretch",
-                        hide_index=True,
-                        selection_mode="multi-cell",
-                        on_select="rerun",
-                    )
+                    tablo_goster(gecerli_manuel_gelir, para_kolonlari=["Tutar"])
             with col_mgid:
                 if not gecerli_manuel_gider_gosterim.empty:
                     st.caption(tc("Manuel gider kalemleri:"))
-                    _goster_df = gecerli_manuel_gider_gosterim.copy()
-                    st.dataframe(
-                        _goster_df.style.format({"Tutar": "${:,.2f}"}),
-                        width="stretch",
-                        hide_index=True,
-                        selection_mode="multi-cell",
-                        on_select="rerun",
-                    )
+                    tablo_goster(gecerli_manuel_gider_gosterim, para_kolonlari=["Tutar"])
 
         st.markdown("")
         net_kar_renk = "#10b981" if summary["net_kar"] >= 0 else "#dc2626"
@@ -1865,12 +1913,9 @@ else:
             for _, kr in kaynaklar.iterrows():
                 st.caption(t("kaynak_kolon_metni").format(firma=kr['Kargo Firmasi'], sutun=kr['Kaynak Sutun']))
 
-            st.dataframe(
-                genel_gider_kategori_detay.drop(columns=["Kaynak Sutun"]).style.format({"Genel Gider": "${:,.2f}"}),
-                width="stretch",
-                hide_index=True,
-                selection_mode="multi-cell",
-                on_select="rerun",
+            tablo_goster(
+                genel_gider_kategori_detay.drop(columns=["Kaynak Sutun"]),
+                para_kolonlari=["Genel Gider"],
             )
 
             _genel_gider_toplam = genel_gider_kategori_detay["Genel Gider"].sum()
@@ -1922,23 +1967,14 @@ else:
                 "gelir, gider ve kar/zarar dagilimi."
             ))
             carrier_table = carrier_breakdown(merged)
-            st.dataframe(
-                carrier_table.style.format(
-                    {
-                        "Toplam Gelir (Tum)": "${:,.2f}",
-                        "Eslesen Gelir": "${:,.2f}",
-                        "Kargo Gideri": "${:,.2f}",
-                        "Vergi Gideri": "${:,.2f}",
-                        "Toplam Gider": "${:,.2f}",
-                        "Kar/Zarar": "${:,.2f}",
-                        "Paket Basi Kar/Zarar": "${:,.2f}",
-                        "Kar Yuzdesi (%)": "{:,.1f}%",
-                    }
-                ).map(kar_zarar_stil, subset=["Kar/Zarar", "Paket Basi Kar/Zarar", "Kar Yuzdesi (%)"]),
-                width="stretch",
-                hide_index=True,
-                selection_mode="multi-cell",
-                on_select="rerun",
+            tablo_goster(
+                carrier_table,
+                para_kolonlari=[
+                    "Toplam Gelir (Tum)", "Eslesen Gelir", "Kargo Gideri",
+                    "Vergi Gideri", "Toplam Gider", "Kar/Zarar", "Paket Basi Kar/Zarar",
+                ],
+                yuzde_kolonlari=["Kar Yuzdesi (%)"],
+                renkli_kolonlar=["Kar/Zarar", "Paket Basi Kar/Zarar", "Kar Yuzdesi (%)"],
             )
             indirme_butonlari(carrier_table, "kargo_firmasi_analizi", "carrier_table")
 
@@ -1971,13 +2007,7 @@ else:
                     "Vergi, hangisinin (takip numarasi olmadigi icin) Genel Gider sayildigini "
                     "ve ne kadar tutar tasidigini gosterir."
                 ))
-                st.dataframe(
-                    full_breakdown.style.format({"Tutar": "${:,.2f}"}),
-                    width="stretch",
-                    hide_index=True,
-                    selection_mode="multi-cell",
-                    on_select="rerun",
-                )
+                tablo_goster(full_breakdown, para_kolonlari=["Tutar"])
                 indirme_butonlari(full_breakdown, "kargo_vergi_siniflandirma", "full_breakdown")
 
         elif analiz_secimi == "Ulkelere Gore":
@@ -1987,23 +2017,14 @@ else:
                 "sutunlari sadece gider dosyasinda eslesen gonderilerden gelir."
             ))
             cb = country_breakdown(merged)
-            st.dataframe(
-                cb.style.format(
-                    {
-                        "Toplam_Gelir": "${:,.2f}",
-                        "Eslesen_Gelir": "${:,.2f}",
-                        "Kargo_Gideri": "${:,.2f}",
-                        "Vergi_Gideri": "${:,.2f}",
-                        "Toplam_Gider": "${:,.2f}",
-                        "Kar": "${:,.2f}",
-                        "Paket_Basi_Kar": "${:,.2f}",
-                        "Kar_Yuzde": "{:,.1f}%",
-                    }
-                ).map(kar_zarar_stil, subset=["Kar", "Paket_Basi_Kar", "Kar_Yuzde"]),
-                width="stretch",
-                hide_index=True,
-                selection_mode="multi-cell",
-                on_select="rerun",
+            tablo_goster(
+                cb,
+                para_kolonlari=[
+                    "Toplam_Gelir", "Eslesen_Gelir", "Kargo_Gideri",
+                    "Vergi_Gideri", "Toplam_Gider", "Kar", "Paket_Basi_Kar",
+                ],
+                yuzde_kolonlari=["Kar_Yuzde"],
+                renkli_kolonlar=["Kar", "Paket_Basi_Kar", "Kar_Yuzde"],
             )
             indirme_butonlari(cb, "ulkeye_gore_analiz", "country_table")
 
@@ -2057,20 +2078,11 @@ else:
                 "ESLESEN gonderilerden gelir."
             ))
             cust_table = customer_breakdown(merged)
-            st.dataframe(
-                cust_table.style.format(
-                    {
-                        "Bize Odenen (Gelir)": "${:,.2f}",
-                        "Firmaya Odenen (Gider)": "${:,.2f}",
-                        "Kar/Zarar": "${:,.2f}",
-                        "Paket Basi Kar/Zarar": "${:,.2f}",
-                        "Kar Yuzdesi (%)": "{:,.1f}%",
-                    }
-                ).map(kar_zarar_stil, subset=["Kar/Zarar", "Paket Basi Kar/Zarar", "Kar Yuzdesi (%)"]),
-                width="stretch",
-                hide_index=True,
-                selection_mode="multi-cell",
-                on_select="rerun",
+            tablo_goster(
+                cust_table,
+                para_kolonlari=["Bize Odenen (Gelir)", "Firmaya Odenen (Gider)", "Kar/Zarar", "Paket Basi Kar/Zarar"],
+                yuzde_kolonlari=["Kar Yuzdesi (%)"],
+                renkli_kolonlar=["Kar/Zarar", "Paket Basi Kar/Zarar", "Kar Yuzdesi (%)"],
             )
             indirme_butonlari(cust_table, "musteriye_gore_analiz", "cust_table")
 
@@ -2103,19 +2115,11 @@ else:
                 "musteri, bazi ulkelerde zarar ettiriyor olabilir."
             ))
             cust_country_table = customer_country_breakdown(merged)
-            st.dataframe(
-                cust_country_table.style.format(
-                    {
-                        "Gelir": "${:,.2f}",
-                        "Gider": "${:,.2f}",
-                        "Kar/Zarar": "${:,.2f}",
-                        "Kar Yuzdesi (%)": "{:,.1f}%",
-                    }
-                ).map(kar_zarar_stil, subset=["Kar/Zarar", "Kar Yuzdesi (%)"]),
-                width="stretch",
-                hide_index=True,
-                selection_mode="multi-cell",
-                on_select="rerun",
+            tablo_goster(
+                cust_country_table,
+                para_kolonlari=["Gelir", "Gider", "Kar/Zarar"],
+                yuzde_kolonlari=["Kar Yuzdesi (%)"],
+                renkli_kolonlar=["Kar/Zarar", "Kar Yuzdesi (%)"],
             )
             indirme_butonlari(cust_country_table, "musteri_x_ulke_analizi", "cust_country_table")
 
@@ -2130,15 +2134,10 @@ else:
                 "Gider_Kargo": "Kargo Gideri", "Gider_Tax": "Vergi/Gumruk",
                 "Gider": "Toplam Gider", "Gider_Kalemleri": "Gider Kalemleri",
             })
-            st.dataframe(
-                detayli_rapor_df.style.format(
-                    {"Invoice Amount": "${:,.2f}", "Kargo Gideri": "${:,.2f}",
-                     "Vergi/Gumruk": "${:,.2f}", "Toplam Gider": "${:,.2f}", "Kar": "${:,.2f}"}
-                ).map(kar_zarar_stil, subset=["Kar"]),
-                width="stretch",
-                hide_index=True,
-                selection_mode="multi-cell",
-                on_select="rerun",
+            tablo_goster(
+                detayli_rapor_df,
+                para_kolonlari=["Invoice Amount", "Kargo Gideri", "Vergi/Gumruk", "Toplam Gider", "Kar"],
+                renkli_kolonlar=["Kar"],
             )
             indirme_butonlari(detayli_rapor_df, "detayli_rapor", "tab1")
 
@@ -2200,15 +2199,10 @@ else:
                     _bulunan_sayisi = (_sonuc_df["Durum"] != "Bulunamadi").sum()
                     st.caption(t("takip_sorgu_ozet").format(toplam=len(_takip_listesi), bulunan=_bulunan_sayisi))
 
-                    st.dataframe(
-                        _sonuc_df.style.format(
-                            {"Gelir": "${:,.2f}", "Gider": "${:,.2f}", "Kar/Zarar": "${:,.2f}"},
-                            na_rep="-",
-                        ).map(kar_zarar_stil, subset=["Kar/Zarar"]),
-                        width="stretch",
-                        hide_index=True,
-                        selection_mode="multi-cell",
-                        on_select="rerun",
+                    tablo_goster(
+                        _sonuc_df,
+                        para_kolonlari=["Gelir", "Gider", "Kar/Zarar"],
+                        renkli_kolonlar=["Kar/Zarar"],
                     )
                     indirme_butonlari(_sonuc_df, "takip_no_sorgu_sonuclari", "takip_sorgu")
 
@@ -2250,21 +2244,10 @@ else:
                     "Toplam Eksik Tahsilat", f"${_toplam_eksik:,.2f}", "#dc2626", "⚠️"
                 )
                 st.caption(t("eksik_tahsilat_ozet").format(sayi=len(_eksik_tahsilat)))
-                st.dataframe(
-                    _eksik_tahsilat.style.format(
-                        {
-                            "Firmaya Odenen Vergi": "${:,.2f}",
-                            "Musteriden Tahsil Edilen": "${:,.2f}",
-                            "Eksik Tahsilat": "${:,.2f}",
-                        }
-                    ).map(
-                        lambda v: "background-color: rgba(220, 38, 38, 0.08); color: #b91c1c; font-weight: 700;",
-                        subset=["Eksik Tahsilat"],
-                    ),
-                    width="stretch",
-                    hide_index=True,
-                    selection_mode="multi-cell",
-                    on_select="rerun",
+                tablo_goster(
+                    _eksik_tahsilat,
+                    para_kolonlari=["Firmaya Odenen Vergi", "Musteriden Tahsil Edilen", "Eksik Tahsilat"],
+                    sabit_kirmizi_kolonlar=["Eksik Tahsilat"],
                 )
                 indirme_butonlari(_eksik_tahsilat, "tahsil_edilmeyen_vergi", "vergi_farki")
 
@@ -2344,23 +2327,18 @@ else:
                     )
                 )
 
-                st.dataframe(
-                    _boyut_tablo.style.format(
-                        {
-                            "Bizim Hacim": "{:,.1f}",
-                            "Firma Hacim": "{:,.1f}",
-                            "Hacim Orani (x)": "{:,.2f}x",
-                            "Bizim Agirlik": "{:,.2f}",
-                            "Firma Agirlik": "{:,.2f}",
-                            "Agirlik Farki": "{:,.2f}",
-                            "Kar/Zarar": "${:,.2f}",
-                        },
-                        na_rep="-",
-                    ).map(kar_zarar_stil, subset=["Kar/Zarar"]),
-                    width="stretch",
-                    hide_index=True,
-                    selection_mode="multi-cell",
-                    on_select="rerun",
+                tablo_goster(
+                    _boyut_tablo,
+                    para_kolonlari=["Kar/Zarar"],
+                    renkli_kolonlar=["Kar/Zarar"],
+                    ozel_formatlar={
+                        "Bizim Hacim": lambda v: f"{v:,.1f}",
+                        "Firma Hacim": lambda v: f"{v:,.1f}",
+                        "Hacim Orani (x)": lambda v: f"{v:,.2f}x",
+                        "Bizim Agirlik": lambda v: f"{v:,.2f}",
+                        "Firma Agirlik": lambda v: f"{v:,.2f}",
+                        "Agirlik Farki": lambda v: f"{v:,.2f}",
+                    },
                 )
                 indirme_butonlari(_boyut_tablo, "boyut_agirlik_uyusmazligi", "boyut_uyusmazlik")
 
@@ -2373,7 +2351,7 @@ else:
                 "kargo firmasinin dosyasi yuklenmemis olabilir."
             ))
             not_found_display = not_found[["Shipment No", "Track Number", "Carrier Name", "Status", "Invoice Amount"]]
-            st.dataframe(not_found_display, width="stretch", hide_index=True, selection_mode="multi-cell", on_select="rerun")
+            tablo_goster(not_found_display, para_kolonlari=["Invoice Amount"])
             indirme_butonlari(not_found_display, "gider_bulunamayanlar", "tab2")
 
         elif analiz_secimi == "Eslesmeyen Gider":
@@ -2383,7 +2361,7 @@ else:
                 "dosyasinda eslesen bir gonderi bulunamadi. Farkli ay/musteri donemine "
                 "ait olabilir, kontrol etmekte fayda var."
             ))
-            st.dataframe(unmatched_cost, width="stretch", hide_index=True, selection_mode="multi-cell", on_select="rerun")
+            tablo_goster(unmatched_cost, para_kolonlari=["Gider_Kargo", "Gider_Tax", "Gider"])
             indirme_butonlari(unmatched_cost, "eslesmeyen_gider", "tab3")
 
 
