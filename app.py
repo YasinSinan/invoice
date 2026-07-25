@@ -1832,6 +1832,8 @@ else:
                         gecerli_manuel_gelir.style.format({"Tutar": "${:,.2f}"}),
                         width="stretch",
                         hide_index=True,
+                        selection_mode="multi-cell",
+                        on_select="rerun",
                     )
             with col_mgid:
                 if not gecerli_manuel_gider_gosterim.empty:
@@ -1841,6 +1843,8 @@ else:
                         _goster_df.style.format({"Tutar": "${:,.2f}"}),
                         width="stretch",
                         hide_index=True,
+                        selection_mode="multi-cell",
+                        on_select="rerun",
                     )
 
         st.markdown("")
@@ -1865,6 +1869,8 @@ else:
                 genel_gider_kategori_detay.drop(columns=["Kaynak Sutun"]).style.format({"Genel Gider": "${:,.2f}"}),
                 width="stretch",
                 hide_index=True,
+                selection_mode="multi-cell",
+                on_select="rerun",
             )
 
             _genel_gider_toplam = genel_gider_kategori_detay["Genel Gider"].sum()
@@ -1931,6 +1937,8 @@ else:
                 ).map(kar_zarar_stil, subset=["Kar/Zarar", "Paket Basi Kar/Zarar", "Kar Yuzdesi (%)"]),
                 width="stretch",
                 hide_index=True,
+                selection_mode="multi-cell",
+                on_select="rerun",
             )
             indirme_butonlari(carrier_table, "kargo_firmasi_analizi", "carrier_table")
 
@@ -1967,6 +1975,8 @@ else:
                     full_breakdown.style.format({"Tutar": "${:,.2f}"}),
                     width="stretch",
                     hide_index=True,
+                    selection_mode="multi-cell",
+                    on_select="rerun",
                 )
                 indirme_butonlari(full_breakdown, "kargo_vergi_siniflandirma", "full_breakdown")
 
@@ -1992,6 +2002,8 @@ else:
                 ).map(kar_zarar_stil, subset=["Kar", "Paket_Basi_Kar", "Kar_Yuzde"]),
                 width="stretch",
                 hide_index=True,
+                selection_mode="multi-cell",
+                on_select="rerun",
             )
             indirme_butonlari(cb, "ulkeye_gore_analiz", "country_table")
 
@@ -2057,6 +2069,8 @@ else:
                 ).map(kar_zarar_stil, subset=["Kar/Zarar", "Paket Basi Kar/Zarar", "Kar Yuzdesi (%)"]),
                 width="stretch",
                 hide_index=True,
+                selection_mode="multi-cell",
+                on_select="rerun",
             )
             indirme_butonlari(cust_table, "musteriye_gore_analiz", "cust_table")
 
@@ -2100,6 +2114,8 @@ else:
                 ).map(kar_zarar_stil, subset=["Kar/Zarar", "Kar Yuzdesi (%)"]),
                 width="stretch",
                 hide_index=True,
+                selection_mode="multi-cell",
+                on_select="rerun",
             )
             indirme_butonlari(cust_country_table, "musteri_x_ulke_analizi", "cust_country_table")
 
@@ -2121,6 +2137,8 @@ else:
                 ).map(kar_zarar_stil, subset=["Kar"]),
                 width="stretch",
                 hide_index=True,
+                selection_mode="multi-cell",
+                on_select="rerun",
             )
             indirme_butonlari(detayli_rapor_df, "detayli_rapor", "tab1")
 
@@ -2189,6 +2207,8 @@ else:
                         ).map(kar_zarar_stil, subset=["Kar/Zarar"]),
                         width="stretch",
                         hide_index=True,
+                        selection_mode="multi-cell",
+                        on_select="rerun",
                     )
                     indirme_butonlari(_sonuc_df, "takip_no_sorgu_sonuclari", "takip_sorgu")
 
@@ -2243,6 +2263,8 @@ else:
                     ),
                     width="stretch",
                     hide_index=True,
+                    selection_mode="multi-cell",
+                    on_select="rerun",
                 )
                 indirme_butonlari(_eksik_tahsilat, "tahsil_edilmeyen_vergi", "vergi_farki")
 
@@ -2337,6 +2359,8 @@ else:
                     ).map(kar_zarar_stil, subset=["Kar/Zarar"]),
                     width="stretch",
                     hide_index=True,
+                    selection_mode="multi-cell",
+                    on_select="rerun",
                 )
                 indirme_butonlari(_boyut_tablo, "boyut_agirlik_uyusmazligi", "boyut_uyusmazlik")
 
@@ -2349,7 +2373,7 @@ else:
                 "kargo firmasinin dosyasi yuklenmemis olabilir."
             ))
             not_found_display = not_found[["Shipment No", "Track Number", "Carrier Name", "Status", "Invoice Amount"]]
-            st.dataframe(not_found_display, width="stretch", hide_index=True)
+            st.dataframe(not_found_display, width="stretch", hide_index=True, selection_mode="multi-cell", on_select="rerun")
             indirme_butonlari(not_found_display, "gider_bulunamayanlar", "tab2")
 
         elif analiz_secimi == "Eslesmeyen Gider":
@@ -2359,7 +2383,7 @@ else:
                 "dosyasinda eslesen bir gonderi bulunamadi. Farkli ay/musteri donemine "
                 "ait olabilir, kontrol etmekte fayda var."
             ))
-            st.dataframe(unmatched_cost, width="stretch", hide_index=True)
+            st.dataframe(unmatched_cost, width="stretch", hide_index=True, selection_mode="multi-cell", on_select="rerun")
             indirme_butonlari(unmatched_cost, "eslesmeyen_gider", "tab3")
 
 
