@@ -1057,6 +1057,7 @@ def tablo_goster(
         _hucreler_html = ""
         for _i, kolon in enumerate(goster_df.columns):
             _orijinal_kolon = _ters_adlar.get(kolon, kolon)
+            _renk_ek_stil = ""
             if _i == 0:
                 _deger = "TOPLAM"
             elif _orijinal_kolon in ortalama_kolonlari and _orijinal_kolon in df.columns:
@@ -1069,16 +1070,19 @@ def tablo_goster(
                     _deger = f"ORT: {_yuzde_str(_ortalama, yuzde_ondalik)}"
                 else:
                     _deger = f"ORT: {_tr_sayi(_ortalama, 1)}"
+                if _orijinal_kolon in renkli_kolonlar and not pd.isna(_ortalama):
+                    _renk_ek_stil = kar_zarar_stil(_ortalama)
             elif _orijinal_kolon in yuzde_kolonlari:
                 _deger = ""
             elif _orijinal_kolon in df.columns and pd.api.types.is_numeric_dtype(df[_orijinal_kolon]) and not pd.api.types.is_bool_dtype(df[_orijinal_kolon]):
                 _toplam = df[_orijinal_kolon].sum()
                 _deger = _para_str(_toplam) if _orijinal_kolon in para_kolonlari else _tr_sayi(_toplam, 0)
+                if _orijinal_kolon in renkli_kolonlar:
+                    _renk_ek_stil = kar_zarar_stil(_toplam)
             else:
                 _deger = ""
-            _hizala = "left" if _i == 0 else "right"
             _hucreler_html += (
-                f'<td style="padding: 8px 10px; text-align: {_hizala}; white-space: nowrap;">{_deger}</td>'
+                f'<td style="padding: 8px 10px; text-align: left; white-space: nowrap; {_renk_ek_stil}">{_deger}</td>'
             )
         st.markdown(
             f"""
