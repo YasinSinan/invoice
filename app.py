@@ -2151,6 +2151,7 @@ else:
                 ],
                 yuzde_kolonlari=["Kar_Yuzde"],
                 renkli_kolonlar=["Kar", "Paket_Basi_Kar", "Kar_Yuzde"],
+                ortalama_kolonlari=["Paket_Basi_Kar", "Kar_Yuzde"],
             )
             indirme_butonlari(cb, "ulkeye_gore_analiz", "country_table")
 
