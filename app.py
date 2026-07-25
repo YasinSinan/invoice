@@ -973,7 +973,7 @@ def _yuzde_str(deger, ondalik=1):
 def tablo_goster(
     df, para_kolonlari=(), yuzde_kolonlari=(), tamsayi_kolonlari=(),
     renkli_kolonlar=(), sabit_kirmizi_kolonlar=(), ozel_formatlar=None,
-    yuzde_ondalik=1, toplam_satiri=True, **kwargs
+    ortalama_kolonlari=(), yuzde_ondalik=1, toplam_satiri=True, **kwargs
 ):
     """st.dataframe icin: para/yuzde sutunlarini GORUNEN haliyle AYNI
     virgullu/dolarli METNE cevirip gosterir - boylece hucreyi kopyalayip
@@ -987,7 +987,10 @@ def tablo_goster(
     ozel_formatlar: {kolon_adi: bicim_fonksiyonu} - para/yuzde/tamsayi
     disindaki (orn. hacim, agirlik) sayisal kolonlar icin serbest bicim.
     toplam_satiri: True ise, tum sayisal sutunlarin altina bir "TOPLAM"
-    satiri eklenir (yuzde sutunlari haric - toplamlarinin anlami yok)."""
+    satiri eklenir (yuzde sutunlari haric - toplamlarinin anlami yok).
+    ortalama_kolonlari: bu listedeki kolonlar TOPLAM satirinda toplam
+    yerine ORTALAMA gosterir (orn. paket basi kar/zarar, kar yuzdesi gibi
+    toplamin degil ortalamanin anlamli oldugu kolonlar icin)."""
     goster_df = df.copy()
     renk_df = pd.DataFrame("", index=df.index, columns=df.columns)
 
@@ -1056,6 +1059,16 @@ def tablo_goster(
             _orijinal_kolon = _ters_adlar.get(kolon, kolon)
             if _i == 0:
                 _deger = "TOPLAM"
+            elif _orijinal_kolon in ortalama_kolonlari and _orijinal_kolon in df.columns:
+                _ortalama = df[_orijinal_kolon].mean()
+                if pd.isna(_ortalama):
+                    _deger = "-"
+                elif _orijinal_kolon in para_kolonlari:
+                    _deger = f"ORT: {_para_str(_ortalama)}"
+                elif _orijinal_kolon in yuzde_kolonlari:
+                    _deger = f"ORT: {_yuzde_str(_ortalama, yuzde_ondalik)}"
+                else:
+                    _deger = f"ORT: {_tr_sayi(_ortalama, 1)}"
             elif _orijinal_kolon in yuzde_kolonlari:
                 _deger = ""
             elif _orijinal_kolon in df.columns and pd.api.types.is_numeric_dtype(df[_orijinal_kolon]) and not pd.api.types.is_bool_dtype(df[_orijinal_kolon]):
@@ -2079,6 +2092,7 @@ else:
                 ],
                 yuzde_kolonlari=["Kar Yuzdesi (%)"],
                 renkli_kolonlar=["Kar/Zarar", "Paket Basi Kar/Zarar", "Kar Yuzdesi (%)"],
+                ortalama_kolonlari=["Paket Basi Kar/Zarar", "Kar Yuzdesi (%)"],
             )
             indirme_butonlari(carrier_table, "kargo_firmasi_analizi", "carrier_table")
 
