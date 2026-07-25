@@ -1035,38 +1035,60 @@ def tablo_goster(
         goster_df = goster_df.rename(columns=_yeniden_adlar)
         renk_df = renk_df.rename(columns=_yeniden_adlar)
 
-    if toplam_satiri and not df.empty:
-        _ters_adlar = {yeni: eski for eski, yeni in _yeniden_adlar.items()}
-        _toplam_deger = {}
-        _toplam_stil = {}
-        for _i, kolon in enumerate(goster_df.columns):
-            _orijinal_kolon = _ters_adlar.get(kolon, kolon)
-            if _i == 0:
-                _toplam_deger[kolon] = "TOPLAM"
-            elif _orijinal_kolon in yuzde_kolonlari:
-                _toplam_deger[kolon] = ""
-            elif _orijinal_kolon in df.columns and pd.api.types.is_numeric_dtype(df[_orijinal_kolon]):
-                _toplam = df[_orijinal_kolon].sum()
-                _toplam_deger[kolon] = _para_str(_toplam) if _orijinal_kolon in para_kolonlari else _tr_sayi(_toplam, 0)
-            else:
-                _toplam_deger[kolon] = ""
-            _toplam_stil[kolon] = (
-                "font-weight: 800; border-top: 2px solid #1f2430; background-color: rgba(0,0,0,0.035);"
-            )
-        goster_df.loc["___TOPLAM___"] = _toplam_deger
-        renk_df.loc["___TOPLAM___"] = _toplam_stil
-        # Index'i sifirla - "___TOPLAM___" etiketi eklenince index int64'ten
-        # object tipine karisiyor, bu da Arrow serilestirmede gereksiz bir
-        # ic uyariya yol aciyordu (hide_index=True oldugu icin kullaniciya
-        # hic gorunmuyor ama temiz olsun diye sifirliyoruz).
-        goster_df = goster_df.reset_index(drop=True)
-        renk_df = renk_df.reset_index(drop=True)
-
     kwargs.setdefault("width", "stretch")
     kwargs.setdefault("hide_index", True)
     kwargs.setdefault("selection_mode", "multi-cell")
     kwargs.setdefault("on_select", "rerun")
     st.dataframe(goster_df.style.apply(lambda _: renk_df, axis=None), **kwargs)
+
+    if toplam_satiri and not df.empty:
+        # Toplam satiri BILEREK tablonun (st.dataframe) icine eklenmiyor -
+        # ekleseydik, kullanici bir sutuna gore sirala (ascending/descending)
+        # dedigi anda TOPLAM satiri da diger satirlarla birlikte karisip
+        # ortalarda bir yere dusuyordu. Bunun yerine tablonun HEMEN ALTINA,
+        # ayri/sabit bir HTML satiri olarak, hicbir sekilde siralamaya
+        # dahil olmayacak sekilde ekleniyor.
+        _ters_adlar = {yeni: eski for eski, yeni in _yeniden_adlar.items()}
+        _hucreler_html = ""
+        for _i, kolon in enumerate(goster_df.columns):
+            _orijinal_kolon = _ters_adlar.get(kolon, kolon)
+            if _i == 0:
+                _deger = "TOPLAM"
+            elif _orijinal_kolon in yuzde_kolonlari:
+                _deger = ""
+            elif _orijinal_kolon in df.columns and pd.api.types.is_numeric_dtype(df[_orijinal_kolon]) and not pd.api.types.is_bool_dtype(df[_orijinal_kolon]):
+                _toplam = df[_orijinal_kolon].sum()
+                _deger = _para_str(_toplam) if _orijinal_kolon in para_kolonlari else _tr_sayi(_toplam, 0)
+            else:
+                _deger = ""
+            _hizala = "left" if _i == 0 else "right"
+            _hucreler_html += (
+                f'<td style="padding: 8px 10px; text-align: {_hizala}; white-space: nowrap;">{_deger}</td>'
+            )
+        st.markdown(
+            f"""
+            <div style="overflow-x: auto; margin-top: -2px;">
+                <table style="
+                    width: 100%;
+                    border-collapse: collapse;
+                    table-layout: fixed;
+                    font-size: 13px;
+                    font-weight: 800;
+                    color: #1f2430;
+                    background-color: rgba(0,0,0,0.035);
+                    border-top: 2px solid #1f2430;
+                    border-left: 1.5px solid #c7cbd6;
+                    border-right: 1.5px solid #c7cbd6;
+                    border-bottom: 1.5px solid #c7cbd6;
+                    border-radius: 0 0 8px 8px;
+                    margin-bottom: 8px;
+                ">
+                    <tr>{_hucreler_html}</tr>
+                </table>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
 
 def indirme_butonlari(df, dosya_adi, key_prefix):
