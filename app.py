@@ -2090,15 +2090,6 @@ else:
                 )
                 st.altair_chart(_carrier_chart, width="stretch")
 
-            if not full_breakdown.empty:
-                st.caption(tc(
-                    "Asagidaki tablo her dosyada hangi kategori/sutunun Kargo, hangisinin "
-                    "Vergi, hangisinin (takip numarasi olmadigi icin) Genel Gider sayildigini "
-                    "ve ne kadar tutar tasidigini gosterir."
-                ))
-                tablo_goster(full_breakdown, para_kolonlari=["Tutar"])
-                indirme_butonlari(full_breakdown, "kargo_vergi_siniflandirma", "full_breakdown")
-
         elif analiz_secimi == "Ulkelere Gore":
             st.subheader(t("ulke_analiz_baslik"))
             st.caption(tc(
