@@ -1061,7 +1061,11 @@ def tablo_goster(
             if _i == 0:
                 _deger = "TOPLAM"
             elif _orijinal_kolon in ortalama_kolonlari and _orijinal_kolon in df.columns:
-                _ortalama = df[_orijinal_kolon].mean()
+                # pd.to_numeric ile zorluyoruz - bazi veri akislarinda (orn.
+                # birlestirme/eslestirmeden gecen Gider/Kar kolonlari) dtype
+                # 'object' olarak kalabiliyor, sadece dtype kontrolune
+                # guvenmek boyle durumlarda sessizce bos gostermeye yol aciyordu.
+                _ortalama = pd.to_numeric(df[_orijinal_kolon], errors="coerce").mean()
                 if pd.isna(_ortalama):
                     _deger = "-"
                 elif _orijinal_kolon in para_kolonlari:
@@ -1074,9 +1078,18 @@ def tablo_goster(
                     _renk_ek_stil = kar_zarar_stil(_ortalama)
             elif _orijinal_kolon in yuzde_kolonlari:
                 _deger = ""
+            elif _orijinal_kolon in para_kolonlari or _orijinal_kolon in tamsayi_kolonlari:
+                # Cagiran taraf bu kolonun sayisal (para/tamsayi) oldugunu
+                # ACIKCA belirtti - dtype tespitine guvenmek yerine dogrudan
+                # sayiya cevirip topluyoruz (ayni sebepten: bazi kolonlar
+                # 'object' dtype'ta kalabiliyor).
+                _toplam = pd.to_numeric(df[_orijinal_kolon], errors="coerce").sum()
+                _deger = _para_str(_toplam) if _orijinal_kolon in para_kolonlari else _tr_sayi(_toplam, 0)
+                if _orijinal_kolon in renkli_kolonlar:
+                    _renk_ek_stil = kar_zarar_stil(_toplam)
             elif _orijinal_kolon in df.columns and pd.api.types.is_numeric_dtype(df[_orijinal_kolon]) and not pd.api.types.is_bool_dtype(df[_orijinal_kolon]):
                 _toplam = df[_orijinal_kolon].sum()
-                _deger = _para_str(_toplam) if _orijinal_kolon in para_kolonlari else _tr_sayi(_toplam, 0)
+                _deger = _tr_sayi(_toplam, 0)
                 if _orijinal_kolon in renkli_kolonlar:
                     _renk_ek_stil = kar_zarar_stil(_toplam)
             else:
