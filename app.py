@@ -26,6 +26,7 @@ from processing import (
     customer_breakdown,
     customer_country_breakdown,
     europe_summary,
+    format_country_with_flag,
     load_byelabel_group,
     load_cost_file,
     load_income_file,
@@ -2458,6 +2459,8 @@ else:
                 "Musteriden_Alinan_Vergi": "Musteriden Tahsil Edilen",
                 "Fark": "Eksik Tahsilat",
             }).sort_values("Eksik Tahsilat", ascending=False)
+            if not _eksik_tahsilat.empty:
+                _eksik_tahsilat["Ulke"] = _eksik_tahsilat["Ulke"].apply(format_country_with_flag)
 
             if _eksik_tahsilat.empty:
                 st.success(t("vergi_tam_tahsil"))
