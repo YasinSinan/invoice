@@ -1176,78 +1176,88 @@ if "analiz_secimi" not in st.session_state:
     st.session_state["analiz_secimi"] = None  # None = Ana Sayfa
 
 with st.sidebar:
-    if "sidebar_daralt" not in st.session_state:
-        st.session_state["sidebar_daralt"] = False
-    _sb_daralt = st.session_state["sidebar_daralt"]
-    _sb_genislik = "64px" if _sb_daralt else "248px"
-
     _sidebar_css = """
         <style>
-        /* Sidebar genisligi tiklanabilir bir butonla (sidebar_daralt) kontrol
-           edilir - fare hover'i ile DEGIL. Streamlit'in kendi sidebar'i,
-           kullanicinin surukleyerek yeniden boyutlandirmasina izin vermek
-           icin genisligini kendi JS'iyle aktif yonetiyor; bu yuzden CSS
-           ':hover' tabanli otomatik genisleme/daralma guvenilmez sonuc
-           veriyordu (bazen hic gorunmeme, bazen kapanmama). Sabit (statik)
-           bir genislik zorlamasi - daha once basariyla kullandigimiz yontem -
-           JS ile catismadan guvenilir sekilde calisiyor. Etiket metinlerinin
-           gosterilip gizlenmesi de artik CSS numarasiyla degil, dogrudan
-           Python tarafinda (asagida) kontrol ediliyor. */
+        /* Sidebar HER ZAMAN sabit dar genislikte kalir (Streamlit'in kendi
+           JS'iyle catismamak icin genislik hic degismez - bu, daha once
+           basariyla kullandigimiz, guvenilir yontem). Ikon ile yazi ayri:
+           normalde sadece ikon gorunur (yazi tasar/gizlidir), TEK TEK
+           butonun uzerine gelince (:hover) o butonun metni disariya tasip
+           (overflow: visible) tam olarak gorunur hale gelir - komsu
+           butonlarin yerini degistirmez, cunku buton kendi normal
+           konumunda kalir, sadece tasan kismi gorunur olur. */
         [data-testid="stSidebar"] {
-            width: %%GENISLIK%% !important;
-            min-width: %%GENISLIK%% !important;
-            max-width: %%GENISLIK%% !important;
+            width: 64px !important;
+            min-width: 64px !important;
+            max-width: 64px !important;
             background-color: %%KOYU%%;
             border-right: 1px solid #22252d;
             transform: none !important;
             visibility: visible !important;
             margin-left: 0 !important;
-            transition: width 0.15s ease, min-width 0.15s ease, max-width 0.15s ease;
+            overflow: visible !important;
         }
         [data-testid="stSidebar"] > div:first-child {
             padding: 0 !important;
+            overflow: visible !important;
         }
         [data-testid="stSidebarContent"] {
             padding-top: 0.25rem !important;
+            overflow: visible !important;
         }
         [data-testid="stSidebarContent"] [data-testid="stVerticalBlock"] {
             align-items: flex-start !important;
+            overflow: visible !important;
         }
         div[data-testid="stSidebarContent"] .stButton {
             width: 100% !important;
+            overflow: visible !important;
         }
         div[data-testid="stSidebarContent"] .stButton button {
-            width: 100% !important;
+            width: 64px !important;
             justify-content: flex-start !important;
-            padding: 9px 14px !important;
+            padding: 9px 19px !important;
             margin: 2px 0 !important;
             border-radius: 8px !important;
             display: flex;
             align-items: center;
-            font-size: %%FONT_BOYUTU%% !important;
+            font-size: 20px !important;
             font-weight: 500 !important;
             background: transparent !important;
             border: none !important;
             color: var(--sidebar-text) !important;
             box-shadow: none !important;
-            transition: background 0.15s;
             text-align: left !important;
             white-space: nowrap !important;
             overflow: hidden !important;
+            position: relative !important;
+            z-index: 1;
         }
         div[data-testid="stSidebarContent"] .stButton button div {
             justify-content: flex-start !important;
             width: 100% !important;
-        }
-        div[data-testid="stSidebarContent"] .stButton button:hover {
-            background: rgba(255,255,255,0.06) !important;
-            color: #ffffff !important;
+            overflow: visible !important;
         }
         div[data-testid="stSidebarContent"] .stButton button p {
-            font-size: inherit !important;
+            font-size: 20px !important;
             margin: 0 !important;
             text-align: left !important;
             white-space: nowrap !important;
+        }
+        /* Fare uzerine gelince: buton kendi konumunda/boyutunda kalir
+           (komsu ogeler kaymaz), ama tasan metin artik gizlenmiyor -
+           sag tarafa dogru bir "kanat" gibi acilip tam etiketi gosterir. */
+        div[data-testid="stSidebarContent"] .stButton button:hover {
+            overflow: visible !important;
+            background: %%KOYU%% !important;
+            color: #ffffff !important;
+            box-shadow: 2px 2px 10px rgba(0,0,0,0.35) !important;
+            border-radius: 0 8px 8px 0 !important;
+            z-index: 1000 !important;
+        }
+        div[data-testid="stSidebarContent"] .stButton button:hover p {
+            font-size: 14px !important;
+            font-weight: 500 !important;
         }
         .sidebar-logo {
             display: flex;
@@ -1268,34 +1278,9 @@ with st.sidebar:
             font-size: 16px;
             flex-shrink: 0;
         }
-        .sidebar-logo .name {
-            color: #ffffff !important;
-            font-size: 16px;
-            font-weight: 800;
-        }
-        .sidebar-section {
-            color: #8891a1 !important;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.06em;
-            padding: 14px 18px 6px 18px;
-            text-transform: uppercase;
-            white-space: nowrap;
-            overflow: hidden;
-        }
         </style>
-        """
-    if _sb_daralt:
-        _sidebar_css += """
         <div class="sidebar-logo">
             <div class="box">📦</div>
-        </div>
-        """
-    else:
-        _sidebar_css += """
-        <div class="sidebar-logo">
-            <div class="box">📦</div>
-            <div class="name">ComfyShip</div>
         </div>
         """
     _sidebar_css = (
@@ -1303,14 +1288,8 @@ with st.sidebar:
         .replace("%%ACCENT%%", _tema["accent"])
         .replace("%%KOYU%%", _tema["koyu"])
         .replace("%%KOYU2%%", _tema["koyu2"])
-        .replace("%%GENISLIK%%", _sb_genislik)
-        .replace("%%FONT_BOYUTU%%", "24px" if _sb_daralt else "14px")
     )
     st.markdown(_sidebar_css, unsafe_allow_html=True)
-
-    if st.button("☰" if _sb_daralt else "☰  Daralt", key="sidebar_toggle_btn"):
-        st.session_state["sidebar_daralt"] = not _sb_daralt
-        st.rerun()
 
     _aktif_etiket = st.session_state["analiz_secimi"] or "Ana Sayfa"
     _tum_etiketler = [label for _, label in MENU_ITEMS]
@@ -1330,25 +1309,19 @@ with st.sidebar:
         )
 
     def _buton_metni(icon, label):
-        return icon if _sb_daralt else f"{icon}  {_menu_metni(label)}"
+        return f"{icon}  {_menu_metni(label)}"
 
-    if not _sb_daralt:
-        st.markdown(f'<div class="sidebar-section">{t("ana_menu")}</div>', unsafe_allow_html=True)
     icon, label = BASE_MENU_ITEMS[0]
     if st.button(_buton_metni(icon, label), key=f"nav_{label}", width="stretch"):
         _her_seyi_sifirla()
         st.session_state["analiz_secimi"] = None
         st.rerun()
 
-    if not _sb_daralt:
-        st.markdown(f'<div class="sidebar-section">{t("dosya_islemleri")}</div>', unsafe_allow_html=True)
     for icon, label in BASE_MENU_ITEMS[1:]:
         if st.button(_buton_metni(icon, label), key=f"nav_{label}", width="stretch"):
             st.session_state["analiz_secimi"] = label
             st.rerun()
 
-    if not _sb_daralt:
-        st.markdown(f'<div class="sidebar-section">{t("raporlar")}</div>', unsafe_allow_html=True)
     for icon, label in REPORT_MENU_ITEMS:
         if st.button(_buton_metni(icon, label), key=f"nav_{label}", width="stretch"):
             st.session_state["analiz_secimi"] = label
@@ -1836,13 +1809,9 @@ else:
                         hide_index=True,
                     )
             with col_mgid:
-                if not gecerli_manuel_gider_gosterim.empty or otomatik_satirlar:
+                if not gecerli_manuel_gider_gosterim.empty:
                     st.caption(tc("Manuel gider kalemleri:"))
                     _goster_df = gecerli_manuel_gider_gosterim.copy()
-                    if otomatik_satirlar:
-                        _goster_df = pd.concat(
-                            [_goster_df, pd.DataFrame(otomatik_satirlar)], ignore_index=True
-                        )
                     st.dataframe(
                         _goster_df.style.format({"Tutar": "${:,.2f}"}),
                         width="stretch",
