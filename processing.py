@@ -760,6 +760,7 @@ COUNTRY_TO_ISO = {
     "united states": "US", "usa": "US", "us": "US",
     "canada": "CA",
     "united kingdom": "GB", "uk": "GB", "great britain": "GB",
+    "man (isle of)": "IM", "isle of man": "IM",
     "france": "FR",
     "germany": "DE",
     "spain": "ES",
@@ -1099,6 +1100,7 @@ EUROPE_COUNTRIES = {
     "serbia", "bosnia and herzegovina", "north macedonia",
     "albania", "georgia", "armenia", "azerbaijan",
     "ukraine", "russia",
+    "man (isle of)", "isle of man",
 }
 
 
