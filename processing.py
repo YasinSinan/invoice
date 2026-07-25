@@ -731,10 +731,12 @@ def summarize(merged, genel_gider=0.0, manuel_gelir=0.0):
     toplam_kar = matched["Kar"].sum()
     toplam_gelir = merged["Invoice Amount"].sum()
     toplam_gelir_eslesen = matched["Invoice Amount"].sum()
+    aktif_user_sayisi = merged["User No"].nunique() if "User No" in merged.columns else 0
     net_kar = toplam_kar - genel_gider + manuel_gelir
     return {
         "toplam_gelir": toplam_gelir,
         "toplam_gelir_eslesen": toplam_gelir_eslesen,
+        "aktif_user_sayisi": aktif_user_sayisi,
         "toplam_gider_kargo": matched["Gider_Kargo"].sum(),
         "toplam_gider_tax": matched["Gider_Tax"].sum(),
         "toplam_gider_eslesen": matched["Gider"].sum(),
