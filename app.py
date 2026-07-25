@@ -942,12 +942,13 @@ def kar_zarar_stil(val):
 
 
 def _para_str(deger):
-    """Sayiyi '$1,234.56' seklinde metne cevirir (Excel'e yapistirinca dogru
-    sayi olarak taninip virgullu/dolarli bicimini korur)."""
+    """Sayiyi '1,234.56' seklinde metne cevirir ($ isareti yok - o artik
+    sutun basliginda gosteriliyor). Excel'e yapistirinca dogru sayi olarak
+    taninip virgullu bicimini korur."""
     if pd.isna(deger):
         return "-"
     isaret = "-" if deger < 0 else ""
-    return f"{isaret}${abs(deger):,.2f}"
+    return f"{isaret}{abs(deger):,.2f}"
 
 
 def _yuzde_str(deger, ondalik=1):
@@ -994,6 +995,15 @@ def tablo_goster(
     for kolon, fonk in (ozel_formatlar or {}).items():
         if kolon in df.columns:
             goster_df[kolon] = df[kolon].apply(lambda v, f=fonk: "-" if pd.isna(v) else f(v))
+
+    # Para sutunlarinda hucrelerde tekrar tekrar "$" yazmak yerine, sadece
+    # sutun basligina "($)" ekleniyor. goster_df ve renk_df'nin kolon
+    # adlarinin BIREBIR ayni kalmasi gerekiyor (Styler.apply hizalamasi
+    # icin), o yuzden ikisi de birlikte yeniden adlandiriliyor.
+    _yeniden_adlar = {kolon: f"{kolon} ($)" for kolon in para_kolonlari if kolon in df.columns}
+    if _yeniden_adlar:
+        goster_df = goster_df.rename(columns=_yeniden_adlar)
+        renk_df = renk_df.rename(columns=_yeniden_adlar)
 
     kwargs.setdefault("width", "stretch")
     kwargs.setdefault("hide_index", True)
