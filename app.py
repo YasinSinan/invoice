@@ -1197,21 +1197,27 @@ with st.sidebar:
             margin-left: 0 !important;
             overflow: visible !important;
         }
+        /* Streamlit her widget'i birden fazla ara sarmalayici (wrapper) div
+           icine koyuyor - hangisinin adini kacirirsak orada metin yine
+           kirpilir. Bu yuzden sidebar icindeki HER seyi (evrensel secici
+           ile) overflow:visible yapiyoruz, tek tek isim tahmin etmek
+           yerine - boylece hover'da tasan yazi hicbir ara katmanda
+           kesilmeden gorunur. */
+        [data-testid="stSidebarContent"],
+        [data-testid="stSidebarContent"] * {
+            overflow: visible !important;
+        }
         [data-testid="stSidebar"] > div:first-child {
             padding: 0 !important;
-            overflow: visible !important;
         }
         [data-testid="stSidebarContent"] {
             padding-top: 0.25rem !important;
-            overflow: visible !important;
         }
         [data-testid="stSidebarContent"] [data-testid="stVerticalBlock"] {
             align-items: flex-start !important;
-            overflow: visible !important;
         }
         div[data-testid="stSidebarContent"] .stButton {
             width: 100% !important;
-            overflow: visible !important;
         }
         div[data-testid="stSidebarContent"] .stButton button {
             width: 64px !important;
