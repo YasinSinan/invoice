@@ -329,6 +329,8 @@ def t(anahtar):
 # dil="en" oldugunda karsiligini arar, bulamazsa Turkce metni oldugu gibi
 # dondurur (hicbir caption cevrilmeden kalmaz, en kotu ihtimalle Turkce gorunur).
 _CAPTION_EN = {
+    "Hesaplama tamamlandi. Bir raporu goruntulemek icin sol menuden istedigin analizi sec.":
+        "Calculation complete. Select the analysis you want from the left menu to view a report.",
     "Bir kargo firmasindan fatura geldikce, tum formu doldurmadan sadece o dosyayi secip GitHub'a kaydet. Ayni doneme, ayni firmadan tekrar dosya yuklersen otomatik birlestirilir (tekrarlar elenir, yeni satirlar eklenir).":
         "As invoices come in from a carrier, select just that file and save it to GitHub without filling out the whole form. If you upload another file from the same carrier for the same period again, it's automatically merged (duplicates removed, new rows added).",
     "Bilgisayarindan dosya yuklemek yerine, daha once GitHub'a arsivledigin gelir/gider dosyalarindan istedigini sec ve Hesapla'ya bas.":
@@ -2042,14 +2044,18 @@ else:
             )
         )
 
-        # Rapor sekmelerinden biri secili degilse (orn. hesaplama az once bitti),
-        # varsayilan olarak ilk rapor sekmesini goster.
+        # Hesapla az once bitti ve henuz hicbir rapor sekmesi secilmediyse,
+        # OTOMATIK olarak bir sekme acilmaz - kullanici sol menuden kendisi
+        # bir rapor secene kadar bos/bilgilendirici bir mesaj gosterilir.
         _rapor_etiketleri = [label for _, label in REPORT_MENU_ITEMS]
         if analiz_secimi not in _rapor_etiketleri:
-            analiz_secimi = REPORT_MENU_ITEMS[0][1]
-            st.session_state["analiz_secimi"] = analiz_secimi
-
-        st.divider()
+            st.divider()
+            st.info(tc(
+                "Hesaplama tamamlandi. Bir raporu goruntulemek icin sol menuden "
+                "istedigin analizi sec."
+            ))
+        else:
+            st.divider()
 
         if analiz_secimi == "Kargo Firmalarina Gore":
             st.subheader(t("kargo_analiz_baslik"))
