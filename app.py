@@ -2304,6 +2304,7 @@ else:
                 "ve son gonderi tarihi ve hangi ulkelere gonderi yaptigi listelenir."
             ))
             _user_df = merged.copy()
+            _user_df["Added Date"] = pd.to_datetime(_user_df["Added Date"], errors="coerce")
             _user_df["User No"] = _user_df["User No"].astype(str)
             _user_df["User Name"] = _user_df["User Name"].fillna("Bilinmiyor")
             _aktif_user_tablosu = (
@@ -2322,7 +2323,13 @@ else:
                 )
                 .sort_values("Paket Sayisi", ascending=False)
             )
-            _tarih_str = lambda d: "-" if pd.isna(d) else d.strftime("%d.%m.%Y")
+            def _tarih_str(d):
+                """Gercek veride 'Added Date' bazen datetime disinda bir
+                tipte gelebiliyor (orn. Arrow-destekli string/object) - bu
+                yuzden pd.to_datetime ile once zorluyoruz, dogrudan
+                .strftime() cagirmiyoruz."""
+                d = pd.to_datetime(d, errors="coerce")
+                return "-" if pd.isna(d) else d.strftime("%d.%m.%Y")
             _aktif_user_tablosu["Ilk Gonderi"] = _aktif_user_tablosu["Ilk Gonderi"].apply(_tarih_str)
             _aktif_user_tablosu["Son Gonderi"] = _aktif_user_tablosu["Son Gonderi"].apply(_tarih_str)
             tablo_goster(_aktif_user_tablosu, tamsayi_kolonlari=["Paket Sayisi", "Eslesen Sayisi"])
