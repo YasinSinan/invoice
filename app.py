@@ -128,6 +128,7 @@ CEVIRI = {
         "ulkelere_gore": "Ulkelere Gore",
         "avrupa_ozeti": "Avrupa",
         "musterilere_gore": "Musterilere Gore",
+        "aktif_user_listesi": "Aktif User Listesi",
         "musteri_x_ulke": "Musteri x Ulke",
         "detayli_rapor": "Detayli Rapor",
         "takip_no_sorgula": "Takip No Sorgula",
@@ -233,6 +234,7 @@ CEVIRI = {
         "ulkelere_gore": "By Country",
         "avrupa_ozeti": "Europe",
         "musterilere_gore": "By Customer",
+        "aktif_user_listesi": "Active User List",
         "musteri_x_ulke": "Customer x Country",
         "detayli_rapor": "Detailed Report",
         "takip_no_sorgula": "Track Number Lookup",
@@ -1396,6 +1398,7 @@ REPORT_MENU_ITEMS = [
     ("🚚", "Kargo Firmalarina Gore"),
     ("🌍", "Ulkelere Gore"),
     ("🗺️", "Avrupa Ozeti"),
+    ("👤", "Aktif User Listesi"),
     ("👥", "Musterilere Gore"),
     ("🔗", "Musteri x Ulke"),
     ("📋", "Detayli Rapor"),
@@ -1418,6 +1421,7 @@ _MENU_CEVIRI = {
     "Kargo Firmalarina Gore": "kargo_firmalarina_gore",
     "Ulkelere Gore": "ulkelere_gore",
     "Avrupa Ozeti": "avrupa_ozeti",
+    "Aktif User Listesi": "aktif_user_listesi",
     "Musterilere Gore": "musterilere_gore",
     "Musteri x Ulke": "musteri_x_ulke",
     "Detayli Rapor": "detayli_rapor",
@@ -2292,6 +2296,37 @@ else:
                 indirme_butonlari(_avrupa_cb, "avrupa_detayli_analiz", "avrupa_detay")
             else:
                 st.info(t("avrupa_gonderi_yok"))
+
+        elif analiz_secimi == "Aktif User Listesi":
+            st.subheader(t("aktif_user_listesi"))
+            st.caption(tc(
+                "Gelir dosyasindaki her User No / User Name icin kac gonderi yaptigi, ilk "
+                "ve son gonderi tarihi ve hangi ulkelere gonderi yaptigi listelenir."
+            ))
+            _user_df = merged.copy()
+            _user_df["User No"] = _user_df["User No"].astype(str)
+            _user_df["User Name"] = _user_df["User Name"].fillna("Bilinmiyor")
+            _aktif_user_tablosu = (
+                _user_df.groupby(["User No", "User Name"], as_index=False)
+                .agg(
+                    **{
+                        "Paket Sayisi": ("Shipment No", "count"),
+                        "Eslesen Sayisi": ("Durum", lambda x: (x == "Eslesti").sum()),
+                        "Ilk Gonderi": ("Added Date", "min"),
+                        "Son Gonderi": ("Added Date", "max"),
+                        "Gonderdigi Ulkeler": (
+                            "Receiver Country",
+                            lambda x: ", ".join(format_country_with_flag(u) for u in sorted(set(x.dropna()))),
+                        ),
+                    }
+                )
+                .sort_values("Paket Sayisi", ascending=False)
+            )
+            _tarih_str = lambda d: "-" if pd.isna(d) else d.strftime("%d.%m.%Y")
+            _aktif_user_tablosu["Ilk Gonderi"] = _aktif_user_tablosu["Ilk Gonderi"].apply(_tarih_str)
+            _aktif_user_tablosu["Son Gonderi"] = _aktif_user_tablosu["Son Gonderi"].apply(_tarih_str)
+            tablo_goster(_aktif_user_tablosu, tamsayi_kolonlari=["Paket Sayisi", "Eslesen Sayisi"])
+            indirme_butonlari(_aktif_user_tablosu, "aktif_user_listesi", "aktif_user")
 
         elif analiz_secimi == "Musterilere Gore":
             st.subheader(t("musteri_analiz_baslik"))
