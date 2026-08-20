@@ -379,8 +379,10 @@ _CAPTION_EN = {
         "These shipments have a tracking number, but no matching entry was found in the uploaded expense files. They may not have been invoiced yet, or the relevant carrier's file may not have been uploaded.",
     "Bu takip numaralari kargo firmasinin fatura listesinde var ama gelir dosyasinda eslesen bir gonderi bulunamadi. Farkli ay/musteri donemine ait olabilir, kontrol etmekte fayda var.":
         "These tracking numbers exist in the carrier's invoice list, but no matching shipment was found in the income file. They may belong to a different month/customer period - worth checking.",
-    "Musteriye beyan ettigimiz (gelir dosyasindaki) ile kargo firmasinin faturasindaki olcumleri **hacim** (uzunluk x genislik x yukseklik) ve **agirlik** olarak karsilastirir - tek tek kenar (uzunluk/genislik/yukseklik) karsilastirilmaz, cunku firmalar hangi kenara 'uzunluk' hangisine 'genislik' dedigini bizden farkli siralayabiliyor; hacim carpimda sira onemli olmadigi icin bu sorunu ortadan kaldirir.\n\nSadece **hem bizim hem firmanin olcusu birlikte mevcut olan** ve ZARAR ettigimiz (Kar/Zarar < 0) gonderileri gosterir.\n\n⚠️ Not 1: Su an sadece **FedEx, Asendia ve UniUni** fatura dosyalarinda boyut/agirlik bilgisi bulunuyor. UPS ve ByeLabel grubu firmalarinin fatura formatlarinda bu bilgi yok, bu yuzden o gonderiler bu listede gorunmez.\n\n⚠️ Not 2: Bizim olcum birimimiz (inc/lb) ile bazi firmalarin kendi birimi (orn. cm/kg) farkli olabilir - 'Hacim Orani' sutunu TUM satirlarda benzer, tutarli bir kat gosteriyorsa (orn. hep ~16x gibi) bu bir birim farkindan kaynaklaniyor olabilir, gercek bir uyusmazliktan degil. Soyle bir durumda bana haber ver, birim cevrimini ekleyelim.":
-        "Compares what we declared to the customer (in the income file) with the carrier's invoice measurements by **volume** (length x width x height) and **weight** - individual sides (length/width/height) are not compared one by one, because carriers may order which side is 'length' vs 'width' differently than we do; since order doesn't matter in a volume product, this removes that problem.\n\nOnly shows shipments where **both our measurement and the carrier's measurement are available together** and we made a LOSS (Profit/Loss < 0).\n\n⚠️ Note 1: Currently only **FedEx, Asendia and UniUni** invoice files contain dimension/weight information. UPS and the ByeLabel group of carriers don't have this in their invoice formats, so those shipments won't appear in this list.\n\n⚠️ Note 2: Our unit of measurement (in/lb) may differ from some carriers' own units (e.g. cm/kg) - if the 'Volume Ratio' column shows a similar, consistent multiple across ALL rows (e.g. always ~16x), this may be caused by a unit difference rather than a real mismatch. If you notice this, let me know and we'll add unit conversion.",
+    "Musteriye beyan ettigimiz (gelir dosyasindaki) ile kargo firmasinin faturasindaki olcumleri **hacim** (uzunluk x genislik x yukseklik) ve **agirlik** olarak karsilastirir - tek tek kenar (uzunluk/genislik/yukseklik) karsilastirilmaz, cunku firmalar hangi kenara 'uzunluk' hangisine 'genislik' dedigini bizden farkli siralayabiliyor; hacim carpimda sira onemli olmadigi icin bu sorunu ortadan kaldirir.\n\nSadece **hem bizim hem firmanin olcusu birlikte mevcut olan** ve ZARAR ettigimiz (Kar/Zarar < 0) gonderileri gosterir.\n\n⚠️ Not 1: Su an sadece **FedEx, Asendia, UniUni ve ePost Global (Fatura)** fatura dosyalarinda boyut/agirlik bilgisi bulunuyor. UPS ve ByeLabel grubu firmalarinin fatura formatlarinda bu bilgi yok, bu yuzden o gonderiler bu listede gorunmez.\n\n⚠️ Not 2: Bizim olcum birimimiz (inc/lb) ile bazi firmalarin kendi birimi (orn. cm/kg) farkli olabilir - 'Hacim Orani' sutunu TUM satirlarda benzer, tutarli bir kat gosteriyorsa (orn. hep ~16x gibi) bu bir birim farkindan kaynaklaniyor olabilir, gercek bir uyusmazliktan degil. Soyle bir durumda bana haber ver, birim cevrimini ekleyelim.":
+        "Compares what we declared to the customer (in the income file) with the carrier's invoice measurements by **volume** (length x width x height) and **weight** - individual sides (length/width/height) are not compared one by one, because carriers may order which side is 'length' vs 'width' differently than we do; since order doesn't matter in a volume product, this removes that problem.\n\nOnly shows shipments where **both our measurement and the carrier's measurement are available together** and we made a LOSS (Profit/Loss < 0).\n\n⚠️ Note 1: Currently only **FedEx, Asendia, UniUni and ePost Global (Fatura)** invoice files contain dimension/weight information. UPS and the ByeLabel group of carriers don't have this in their invoice formats, so those shipments won't appear in this list.\n\n⚠️ Note 2: Our unit of measurement (in/lb) may differ from some carriers' own units (e.g. cm/kg) - if the 'Volume Ratio' column shows a similar, consistent multiple across ALL rows (e.g. always ~16x), this may be caused by a unit difference rather than a real mismatch. If you notice this, let me know and we'll add unit conversion.",
+    "Manuel gelir kalemleri:": "Manual income items:",
+    "Manuel gider kalemleri:": "Manual expense items:",
 }
 
 
@@ -1091,11 +1093,6 @@ def tablo_goster(
         if kolon in df.columns:
             goster_df[kolon] = df[kolon].apply(lambda v, f=fonk: "-" if pd.isna(v) else f(v))
 
-    # Yukarida acikca belirtilmemis ama sayisal olan sutunlar da (orn.
-    # "Paket Sayisi" gibi tamsayi_kolonlari'na eklenmeyi unutulmus kolonlar)
-    # tutarli Turkce bicime cevrilir - hem gorunum hem de TOPLAM satirinda
-    # veri tipi karismasin diye (Arrow, ayni kolonda hem sayi hem metin
-    # oldugunda uyari veriyordu).
     _islenmis_kolonlar = (
         set(para_kolonlari) | set(yuzde_kolonlari) | set(tamsayi_kolonlari) | set((ozel_formatlar or {}).keys())
     )
@@ -1109,10 +1106,6 @@ def tablo_goster(
             _ondalik = 0 if _tamsayi_mi else 2
             goster_df[kolon] = df[kolon].apply(lambda v, o=_ondalik: "-" if pd.isna(v) else _tr_sayi(v, o))
 
-    # Para sutunlarinda hucrelerde tekrar tekrar "$" yazmak yerine, sadece
-    # sutun basligina "($)" ekleniyor. goster_df ve renk_df'nin kolon
-    # adlarinin BIREBIR ayni kalmasi gerekiyor (Styler.apply hizalamasi
-    # icin), o yuzden ikisi de birlikte yeniden adlandiriliyor.
     _yeniden_adlar = {kolon: f"{kolon} ($)" for kolon in para_kolonlari if kolon in df.columns}
     if _yeniden_adlar:
         goster_df = goster_df.rename(columns=_yeniden_adlar)
@@ -1125,12 +1118,6 @@ def tablo_goster(
     st.dataframe(goster_df.style.apply(lambda _: renk_df, axis=None), **kwargs)
 
     if toplam_satiri and not df.empty:
-        # Toplam satiri BILEREK tablonun (st.dataframe) icine eklenmiyor -
-        # ekleseydik, kullanici bir sutuna gore sirala (ascending/descending)
-        # dedigi anda TOPLAM satiri da diger satirlarla birlikte karisip
-        # ortalarda bir yere dusuyordu. Bunun yerine tablonun HEMEN ALTINA,
-        # ayri/sabit bir HTML satiri olarak, hicbir sekilde siralamaya
-        # dahil olmayacak sekilde ekleniyor.
         _ters_adlar = {yeni: eski for eski, yeni in _yeniden_adlar.items()}
         _hucreler_html = ""
         for _i, kolon in enumerate(goster_df.columns):
@@ -1139,10 +1126,6 @@ def tablo_goster(
             if _i == 0:
                 _deger = "TOPLAM"
             elif _orijinal_kolon in ortalama_kolonlari and _orijinal_kolon in df.columns:
-                # pd.to_numeric ile zorluyoruz - bazi veri akislarinda (orn.
-                # birlestirme/eslestirmeden gecen Gider/Kar kolonlari) dtype
-                # 'object' olarak kalabiliyor, sadece dtype kontrolune
-                # guvenmek boyle durumlarda sessizce bos gostermeye yol aciyordu.
                 _ortalama = pd.to_numeric(df[_orijinal_kolon], errors="coerce").mean()
                 if pd.isna(_ortalama):
                     _deger = "-"
@@ -1157,10 +1140,6 @@ def tablo_goster(
             elif _orijinal_kolon in yuzde_kolonlari:
                 _deger = ""
             elif _orijinal_kolon in para_kolonlari or _orijinal_kolon in tamsayi_kolonlari:
-                # Cagiran taraf bu kolonun sayisal (para/tamsayi) oldugunu
-                # ACIKCA belirtti - dtype tespitine guvenmek yerine dogrudan
-                # sayiya cevirip topluyoruz (ayni sebepten: bazi kolonlar
-                # 'object' dtype'ta kalabiliyor).
                 _toplam = pd.to_numeric(df[_orijinal_kolon], errors="coerce").sum()
                 _deger = _para_str(_toplam) if _orijinal_kolon in para_kolonlari else _tr_sayi(_toplam, 0)
                 if _orijinal_kolon in renkli_kolonlar:
@@ -1304,9 +1283,6 @@ st.markdown(
 )
 
 # --------------------------------------------------------- ust satir (grid) ---
-# Baslik, tema secici, dil secici, kullanici bilgisi ve cikis butonu artik
-# TEK bir st.columns() satirinda - boylece hepsi ayni hizada, tek bir
-# grid/satir gibi hizalanir (ayri ayri satirlar yerine).
 st.markdown(
     """
     <style>
@@ -1411,9 +1387,6 @@ REPORT_MENU_ITEMS = [
 ]
 MENU_ITEMS = BASE_MENU_ITEMS + REPORT_MENU_ITEMS
 
-# Menu etiketleri (internal key - yonlendirme icin degismez) ile ceviri
-# anahtarlarini eslestirir. Boylece analiz_secimi karsilastirmalari (kodun
-# her yerinde kullanilan) hic degismeden kalir, sadece GORUNEN metin cevrilir.
 _MENU_CEVIRI = {
     "Ana Sayfa": "ana_sayfa",
     "Kargo Firmasina Gore Dosya Yukle": "kargo_dosya_yukle",
@@ -1448,14 +1421,6 @@ with st.sidebar:
 
     _sidebar_css = """
         <style>
-        /* Sidebar genisligi TIKLAMA ile (sidebar_daralt) kontrol edilir -
-           fare hover'i ile DEGIL. CSS ':hover' tabanli yontemler (hem
-           genislik degistirme hem de tek tek butonda overflow acma)
-           defalarca denendi ve tarayicida guvenilmez/calismaz cikti -
-           muhtemelen Streamlit'in kendi ic yapisindaki bir ara katman veya
-           JS davranisiyla catisiyor. Sabit (statik) genislik + tiklamayla
-           degisen buton metni (Python tarafinda, CSS numarasi degil) ise
-           daha once acikca dogrulanmis, guvenilir tek yontem. */
         [data-testid="stSidebar"] {
             width: %%GENISLIK%% !important;
             min-width: %%GENISLIK%% !important;
@@ -1755,7 +1720,6 @@ else:
     if analiz_secimi in _rapor_etiketleri_tumu and not _hesapla_var:
         st.warning(t("once_hesapla_uyari"))
 
-    # Yuklu parametreler varsa widget varsayilan degerlerine uygula
     _params = st.session_state.get("yuklu_parametreler", {})
 
     # ---------------------------------------------------------------- yukleme ---
@@ -1954,7 +1918,6 @@ else:
             width="stretch",
         ):
             with st.spinner(t("yukleniyor")):
-                # Dosyalari oku ve session_state'e kaydet
                 try:
                     _gelir_dfs = []
                     for _d in st.session_state["gelir_dosyalari"]:
@@ -2011,18 +1974,11 @@ else:
     # ---------------------------------------------------------------- hesapla ---
     if st.session_state.get("hesapla_tiklandi") and "income_df_cache" in st.session_state:
 
-        # Dosyalari her seferinde yeniden yuklemek yerine cache'den al.
-        # "Hesapla" butonuna basildiginda cache guncellenir; sayfa tekrar
-        # render edildiginde (orn. filtre degisince) asagidaki blok mevcut
-        # dosya listesinden guncel filtrelerle income_df'i yeniden hesaplar.
         income_df = st.session_state["income_df_cache"]
         cost_dfs = st.session_state["cost_dfs_cache"]
         breakdown_dfs = st.session_state["breakdown_dfs_cache"]
         carrier_overhead_toplam = st.session_state["carrier_overhead_cache"]
 
-        # Filtreler degismisse gelir dosyalarini cache'deki listeden yeniden isle
-        # (only_paid / exclude_unassigned_carrier degisebilir - bunlar dosya
-        # okumadan ayri hesaplama adimi oldugu icin burada uygulanir)
         if st.session_state.get("gelir_dosyalari"):
             try:
                 _gelir_dfs_yeniden = [
@@ -2040,9 +1996,6 @@ else:
         for w in st.session_state.get("warnings_cache", []):
             st.warning(w)
 
-        # Pakete baglanamayan giderler (Brokerage/Government Charges vb.)
-        # artik otomatik olarak manuel gider listesine eklenmiyor. Kullanici
-        # isterse bunlari kendisi manuel gider tablosuna elle girebilir.
         full_breakdown_erken = pd.concat(breakdown_dfs, ignore_index=True) if breakdown_dfs else pd.DataFrame()
 
         manuel_gider_toplam = manual_expense_total(manual_expenses_df)
@@ -2061,17 +2014,8 @@ else:
         merged = apply_per_package_carrier_fee(merged, manual_carrier_expenses_df)
         summary = summarize(merged, genel_gider=toplam_genel_gider, manuel_gelir=manuel_gelir_toplam)
 
-        # KPI ozet karti bolumu (Ozet basligi, sayisal kartlar, manuel
-        # gelir/gider onizlemesi, Net Kar karti, genel gider detayi, eslesme
-        # orani mesajlari) SADECE hicbir rapor sekmesi secili degilken
-        # gosterilir. Bir rapor sekmesi (orn. Kargo Firmalarina Gore)
-        # seciliyken bu bolumun HICBIRI gosterilmez - sayfada sadece secilen
-        # analiz gorunur, KPI kartlari onu kalabalikligindirmaz.
         _rapor_etiketleri = [label for _, label in REPORT_MENU_ITEMS]
 
-        # has_per_package_fee, sayfanin daha sonraki bir yerinde (tam rapor
-        # Excel disa aktarimi) da kullanildigi icin KOSULSUZ hesaplanmasi
-        # gerekiyor - sadece Ozet bolumune ozel degil.
         gecerli_paket_basi = manual_carrier_expenses_df.dropna(subset=["Kargo Firmasi", "Paket Basi Tutar"])
         gecerli_paket_basi = gecerli_paket_basi[gecerli_paket_basi["Kargo Firmasi"].astype(str).str.strip() != ""]
         has_per_package_fee = not gecerli_paket_basi.empty
@@ -2530,10 +2474,10 @@ else:
                 "carpimda sira onemli olmadigi icin bu sorunu ortadan kaldirir.\n\n"
                 "Sadece **hem bizim hem firmanin olcusu birlikte mevcut olan** ve "
                 "ZARAR ettigimiz (Kar/Zarar < 0) gonderileri gosterir.\n\n"
-                "⚠️ Not 1: Su an sadece **FedEx, Asendia ve UniUni** fatura dosyalarinda "
-                "boyut/agirlik bilgisi bulunuyor. UPS ve ByeLabel grubu firmalarinin "
-                "fatura formatlarinda bu bilgi yok, bu yuzden o gonderiler bu listede "
-                "gorunmez.\n\n"
+                "⚠️ Not 1: Su an sadece **FedEx, Asendia, UniUni ve ePost Global "
+                "(Fatura)** fatura dosyalarinda boyut/agirlik bilgisi bulunuyor. UPS "
+                "ve ByeLabel grubu firmalarinin fatura formatlarinda bu bilgi yok, bu "
+                "yuzden o gonderiler bu listede gorunmez.\n\n"
                 "⚠️ Not 2: Bizim olcum birimimiz (inc/lb) ile bazi firmalarin kendi "
                 "birimi (orn. cm/kg) farkli olabilir - 'Hacim Orani' sutunu TUM "
                 "satirlarda benzer, tutarli bir kat gosteriyorsa (orn. hep ~16x gibi) "
@@ -2656,7 +2600,6 @@ else:
 
         st.divider()
 
-        # Excel export icin tum analizleri hesapla (sidebar seciminden bagimsiz)
         _carrier_table_export = carrier_breakdown(merged)
         _cb_export = country_breakdown(merged)
         _cust_table_export = customer_breakdown(merged)
