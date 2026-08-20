@@ -89,6 +89,39 @@ CARRIER_PROFILES = {
             "weight": "Rated Weight Amount",
         },
     },
+    "ePost Global (Fatura)": {
+        # ePost Global'in DOGRUDAN kendi fatura formati (orn. "EPG_BIL_...xlsx").
+        # ByeLabel grubu icindeki "ePost Global" alt profilinden farkli - o
+        # birlesik shipments-...xlsx dosyasindan turetiliyor, bu ise ePost
+        # Global'in kendi bagimsiz faturasi. Ikisi de ayni kanonik isme
+        # (CARRIER_NAME_ALIASES -> "ePost Global") normalize edildigi icin,
+        # ayni doneme her ikisinden de dosya yuklenirse sonuclar sorunsuz
+        # birlesir (tekrar eden takip numaralari cost_summary asamasinda
+        # toplanir).
+        #
+        # Dosyada iki sayfa bulunur: ilk sayfa TUM paketleri icerir
+        # (total_amt = sell_rate + duty + tax + Fuel + Handling +
+        # Transportation Surcharge - dogrulandi), "tax" sayfasi ise sadece
+        # vergi/gumruk tahsil edilen paketlerin bir ALT KUMESI. "tax"
+        # sayfasi ayrica toplanmiyor - ilk sayfa tek basina zaten tum
+        # tutari iceriyor, aksi halde cift sayim olurdu.
+        "tracking_col": "trackingno",
+        "charge_col": "total_amt",
+        "currency_col": "CURRENCY",
+        "invoice_col": "refno",
+        "component_charge_cols": {
+            "kargo": ["sell_rate", "Fuel", "Handling", "Transportation Surcharge"],
+            "vergi": ["duty", "tax"],
+        },
+        "dim_cols": {
+            "length": "dim_length", "width": "dim_width", "height": "dim_height", "weight": "bill_wt",
+        },
+        # ByeLabel icindeki "ePost Global" alt profiliyle (oncelik 0,
+        # varsayilan) ayni doneme ait CAKISAN takip numaralari gelirse, bu
+        # dosya (tekil ePost Global faturasi) ONCELIKLI sayilir - ayni
+        # paketin gideri iki kaynaktan da toplanip cift sayilmaz.
+        "kaynak_oncelik": 1,
+    },
 }
 
 # ByeLabel dosyasi (shipments-...xlsx) tek tabloda birden fazla firma icerir.
@@ -264,18 +297,10 @@ def load_income_file(file_obj, only_paid=True, exclude_unassigned_carrier=True):
         out = out[~bos].reset_index(drop=True)
     out["Carrier Name"] = out["Carrier Name"].apply(_normalize_carrier_name)
     out["TrackingKey"] = out["Track Number"].astype(str).str.strip()
-    # Not: bazi pandas surumlerinde (orn. Arrow tabanli string dtype) NaN
-    # degerler astype(str) sonrasi literal "nan" metnine degil, null/NA
-    # olarak kalabiliyor - bu yuzden orijinal kolonun notna() kontrolu de
-    # ayrica yapiliyor, aksi halde takip numarasi olmayan gonderiler
-    # yanlislikla "takip numarasi var" sayilabiliyordu.
     out["Takip_Var_Mi"] = out["Track Number"].notna() & ~out["TrackingKey"].isin(NO_TRACKING_VALUES)
     return out
 
 
-# "Carriers" sutununda gecmesi muhtemel bilinen kargo firmasi anahtar
-# kelimeleri (FBA formatinda bu sutun "FedEx FedEx International Ground®"
-# gibi hem kisa adi hem servis aciklamasini birlikte iceriyor).
 _FBA_CARRIER_ANAHTAR_KELIMELER = [
     "FedEx", "UPS", "DHL", "Asendia", "UniUni", "USPS",
     "Purolator", "Intelcom", "APC", "Evri", "ePost",
@@ -283,10 +308,6 @@ _FBA_CARRIER_ANAHTAR_KELIMELER = [
 
 
 def _fba_carrier_adi_cikar(ham_metin):
-    """FBA dosyasindaki 'Carriers' sutunundan (orn. 'FedEx FedEx International
-    Ground®' veya birden fazla firma varsa 'X, Y') temiz bir kargo firmasi
-    adi cikarir. Bilinen bir firma bulunamazsa (orn. 'Comfy Logistic' -
-    sirketin kendi ic teslimat servisi), ilk iki kelimeyi etiket olarak kullanir."""
     if pd.isna(ham_metin) or not str(ham_metin).strip():
         return None
     ilk_parca = str(ham_metin).split(",")[0].strip()
@@ -298,22 +319,6 @@ def _fba_carrier_adi_cikar(ham_metin):
 
 
 def load_income_file_fba(file_obj, only_paid=True, exclude_unassigned_carrier=True):
-    """FBA_PLUS formatindaki gelir dosyasini okur (comfylifeusa@gmail.com
-    kullanicisina ozel gelir dosyasi yapisi). Sonuc, load_income_file() ile
-    AYNI kolon yapisini (Shipment No, Track Number, Carrier Name, Invoice
-    Amount, Status, Added Date, Receiver Country, User No, User Name,
-    TrackingKey, Takip_Var_Mi, Musteriden_Alinan_Vergi, Musteri_* boyut
-    kolonlari) dondurur - boylece build_report ve sonraki tum analiz kodu
-    hicbir degisiklik gerektirmeden calisir.
-
-    Bu formatta (WH_CUSTOMER_SHIPMENT_LIST'ten farkli olarak):
-    - 'FBA No' -> Shipment No, 'Amount' -> Invoice Amount, 'Payment Status' ->
-      odeme durumu icin kullanilir (Status yerine).
-    - 'Carriers' sutunu firma adini servis aciklamasiyla birlikte icerir,
-      buradan temiz firma adi cikarilir (_fba_carrier_adi_cikar).
-    - Musteriden tahsil edilen vergi/gumruk ve boyut/agirlik bilgisi bu
-      formatta yok, ilgili kolonlar otomatik 0/NaN olarak doldurulur.
-    """
     df = pd.read_excel(file_obj)
 
     required = [
@@ -343,9 +348,6 @@ def load_income_file_fba(file_obj, only_paid=True, exclude_unassigned_carrier=Tr
         "User Name": df["User Name"],
     })
 
-    # Bu formatta musteriden ayrica tahsil edilen vergi/gumruk ve boyut/agirlik
-    # bilgisi yok - ilgili kolonlar diger formatla ayni sekilde doldurulur ki
-    # build_report ve sonraki analizler hata vermeden calissin.
     out["Musteriden_Alinan_Vergi"] = 0.0
     for hedef in ["Musteri_Weight", "Musteri_Length", "Musteri_Width", "Musteri_Height", "Musteri_Chargeable_Weight"]:
         out[hedef] = pd.NA
@@ -357,35 +359,11 @@ def load_income_file_fba(file_obj, only_paid=True, exclude_unassigned_carrier=Tr
         out = out[~bos].reset_index(drop=True)
     out["Carrier Name"] = out["Carrier Name"].apply(_normalize_carrier_name)
     out["TrackingKey"] = out["Track Number"].astype(str).str.strip()
-    # Not: bazi pandas surumlerinde (orn. Arrow tabanli string dtype) NaN
-    # degerler astype(str) sonrasi literal "nan" metnine degil, null/NA
-    # olarak kalabiliyor - bu yuzden orijinal kolonun notna() kontrolu de
-    # ayrica yapiliyor, aksi halde takip numarasi olmayan gonderiler
-    # yanlislikla "takip numarasi var" sayilabiliyordu.
     out["Takip_Var_Mi"] = out["Track Number"].notna() & ~out["TrackingKey"].isin(NO_TRACKING_VALUES)
     return out
 
 
 def load_cost_file(file_obj, carrier_name):
-    """Bir kargo firmasinin gider dosyasini okur, takip numarasina gore gruplar.
-
-    Kargo bedeli (charge_col) ve vergi/gumruk (tax_col veya tax_category_col
-    ile belirlenen) ayri ayri toplanir, sonra "Gider" olarak birlestirilir.
-
-    Takip numarasi OLMAYAN vergi/komisyon satirlari (orn. UPS'te Brokerage
-    Charges, Government Charges) belirli bir pakete baglanamaz - bunlar
-    "genel gider" olarak ayrica dondurulur, pakete dagitilmaz.
-
-    Ayni takip numarasi birden fazla satirda gecerse (tekrar/surcharge satiri vs.)
-    ucretler toplanir - hicbir satir atilmaz.
-
-    Para birimi USD disindaysa, her satir kendi tarihindeki gunluk kur ile
-    otomatik olarak USD'ye cevrilir (Frankfurter API).
-
-    Returns: (grouped_df, currency_warning, genel_gider_tutari, breakdown_df)
-    breakdown_df: hangi kategori/sutunun Kargo / Vergi / Genel Gider olarak
-    siniflandirildigini ve ne kadar tutar tasidigini gosterir (seffaflik icin).
-    """
     if carrier_name not in _ALL_PROFILES:
         raise ValueError(f"Taninmayan kargo firmasi: {carrier_name}")
 
@@ -413,8 +391,6 @@ def load_cost_file(file_obj, carrier_name):
     tax_category_col = profile.get("tax_category_col")
     tax_category_values = profile.get("tax_category_values")
 
-    # Kargo firmasinin olcup fatura dosyasina yazdigi boyut/agirlik bilgileri
-    # (varsa) - musterimize beyan ettigimiz degerlerle karsilastirmak icin.
     dim_cols_cfg = profile.get("dim_cols", {})
     dim_col_map = {}
     for boyut_adi, kolon_adi in dim_cols_cfg.items():
@@ -431,10 +407,6 @@ def load_cost_file(file_obj, carrier_name):
         if df.empty:
             return pd.DataFrame(columns=empty_cols), None, 0.0, empty_breakdown
 
-    # Bazi firmalar (orn. FedEx) her gonderi icin bircok ayri ucret kalemini
-    # ayni satirda yan yana kolonlar olarak verir (Description/Amount cifti
-    # tekrarlanir). Bu durumda her cift kendi aciklamasina gore Kargo/Vergi
-    # olarak siniflandirilip satir bazinda toplanir.
     wide_breakdown_rows = []
     if profile.get("wide_charge_pairs"):
         desc_prefix = profile["desc_col_prefix"]
@@ -506,8 +478,6 @@ def load_cost_file(file_obj, carrier_name):
     else:
         is_tax = pd.Series(False, index=df.index)
 
-    # Vergi kategorisinde olup takip numarasi OLMAYAN satirlar -> genel gider.
-    # Belirli bir pakete baglanamadiklari icin eslestirmeye dahil edilmezler.
     no_tracking = df[track_col].isna()
     overhead_mask = is_tax & no_tracking
     genel_gider = float(df.loc[overhead_mask, charge_col].fillna(0).sum())
@@ -526,22 +496,41 @@ def load_cost_file(file_obj, carrier_name):
         df = df.dropna(subset=[charge_col])
 
     if "_wide_kargo" in df.columns:
-        # Satir bazinda zaten Kargo/Vergi olarak hesaplanmis (wide_charge_pairs).
-        # "_item_desc" da ayni adimda zaten olusturuldu.
         df["_kargo_raw"] = df["_wide_kargo"]
         df["_tax_raw"] = df["_wide_tax"]
         breakdown_rows.extend(wide_breakdown_rows)
     elif profile.get("all_tax"):
-        # Tum dosya zaten bir vergi/gumruk dosyasi (orn. Asendia Duty & Tax raporu) -
-        # charge_col'un tamami Vergi sayilir, Kargo payi yok.
         df["_kargo_raw"] = 0.0
         df["_tax_raw"] = df[charge_col]
         df["_item_desc"] = display_name + ": $" + df[charge_col].round(2).astype(str)
         breakdown_rows.append((display_name, charge_col, charge_col, "Vergi", float(df[charge_col].sum())))
+    elif profile.get("component_charge_cols"):
+        # Sabit isimli birden fazla ucret kolonu var (orn. ePost Global
+        # faturasi: sell_rate/Fuel/Handling/Transportation Surcharge = Kargo,
+        # duty/tax = Vergi). wide_charge_pairs'ten farki: kolon adlari her
+        # satirda AYNI (Description/Amount cifti tekrarlanmiyor), sadece
+        # sabit kolonlar kargo/vergi olarak iki gruba ayrilip toplaniyor.
+        comp = profile["component_charge_cols"]
+        kargo_cols = [c for c in comp.get("kargo", []) if c in df.columns]
+        vergi_cols = [c for c in comp.get("vergi", []) if c in df.columns]
+
+        df["_kargo_raw"] = df[kargo_cols].apply(pd.to_numeric, errors="coerce").fillna(0.0).sum(axis=1) if kargo_cols else 0.0
+        df["_tax_raw"] = df[vergi_cols].apply(pd.to_numeric, errors="coerce").fillna(0.0).sum(axis=1) if vergi_cols else 0.0
+
+        _desc_cols = []
+        for col in kargo_cols + vergi_cols:
+            _sayisal = pd.to_numeric(df[col], errors="coerce").fillna(0.0)
+            _desc_cols.append((col + ": $" + _sayisal.round(2).astype(str)).where(_sayisal != 0))
+        df["_item_desc"] = (
+            pd.concat(_desc_cols, axis=1).apply(lambda row: "; ".join(row.dropna()), axis=1)
+            if _desc_cols else ""
+        )
+
+        for col in kargo_cols:
+            breakdown_rows.append((display_name, col, col, "Kargo", float(pd.to_numeric(df[col], errors="coerce").fillna(0.0).sum())))
+        for col in vergi_cols:
+            breakdown_rows.append((display_name, col, col, "Vergi", float(pd.to_numeric(df[col], errors="coerce").fillna(0.0).sum())))
     elif tax_category_col and tax_category_col in df.columns:
-        # Ayni tutar kolonu (charge_col), baska bir kolonun degerine gore
-        # kargo / vergi olarak ikiye bolunur (orn. UPS'te "Brokerage Charges" gibi
-        # satirlar Net Amount Due icinde ama vergi sayilmasi gerekiyor).
         is_tax = df[tax_category_col].isin(tax_category_values)
         df["_kargo_raw"] = df[charge_col].where(~is_tax, 0.0)
         df["_tax_raw"] = df[charge_col].where(is_tax, 0.0)
@@ -622,10 +611,8 @@ def load_cost_file(file_obj, carrier_name):
     grouped["Gider"] = grouped["Gider_Kargo"] + grouped["Gider_Tax"]
     grouped["Kargo Firmasi"] = display_name
     grouped["Satir Sayisi"] = df.groupby("TrackingKey").size().values
+    grouped["_KaynakOncelik"] = profile.get("kaynak_oncelik", 0)
 
-    # Boyut/agirlik bilgileri (varsa) - ilk gecerli (bos/sifir olmayan) deger alinir.
-    # groupby().apply() yerine sort+drop_duplicates kullanilir - buyuk dosyalarda
-    # (onbinlerce satir) cok daha hizlidir, apply() ile zaman asimina yol acabiliyordu.
     for boyut_adi in ["length", "width", "height", "weight"]:
         hedef_kolon = f"Firma_{boyut_adi.capitalize()}"
         if boyut_adi in dim_col_map:
@@ -645,17 +632,6 @@ def load_cost_file(file_obj, carrier_name):
 
 
 def load_byelabel_group(file_obj):
-    """ByeLabel dosyasini (shipments-...xlsx) tek seferde yukler, icindeki
-    butun firmalari (ePost Global, DHL, intelcom, APC, USPS, Evri, Purolator,
-    FedEx, UPS) otomatik olarak ayri ayri isler.
-
-    Kullaniciya arayuzde tek bir secenek ("ByeLabel - Tum Firmalar") gosterilir,
-    ama sonuctaki tablolarda her firma kendi adiyla (orn. "DHL", "ePost Global")
-    ayri ayri gorunur - cunku her biri kendi profiliyle load_cost_file()
-    uzerinden ayri ayri islenir.
-
-    Returns: (cost_dfs, warnings, toplam_genel_gider, breakdown_dfs)
-    """
     cost_dfs = []
     warnings = []
     toplam_genel_gider = 0.0
@@ -675,9 +651,18 @@ def load_byelabel_group(file_obj):
 
 
 def build_report(income_df, cost_dfs):
-    """Gelir ve (bir veya daha fazla kargo firmasindan) gider verisini birlestirir."""
     if cost_dfs:
         cost_all = pd.concat(cost_dfs, ignore_index=True)
+        # Ayni takip numarasi + ayni (normalize edilmis) kargo firmasi
+        # BIRDEN FAZLA kaynaktan geliyorsa (orn. hem ByeLabel grubu hem
+        # tekil ePost Global faturasi ayni paketi iceriyorsa), sadece EN
+        # YUKSEK oncelikli kaynagin satiri kullanilir - digerleri atilir.
+        # Boylece ayni paketin gideri iki kez toplanmaz. Farkli KARGO
+        # FIRMALARI ayni takip numarasini paylasirsa (nadir, gercek bir
+        # durum degil ama teorik), bu satirlar hala toplanir (eski davranis).
+        if "_KaynakOncelik" in cost_all.columns:
+            cost_all = cost_all.sort_values("_KaynakOncelik", ascending=False)
+            cost_all = cost_all.drop_duplicates(subset=["TrackingKey", "Kargo Firmasi"], keep="first")
         _boyut_kolonlari = [c for c in ["Firma_Length", "Firma_Width", "Firma_Height", "Firma_Weight"] if c in cost_all.columns]
         cost_summary = cost_all.groupby("TrackingKey", as_index=False).agg(
             Gider_Kargo=("Gider_Kargo", "sum"),
@@ -686,8 +671,6 @@ def build_report(income_df, cost_dfs):
             Gider_Kalemleri=("Gider_Kalemleri", lambda x: "; ".join(v for v in x if v)),
             Kargo_Firmalari=("Kargo Firmasi", lambda x: ", ".join(sorted(set(x)))),
         )
-        # Boyut/agirlik kolonlari icin ayni takip numarasinin ilk gecerli
-        # degeri alinir (sort+drop_duplicates ile, buyuk veride hizli).
         for kolon in _boyut_kolonlari:
             gecici = cost_all[["TrackingKey", kolon]].dropna(subset=[kolon])
             ilk_degerler = gecici.drop_duplicates(subset="TrackingKey", keep="first").set_index("TrackingKey")[kolon]
