@@ -61,15 +61,26 @@ CARRIER_PROFILES = {
         "tax_category_values": ["US Customs Duties", "Government Charges", "Brokerage Charges", "Import Shipment Detail"],
     },
     "Asendia - Vergi/Gumruk": {
-        # Asendia'nin ayri Duty & Tax raporu. Sadece "2026" sayfasi islenir;
-        # "2025" sayfasinda Customer Tracking Number Original kolonu yok ve
-        # gelir penceresiyle (2026 Nisan-Mayis) tarihsel ortusmesi de yok.
-        "tracking_col": "Customer Tracking Number Original",
-        "charge_col": "Total Charge",
-        "date_col": "Job Date",
+        # Asendia'nin ayri Duty & Tax raporu. Sayfa adi sabit DEGIL (eskiden
+        # "2026" idi, yeni dosyalarda farkli olabiliyor): takip kolonunu
+        # iceren sayfa(lar) otomatik bulunur. Eski dosyalardaki "2025"
+        # sayfasinda bu kolon olmadigi icin zaten otomatik atlanir.
+        "tracking_col": ["Customer Tracking Number Original", "CustomerTrackingNumberOriginal"],
+        "charge_col": ["Total Charge", "TOTALCHARGE", "total charge"],
+        "date_col": ["Job Date", "JobDate"],
+        "date_format": "%m/%d/%Y %I:%M:%S %p",
         "invoice_col": "Invoice Number",
-        "sheet_name": "2026",
+        "desc_col": "Product",
+        # Kargo dosyasiyla ayni Excel bolge ayari bozulmasi burada da olabiliyor.
+        "excel_locale_fix": True,
         "all_tax": True,
+        # Bu dosyada vergi disi ek ucretler de gelebiliyor (orn. 'Length
+        # between 48" & 78"' = buyuk paket ek ucreti). Product aciklamasi
+        # bu kelimelerden birini icermeyen satirlar Kargo sayilir.
+        "vergi_desc_contains": ["duty", "tax", "vat", "gst", "hst"],
+        # Raporda daha anlasilir gorunsun diye: aciklamasi bu kelimelerden
+        # birini iceren satirlar "Oversize (...)" olarak etiketlenir.
+        "oversize_desc_contains": ["length", "oversize", "girth", "overmax"],
         "kaynak_turu": "vergi",
     },
     "FedEx": {
@@ -484,13 +495,31 @@ def load_cost_file(file_obj, carrier_name):
     display_name = _normalize_carrier_name(carrier_name)
     if hasattr(file_obj, "seek"):
         file_obj.seek(0)
-    if profile.get("excel_locale_fix"):
-        # dtype=object: metin hucreler str, Excel'in sayiya cevirdigi hucreler
-        # int/float olarak kalir - bozulmayi ancak bu ayrimla tespit edebiliriz.
-        df = pd.read_excel(file_obj, sheet_name=profile.get("sheet_name", 0), dtype=object)
-        df = _excel_yerel_ayar_duzelt(df, profile, carrier_name)
+    # dtype=object (excel_locale_fix): metin hucreler str, Excel'in sayiya
+    # cevirdigi hucreler int/float olarak kalir - bozulmayi ancak bu ayrimla
+    # tespit edebiliriz.
+    _read_kwargs = {"dtype": object} if profile.get("excel_locale_fix") else {}
+    if profile.get("sheet_name") is not None:
+        df = pd.read_excel(file_obj, sheet_name=profile["sheet_name"], **_read_kwargs)
     else:
-        df = pd.read_excel(file_obj, sheet_name=profile.get("sheet_name", 0))
+        # Sayfa adi sabit degilse: takip kolonunu iceren TUM sayfalar okunup
+        # birlestirilir. Boylece dosyaya elle eklenen "Ozet" gibi sayfalar
+        # (ilk sirada olsa bile) atlanir, birden fazla fatura sayfasi varsa
+        # (orn. her hafta ayri sayfa) hepsi dahil edilir.
+        _sayfalar = pd.read_excel(file_obj, sheet_name=None, **_read_kwargs)
+        _veri_sayfalari = [
+            s for s in _sayfalar.values()
+            if _resolve_col(s, profile["tracking_col"], carrier_name, required=False)
+        ]
+        if not _veri_sayfalari:
+            beklenen = profile["tracking_col"] if isinstance(profile["tracking_col"], list) else [profile["tracking_col"]]
+            raise ValueError(
+                f"{carrier_name} dosyasinin hicbir sayfasinda beklenen takip kolonu yok: "
+                f"{', '.join(repr(c) for c in beklenen)}. Dosyadaki sayfalar: {', '.join(_sayfalar.keys())}"
+            )
+        df = pd.concat(_veri_sayfalari, ignore_index=True)
+    if profile.get("excel_locale_fix"):
+        df = _excel_yerel_ayar_duzelt(df, profile, carrier_name)
 
     track_col = _resolve_col(df, profile["tracking_col"], carrier_name)
     if profile.get("charge_col"):
@@ -520,6 +549,11 @@ def load_cost_file(file_obj, carrier_name):
     tax_category_col = profile.get("tax_category_col")
     tax_category_values = profile.get("tax_category_values")
     desc_col = profile.get("desc_col") if profile.get("desc_col") in df.columns else None
+    if desc_col and profile.get("oversize_desc_contains"):
+        _aciklama = df[desc_col].astype(str).str.strip()
+        _desen = "|".join(re.escape(k) for k in profile["oversize_desc_contains"])
+        _oversize_mi = _aciklama.str.contains(_desen, case=False, na=False) & ~_aciklama.str.lower().str.startswith("oversize")
+        df[desc_col] = df[desc_col].where(~_oversize_mi, "Oversize (" + _aciklama + ")")
 
     dim_cols_cfg = profile.get("dim_cols", {})
     dim_col_map = {}
@@ -630,12 +664,20 @@ def load_cost_file(file_obj, carrier_name):
         df["_tax_raw"] = df["_wide_tax"]
         breakdown_rows.extend(wide_breakdown_rows)
     elif profile.get("all_tax"):
-        df["_kargo_raw"] = 0.0
-        df["_tax_raw"] = df[charge_col]
+        df[charge_col] = pd.to_numeric(df[charge_col], errors="coerce")
+        vergi_kelimeleri = profile.get("vergi_desc_contains")
+        if desc_col and vergi_kelimeleri:
+            _desenler = "|".join(re.escape(k) for k in vergi_kelimeleri)
+            vergi_mi = df[desc_col].astype(str).str.contains(_desenler, case=False, na=False)
+        else:
+            vergi_mi = pd.Series(True, index=df.index)
+        df["_kargo_raw"] = df[charge_col].where(~vergi_mi, 0.0)
+        df["_tax_raw"] = df[charge_col].where(vergi_mi, 0.0)
         if desc_col:
             df["_item_desc"] = df[desc_col].astype(str) + ": $" + df[charge_col].round(2).astype(str)
             for d, total in df.groupby(desc_col)[charge_col].sum().items():
-                breakdown_rows.append((display_name, d, desc_col, "Vergi", float(total)))
+                ornek_vergi = bool(vergi_mi[df[desc_col] == d].iloc[0])
+                breakdown_rows.append((display_name, d, desc_col, "Vergi" if ornek_vergi else "Kargo", float(total)))
         else:
             df["_item_desc"] = display_name + ": $" + df[charge_col].round(2).astype(str)
             breakdown_rows.append((display_name, charge_col, charge_col, "Vergi", float(df[charge_col].sum())))
