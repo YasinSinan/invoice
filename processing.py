@@ -23,12 +23,25 @@ CARRIER_PROFILES = {
         # (orn. "CustomerTrackingNumberOriginal" vs "Customer Tracking Number
         # Original"). Liste olarak verilen alanlar, dosyada hangisi varsa o
         # kullanilir.
-        "tracking_col": ["CustomerTrackingNumberOriginal", "Customer Tracking Number Original"],
-        "charge_col": ["TOTALCHARGE", "total charge", "Total Charge"],
-        "currency_col": ["CurrencyType", "Currency Type"],
-        "date_col": ["JobDate", "Job Date"],
+        #
+        # Yeni format (2026-08 ve sonrasi): toplam ucret kolonu YOK. Tasima
+        # gideri = Piece Charge + Surcharges + Fuel Surcharge (ucu de Kargo).
+        # Surcharges bazi satirlarda bos gelir -> 0 kabul edilir.
+        "tracking_col": ["Customer Tracking Number Original", "CustomerTrackingNumberOriginal"],
+        "component_charge_cols": {
+            "kargo": ["Piece Charge", "Surcharges", "Fuel Surcharge"],
+        },
+        "currency_col": ["Currency Type", "CurrencyType"],
+        "date_col": ["Job Date", "JobDate"],
+        "date_format": "%m/%d/%Y %I:%M:%S %p",
         "invoice_col": "Invoice Number",
-        "dim_cols": {"length": "Length", "width": "Width", "height": "Height", "weight": "ChargeableWeight"},
+        "dim_cols": {"length": "Length", "width": "Width", "height": "Height", "weight": "Chargeable Weight"},
+        # Asendia dosyasi sayilari METIN olarak veriyor ("2.9000"). Dosya
+        # Hollanda/Avrupa bolge ayarli Excel'de acilip kaydedilirse Excel
+        # bir kismini "." binlik ayirici sanip sayiya ceviriyor
+        # ("1.5100" -> 15100) ve tarihlerde gun/ay yer degistiriyor.
+        # Bu bayrak o bozulmayi otomatik geri alir (bkz. _excel_yerel_ayar_duzelt).
+        "excel_locale_fix": True,
     },
     "UniUni": {
         "tracking_col": "Parcel Tracking No.",
@@ -270,6 +283,67 @@ def _resolve_col(df, name_or_list, carrier_name, required=True):
     raise ValueError(f"{carrier_name} dosyasinda beklenen kolon(lar) bulunamadi: {secenekler}")
 
 
+def _excel_yerel_ayar_duzelt(df, profile, carrier_name):
+    """Metin olarak gelen sayi/tarih kolonlarinda, Excel'in bolge ayari
+    yuzunden bozdugu hucreleri geri duzeltir (dtype=object ile okunmus df).
+
+    Sayilar: Kolondaki metin hucrelerin ondalik basamak sayisi (orn.
+    "2.9000" -> 4) esas alinir. Ayni kolonda Excel'in sayiya cevirdigi
+    (str olmayan) hucreler 10^basamak kadar buyumustur ("1.5100" -> 15100),
+    bu yuzden o degere bolunur. Kolonun TAMAMI zaten gercek sayiysa (hic
+    metin hucre yoksa) dokunulmaz - temiz dosyalar etkilenmez.
+
+    Tarihler: Metin hucreler profildeki date_format ile (ABD, ay/gun/yil)
+    okunur. Excel'in tarihe cevirdigi hucrelerde gun ile ay yer
+    degistirmistir ("8/10/2026" -> 8 Ekim), geri cevrilir.
+    """
+    comp = profile.get("component_charge_cols", {})
+    sayi_kolonlari = [c for grup in comp.values() for c in grup]
+    sayi_kolonlari += list(profile.get("dim_cols", {}).values())
+    if profile.get("charge_col"):
+        sayi_kolonlari += profile["charge_col"] if isinstance(profile["charge_col"], list) else [profile["charge_col"]]
+
+    for kolon in dict.fromkeys(sayi_kolonlari):
+        if kolon not in df.columns:
+            continue
+        s = df[kolon]
+        metin_mi = s.map(lambda v: isinstance(v, str))
+        if metin_mi.any():
+            basamaklar = s[metin_mi].str.strip().str.extract(r"\.(\d+)$")[0].dropna().str.len()
+            basamak = int(basamaklar.mode().iloc[0]) if not basamaklar.empty else 0
+            bozuk = s.notna() & ~metin_mi
+            if basamak > 0 and bozuk.any():
+                s = s.copy()
+                s[bozuk] = pd.to_numeric(s[bozuk], errors="coerce") / (10 ** basamak)
+        df[kolon] = pd.to_numeric(s, errors="coerce")
+
+    date_col = (
+        _resolve_col(df, profile["date_col"], carrier_name, required=False) if profile.get("date_col") else None
+    )
+    if date_col:
+        s = df[date_col]
+        metin_mi = s.map(lambda v: isinstance(v, str))
+        if metin_mi.any():
+            fmt = profile.get("date_format")
+            sonuc = pd.Series(pd.NaT, index=s.index, dtype="datetime64[ns]")
+            sonuc[metin_mi] = pd.to_datetime(
+                s[metin_mi].str.strip(), format=fmt if fmt else "mixed", errors="coerce"
+            )
+
+            def _gun_ay_cevir(v):
+                try:
+                    t = pd.Timestamp(v)
+                    return t.replace(month=t.day, day=t.month)
+                except (ValueError, TypeError):
+                    return pd.NaT
+
+            bozuk = s.notna() & ~metin_mi
+            if bozuk.any():
+                sonuc[bozuk] = s[bozuk].map(_gun_ay_cevir)
+            df[date_col] = sonuc
+    return df
+
+
 def load_income_file(file_obj, only_paid=True, exclude_unassigned_carrier=True):
     """Gelir dosyasini okur, ihtiyac duyulan kolonlari secer.
 
@@ -410,10 +484,32 @@ def load_cost_file(file_obj, carrier_name):
     display_name = _normalize_carrier_name(carrier_name)
     if hasattr(file_obj, "seek"):
         file_obj.seek(0)
-    df = pd.read_excel(file_obj, sheet_name=profile.get("sheet_name", 0))
+    if profile.get("excel_locale_fix"):
+        # dtype=object: metin hucreler str, Excel'in sayiya cevirdigi hucreler
+        # int/float olarak kalir - bozulmayi ancak bu ayrimla tespit edebiliriz.
+        df = pd.read_excel(file_obj, sheet_name=profile.get("sheet_name", 0), dtype=object)
+        df = _excel_yerel_ayar_duzelt(df, profile, carrier_name)
+    else:
+        df = pd.read_excel(file_obj, sheet_name=profile.get("sheet_name", 0))
 
     track_col = _resolve_col(df, profile["tracking_col"], carrier_name)
-    charge_col = _resolve_col(df, profile["charge_col"], carrier_name)
+    if profile.get("charge_col"):
+        charge_col = _resolve_col(df, profile["charge_col"], carrier_name)
+    elif profile.get("component_charge_cols"):
+        # Toplam kolonu olmayan dosyalar (orn. yeni Asendia formati): tum
+        # bilesen kolonlarin toplami sanal bir toplam kolonu olarak uretilir.
+        _tum_bilesenler = [
+            c for grup in profile["component_charge_cols"].values() for c in grup if c in df.columns
+        ]
+        if not _tum_bilesenler:
+            beklenen = ", ".join(f"'{c}'" for grup in profile["component_charge_cols"].values() for c in grup)
+            raise ValueError(f"{carrier_name} dosyasinda beklenen ucret kolonlari bulunamadi: {beklenen}")
+        df["_component_total"] = (
+            df[_tum_bilesenler].apply(pd.to_numeric, errors="coerce").fillna(0.0).sum(axis=1)
+        )
+        charge_col = "_component_total"
+    else:
+        raise ValueError(f"{carrier_name} profilinde charge_col tanimli degil")
     tax_col = _resolve_col(df, profile["tax_col"], carrier_name, required=False) if profile.get("tax_col") else None
     currency_col = (
         _resolve_col(df, profile["currency_col"], carrier_name, required=False)
