@@ -2255,7 +2255,7 @@ else:
                 _user_df.groupby(["User No", "User Name"], as_index=False)
                 .agg(
                     **{
-                        "Paket Sayisi": ("Shipment No", "count"),
+                        "Paket Sayisi": ("Takip_Var_Mi", "sum"),
                         "Eslesen Sayisi": ("Durum", lambda x: (x == "Eslesti").sum()),
                         "Ilk Gonderi": ("Added Date", "min"),
                         "Son Gonderi": ("Added Date", "max"),
