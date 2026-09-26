@@ -1055,7 +1055,7 @@ def country_breakdown(merged):
     out = (
         merged.groupby("Receiver Country", as_index=False)
         .agg(
-            Gonderi_Sayisi=("Shipment No", "count"),
+            Gonderi_Sayisi=("Takip_Var_Mi", "sum"),
             Eslesen_Sayisi=("Durum", lambda x: (x == "Eslesti").sum()),
             Toplam_Gelir=("Invoice Amount", "sum"),
             Eslesen_Gelir=("_eslesen_gelir", "sum"),
@@ -1098,7 +1098,7 @@ def carrier_breakdown(merged):
         merged.groupby("Carrier Name", as_index=False)
         .agg(
             **{
-                "Paket Sayisi": ("Shipment No", "count"),
+                "Paket Sayisi": ("Takip_Var_Mi", "sum"),
                 "Eslesen Sayisi": ("Durum", lambda x: (x == "Eslesti").sum()),
                 "Toplam Gelir (Tum)": ("Invoice Amount", "sum"),
                 "Eslesen Gelir": ("_eslesen_gelir", "sum"),
@@ -1186,7 +1186,7 @@ def customer_breakdown(merged):
         merged.groupby(["User No", "User Name"], as_index=False)
         .agg(
             **{
-                "Paket Sayisi": ("Shipment No", "count"),
+                "Paket Sayisi": ("Takip_Var_Mi", "sum"),
                 "Eslesen Sayisi": ("Durum", lambda x: (x == "Eslesti").sum()),
                 "Bize Odenen (Gelir)": ("Invoice Amount", "sum"),
                 "Firmaya Odenen (Gider)": ("Gider", "sum"),
@@ -1226,7 +1226,7 @@ def customer_country_breakdown(merged):
         merged.groupby(["User No", "User Name", "Receiver Country"], as_index=False)
         .agg(
             **{
-                "Paket Sayisi": ("Shipment No", "count"),
+                "Paket Sayisi": ("Takip_Var_Mi", "sum"),
                 "Eslesen Sayisi": ("Durum", lambda x: (x == "Eslesti").sum()),
                 "Gelir": ("Invoice Amount", "sum"),
                 "Gider": ("Gider", "sum"),
