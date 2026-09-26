@@ -353,7 +353,12 @@ def merge_and_save_raw_file(period, category, filename, new_bytes):
     url = f"{API_BASE}/contents/{RAW_DATA_DIR}/{period}/{category}/{filename}"
     existing = _get(url, headers=_headers(), timeout=15)
 
-    new_df = pd.read_excel(io.BytesIO(new_bytes))
+    # dtype=object: hucreler oldugu gibi (metin metin, sayi sayi) okunur ve
+    # birlestirilmis dosyaya ayni tiplerle geri yazilir. Aksi halde pandas
+    # metin sayilari ("2.9000") gercek sayiya cevirir ve Asendia'daki Excel
+    # bolge ayari bozulmasini (processing._excel_yerel_ayar_duzelt) tespit
+    # etmek imkansiz hale gelir.
+    new_df = pd.read_excel(io.BytesIO(new_bytes), dtype=object)
 
     if existing.status_code == 404:
         save_raw_file(period, category, filename, new_bytes)
@@ -367,7 +372,7 @@ def merge_and_save_raw_file(period, category, filename, new_bytes):
     _kontrol_et(existing, "Dosya birlestirilirken (mevcut dosya kontrolu)")
 
     old_content = load_raw_file(period, category, filename)
-    old_df = pd.read_excel(io.BytesIO(old_content))
+    old_df = pd.read_excel(io.BytesIO(old_content), dtype=object)
 
     combined = pd.concat([old_df, new_df], ignore_index=True)
     dedup_key = _guess_dedup_key(combined)
