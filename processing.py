@@ -57,6 +57,7 @@ CARRIER_PROFILES = {
         "invoice_col": "Invoice Number",
         "sheet_name": "2026",
         "all_tax": True,
+        "kaynak_turu": "vergi",
     },
     "FedEx": {
         # FedEx'in detayli fatura raporu: her gonderi tek satir, ama her satirda
@@ -122,6 +123,37 @@ CARRIER_PROFILES = {
         # paketin gideri iki kaynaktan da toplanip cift sayilmaz.
         "kaynak_oncelik": 1,
     },
+    "APC (Fatura)": {
+        # APC'nin DOGRUDAN kendi kargo faturasi (orn. "APC_august_transport.xlsx").
+        # Her paket icin iki satir gelir: ana tasima ucreti
+        # ("parcelConnect PriorityDDPDelcon") ve yakit ek ucreti
+        # ("Fuel Surcharge-..."). Ikisi de Kargo sayilir ve takip numarasina
+        # (Reference) gore toplanir. Boyutlar inc, agirlik lb.
+        "tracking_col": "Reference",
+        "charge_col": "LineTotal",
+        "date_col": "AWBDate",
+        "invoice_col": "Invoice #",
+        "desc_col": "ServiceName",
+        "dim_cols": {"length": "Length", "width": "Width", "height": "Height", "weight": "BillableLbs"},
+        # ByeLabel icindeki "APC" alt profiliyle ayni paket cakisirsa bu
+        # dosya (APC'nin kendi faturasi) oncelikli sayilir.
+        "kaynak_oncelik": 1,
+    },
+    "APC - Vergi/Gumruk": {
+        # APC'nin ayri Duties & Taxes faturasi (orn. "APC_august_tax.xlsx").
+        # Satirlar: "parcelConnect VAT" (sabit VAT islem ucreti) ve
+        # "parcelConnect Duties & Taxes" (Duty + Tax + DefermentFee =
+        # LineTotal). Tamami Vergi sayilir. Ayni takip numarasi APC kargo
+        # dosyasinda da bulunur - kaynak_turu="vergi" sayesinde ikisi
+        # birbirini ezmez, toplanir.
+        "tracking_col": "Reference",
+        "charge_col": "LineTotal",
+        "date_col": "AWBDate",
+        "invoice_col": "Invoice #",
+        "desc_col": "ServiceName",
+        "all_tax": True,
+        "kaynak_turu": "vergi",
+    },
 }
 
 # ByeLabel dosyasi (shipments-...xlsx) tek tabloda birden fazla firma icerir.
@@ -159,6 +191,7 @@ _ALL_PROFILES = {**CARRIER_PROFILES, **BYELABEL_SUB_PROFILES}
 # tek/kanonik isim. Yeni bir firma icin birlestirme istenirse buraya bir satir
 # eklemek yeterli.
 CARRIER_NAME_ALIASES = {
+    "apc": "APC",
     "asendia": "Asendia",
     "epost": "ePost Global",
     "fedex": "FedEx",
@@ -390,6 +423,7 @@ def load_cost_file(file_obj, carrier_name):
     date_col = _resolve_col(df, profile["date_col"], carrier_name, required=False) if profile.get("date_col") else None
     tax_category_col = profile.get("tax_category_col")
     tax_category_values = profile.get("tax_category_values")
+    desc_col = profile.get("desc_col") if profile.get("desc_col") in df.columns else None
 
     dim_cols_cfg = profile.get("dim_cols", {})
     dim_col_map = {}
@@ -502,8 +536,13 @@ def load_cost_file(file_obj, carrier_name):
     elif profile.get("all_tax"):
         df["_kargo_raw"] = 0.0
         df["_tax_raw"] = df[charge_col]
-        df["_item_desc"] = display_name + ": $" + df[charge_col].round(2).astype(str)
-        breakdown_rows.append((display_name, charge_col, charge_col, "Vergi", float(df[charge_col].sum())))
+        if desc_col:
+            df["_item_desc"] = df[desc_col].astype(str) + ": $" + df[charge_col].round(2).astype(str)
+            for d, total in df.groupby(desc_col)[charge_col].sum().items():
+                breakdown_rows.append((display_name, d, desc_col, "Vergi", float(total)))
+        else:
+            df["_item_desc"] = display_name + ": $" + df[charge_col].round(2).astype(str)
+            breakdown_rows.append((display_name, charge_col, charge_col, "Vergi", float(df[charge_col].sum())))
     elif profile.get("component_charge_cols"):
         # Sabit isimli birden fazla ucret kolonu var (orn. ePost Global
         # faturasi: sell_rate/Fuel/Handling/Transportation Surcharge = Kargo,
@@ -550,6 +589,14 @@ def load_cost_file(file_obj, carrier_name):
         df["_item_desc"] = pd.concat([kargo_part, tax_part], axis=1).apply(lambda row: "; ".join(row.dropna()), axis=1)
         breakdown_rows.append((display_name, charge_col, charge_col, "Kargo", float(df[charge_col].sum())))
         breakdown_rows.append((display_name, tax_col, tax_col, "Vergi", float(df[tax_col].fillna(0).sum())))
+    elif desc_col:
+        # Tum satirlar Kargo; aciklama kolonu (orn. APC ServiceName) kalem
+        # adini verir, dagilim tablosunda her kalem ayri gorunur.
+        df["_kargo_raw"] = df[charge_col]
+        df["_tax_raw"] = 0.0
+        df["_item_desc"] = df[desc_col].astype(str) + ": $" + df[charge_col].round(2).astype(str)
+        for d, total in df.groupby(desc_col)[charge_col].sum().items():
+            breakdown_rows.append((display_name, d, desc_col, "Kargo", float(total)))
     else:
         df["_kargo_raw"] = df[charge_col]
         df["_tax_raw"] = 0.0
@@ -612,6 +659,7 @@ def load_cost_file(file_obj, carrier_name):
     grouped["Kargo Firmasi"] = display_name
     grouped["Satir Sayisi"] = df.groupby("TrackingKey").size().values
     grouped["_KaynakOncelik"] = profile.get("kaynak_oncelik", 0)
+    grouped["_KaynakTuru"] = profile.get("kaynak_turu", "ana")
 
     for boyut_adi in ["length", "width", "height", "weight"]:
         hedef_kolon = f"Firma_{boyut_adi.capitalize()}"
@@ -660,9 +708,18 @@ def build_report(income_df, cost_dfs):
         # Boylece ayni paketin gideri iki kez toplanmaz. Farkli KARGO
         # FIRMALARI ayni takip numarasini paylasirsa (nadir, gercek bir
         # durum degil ama teorik), bu satirlar hala toplanir (eski davranis).
+        #
+        # _KaynakTuru: ayri vergi faturalari ("vergi", orn. Asendia/APC -
+        # Vergi/Gumruk) kargo faturasiyla ("ana") AYNI takip numarasini
+        # tasir ama ayni gideri tekrar etmez - farkli bir gider kalemidir.
+        # Bu yuzden tekillestirme tur bazinda yapilir; kargo + vergi
+        # satirlari birbirini ezmez, asagida toplanir.
         if "_KaynakOncelik" in cost_all.columns:
-            cost_all = cost_all.sort_values("_KaynakOncelik", ascending=False)
-            cost_all = cost_all.drop_duplicates(subset=["TrackingKey", "Kargo Firmasi"], keep="first")
+            if "_KaynakTuru" not in cost_all.columns:
+                cost_all["_KaynakTuru"] = "ana"
+            cost_all["_KaynakTuru"] = cost_all["_KaynakTuru"].fillna("ana")
+            cost_all = cost_all.sort_values("_KaynakOncelik", ascending=False, kind="stable")
+            cost_all = cost_all.drop_duplicates(subset=["TrackingKey", "Kargo Firmasi", "_KaynakTuru"], keep="first")
         _boyut_kolonlari = [c for c in ["Firma_Length", "Firma_Width", "Firma_Height", "Firma_Weight"] if c in cost_all.columns]
         cost_summary = cost_all.groupby("TrackingKey", as_index=False).agg(
             Gider_Kargo=("Gider_Kargo", "sum"),
