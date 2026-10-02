@@ -134,6 +134,11 @@ CARRIER_PROFILES = {
         "charge_col": "total_amt",
         "currency_col": "CURRENCY",
         "invoice_col": "refno",
+        # Gelir dosyasinda bazi ePost paketlerinin Track Number'i gercek takip
+        # numarasi yerine ePost referans numarasi (EPG0110931000...) olarak
+        # geliyor. Takip numarasiyla eslesmeyen gelir satirlari, bu kolon
+        # uzerinden ikinci kez aranir (bkz. build_report).
+        "alt_tracking_col": "refno",
         "component_charge_cols": {
             "kargo": ["sell_rate", "Fuel", "Handling", "Transportation Surcharge"],
             "vergi": ["duty", "tax"],
@@ -799,6 +804,17 @@ def load_cost_file(file_obj, carrier_name):
     grouped["_KaynakOncelik"] = profile.get("kaynak_oncelik", 0)
     grouped["_KaynakTuru"] = profile.get("kaynak_turu", "ana")
 
+    # Ikincil eslesme anahtari (orn. ePost refno): her takip numarasi icin
+    # ilk dolu deger alinir.
+    alt_col = profile.get("alt_tracking_col")
+    if alt_col and alt_col in df.columns:
+        _alt = df[["TrackingKey", alt_col]].dropna(subset=[alt_col]).copy()
+        _alt[alt_col] = _alt[alt_col].astype(str).str.strip()
+        _alt = _alt[_alt[alt_col] != ""].drop_duplicates(subset="TrackingKey", keep="first")
+        grouped["_AltKey"] = grouped["TrackingKey"].map(_alt.set_index("TrackingKey")[alt_col])
+    else:
+        grouped["_AltKey"] = None
+
     for boyut_adi in ["length", "width", "height", "weight"]:
         hedef_kolon = f"Firma_{boyut_adi.capitalize()}"
         if boyut_adi in dim_col_map:
@@ -878,7 +894,25 @@ def build_report(income_df, cost_dfs):
             ]
         )
 
-    merged = income_df.merge(cost_summary, on="TrackingKey", how="left")
+    # Ikincil anahtar: takip numarasiyla giderde bulunamayan gelir satirlari,
+    # gider dosyasindaki alternatif numara (orn. ePost refno) uzerinden
+    # aranir. Bulunursa o paketin gercek takip numarasina baglanir.
+    _eslesme_anahtari = income_df["TrackingKey"]
+    if cost_dfs and "_AltKey" in cost_all.columns:
+        _alt_harita = (
+            cost_all.dropna(subset=["_AltKey"])
+            .drop_duplicates(subset="_AltKey", keep="first")
+            .set_index("_AltKey")["TrackingKey"]
+        )
+        _dogrudan = income_df["TrackingKey"].isin(set(cost_summary["TrackingKey"]))
+        _alt_bulunan = income_df["TrackingKey"].map(_alt_harita)
+        _eslesme_anahtari = income_df["TrackingKey"].where(_dogrudan | _alt_bulunan.isna(), _alt_bulunan)
+
+    merged = income_df.assign(_EslesmeAnahtari=_eslesme_anahtari).merge(
+        cost_summary.rename(columns={"TrackingKey": "_EslesmeAnahtari"}),
+        on="_EslesmeAnahtari",
+        how="left",
+    )
 
     def status(row):
         if not row["Takip_Var_Mi"]:
@@ -890,7 +924,8 @@ def build_report(income_df, cost_dfs):
     merged["Durum"] = merged.apply(status, axis=1)
     merged["Kar"] = merged["Invoice Amount"] - merged["Gider"]
 
-    income_keys = set(income_df["TrackingKey"])
+    income_keys = set(merged["_EslesmeAnahtari"])
+    merged = merged.drop(columns=["_EslesmeAnahtari"])
     unmatched_cost = cost_summary[~cost_summary["TrackingKey"].isin(income_keys)].copy()
 
     return merged, unmatched_cost
